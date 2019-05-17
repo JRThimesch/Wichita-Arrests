@@ -25,6 +25,15 @@ def trimPageHeader(_list):
     else:
         print("EXCEPTION ERROR")
 
+def findLastOccurence(_list, _str):
+    return max(loc for loc, val in enumerate(_list) if val == _str)
+
+def regexFirstLast(_list, _pattern, _min = True):
+    if _min:
+        return min(i for i, item in enumerate(_list) if re.search(_pattern, item))
+    else:
+        return max(i for i, item in enumerate(_list) if re.search(_pattern, item))
+
 def getRowStart(_list):
     pattern = '(\d{2}:\d{2})'
     # All names (or starts to our lines) are listed at the end of the raw text given from the PDF, we can skip to the end by finding the 'Arrests:' index
@@ -46,18 +55,45 @@ def trimEnd(_list):
     return _list[:startIndex]
 
 def trimRows(_list):
+    # First we need to get a list of rowStarters
+    rowStarters = getRowStart(_list)
 
-    # rowStarters = getRowStart(_list)
+    # Now we can trim the end of the document since we retrieved the rowStarters
+    _list = trimEnd(_list)
 
-    pattern = '(\w*),'
-    matchIndexes = []
-    for i in range(len(_list)):
-        if re.match(pattern,_list[i]):
-            matchIndexes.append(i)
+    rows = []
     
-    return matchIndexes
+    for word in reversed(rowStarters):
+        # Using .index will find the first index but we need the last index in case there are duplicate rowStarters, which is likely
+        lastIndex = findLastOccurence(_list, word)
 
+        rows.append(_list[lastIndex:])
 
+        # Trim down list with each word found
+        _list = _list[:lastIndex]
+
+    return rows
+
+def getNames(_list):
+    pattern = '(\d{2}/\d{2}/\d{4})'
+    dateIndex = regexFirstLast(_list, pattern)
+    return ' '.join(_list[:dateIndex])
+    #print(findFirstOccurence(_list, pattern))
+
+def getBirthdates(_list):
+    pattern = '(\d{2}/\d{2}/\d{4})'
+    dateIndex = regexFirstLast(_list, pattern)
+    return _list[dateIndex]
+
+def getDates(_list):
+    pattern = '(\d{2}/\d{2}/\d{4})'
+    dateIndex = regexFirstLast(_list, pattern, False)
+    return _list[dateIndex][-10:]
+
+def getAges(_list):
+    pattern = '(\d{2}/\d{2}/\d{4})'
+    dateIndex = regexFirstLast(_list, pattern, False)
+    return _list[dateIndex][:-10]
 
 if __name__ == "__main__":
     parsedText = getRawText('05-15-19 arrest Report.pdf')
@@ -66,25 +102,36 @@ if __name__ == "__main__":
     rawWordsFile = open("rawWords.log", "w", encoding='utf-8')
 
     toParse = ''.join(parsedText['content'])
-    words = toParse.split()
-
-    
-
-    trimPageHeader(words)
-    #getRowStart(words)
-    words = trimEnd(words)
-    
-    
-
-    print(words)
-    
-    #print(trimRow(words))
-
-    for i in trimRows(words):
-        print(words[i])
-
     rawTextFile.write(toParse)
+
+    names, birthdates, dates, ages = [], [], [], []
+    
+
+    words = toParse.split()
     rawWordsFile.write(''.join(words))
+    
+    trimPageHeader(words)
+
+    for s in reversed(trimRows(words)):
+        #print(*s)
+        names.append(getNames(s))
+        birthdates.append(getBirthdates(s))
+        dates.append(getDates(s))
+        ages.append(getAges(s))
+
+    print('Name\t\tDate\t\tBirthdate\t\tAge')
+    for i in range(len(names)):
+        print(names[i], '\t\t', dates[i], '\t\t', birthdates[i], '\t\t', ages[i])
+    #print(birthdates)
+    #print(dates)
+    #print(ages)
 
     rawTextFile.close()
     rawWordsFile.close()
+    #print(trimRow(words))
+
+    #for i in trimRows(words):
+        #print(words[i])
+
+
+    
