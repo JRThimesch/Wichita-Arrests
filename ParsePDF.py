@@ -92,8 +92,23 @@ def getDates(_list):
 
 def getAges(_list):
     pattern = '(\d{2}/\d{2}/\d{4})'
-    dateIndex = regexFirstLast(_list, pattern, False)
-    return _list[dateIndex][:-10]
+    ageIndex = regexFirstLast(_list, pattern, False)
+    return _list[ageIndex][:-10]
+
+def getTimes(_list):
+    pattern = '(\d{2}:\d{2})'
+    timeIndex = regexFirstLast(_list, pattern)
+    return _list[timeIndex]
+
+def getGenders(_list):
+    pattern = '(\d{2}:\d{2})'
+    genderIndex = regexFirstLast(_list, pattern) + 1
+    return _list[genderIndex]
+
+def getLastPart(_list):
+    pattern = '(\d{2}:\d{2})'
+    genderIndex = regexFirstLast(_list, pattern) + 2
+    return _list[genderIndex:]
 
 if __name__ == "__main__":
     parsedText = getRawText('05-15-19 arrest Report.pdf')
@@ -104,8 +119,7 @@ if __name__ == "__main__":
     toParse = ''.join(parsedText['content'])
     rawTextFile.write(toParse)
 
-    names, birthdates, dates, ages = [], [], [], []
-    
+    names, birthdates, dates, ages, times, genders = [], [], [], [], [], []
 
     words = toParse.split()
     rawWordsFile.write(''.join(words))
@@ -113,15 +127,18 @@ if __name__ == "__main__":
     trimPageHeader(words)
 
     for s in reversed(trimRows(words)):
-        #print(*s)
+        print(*s)
         names.append(getNames(s))
         birthdates.append(getBirthdates(s))
         dates.append(getDates(s))
         ages.append(getAges(s))
+        times.append(getTimes(s))
+        genders.append(getGenders(s))
+        print('ass', getLastPart(s))
 
-    print('Name\t\tDate\t\tBirthdate\t\tAge')
+    print('Name\t\tDate\t\tBirthdate\t\tAge\t\tTime\t\tGender')
     for i in range(len(names)):
-        print(names[i], '\t\t', dates[i], '\t\t', birthdates[i], '\t\t', ages[i])
+        print(names[i], '\t\t', dates[i], '\t\t', birthdates[i], '\t\t', ages[i], '\t\t', times[i], '\t\t', genders[i])
     #print(birthdates)
     #print(dates)
     #print(ages)
