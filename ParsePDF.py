@@ -6,13 +6,14 @@ def getRawText(_pdf):
 
 def subfinder(_list, _pattern, _offset = 0):
     matchIndexes = []
+    
     for i in range(len(_list)):
         if _list[i] == _pattern[0] and _list[i:i+len(_pattern)] == _pattern:
             matchIndexes.append(i + _offset)
     return matchIndexes
 
 def trimPageHeader(_list):
-    #Header patterns needed to find the indexes to be removed
+    # Header patterns needed to find the indexes to be removed
     patternStart = ['Wichita', 'Police', 'Department']
     patternEnd = ['/', 'Warrants']
     
@@ -26,7 +27,7 @@ def trimPageHeader(_list):
         print("EXCEPTION ERROR")
 
 def findLastOccurence(_list, _str):
-    return max(loc for loc, val in enumerate(_list) if val == _str)
+    return max(i for i, item in enumerate(_list) if item == _str)
 
 def regexFirstLast(_list, _pattern, _min = True):
     if _min:
@@ -35,17 +36,17 @@ def regexFirstLast(_list, _pattern, _min = True):
         return max(i for i, item in enumerate(_list) if re.search(_pattern, item))
 
 def getRowStart(_list):
-    pattern = '(\d{2}:\d{2})'
+    pattern = '(\w+?)-(\w+?,)|(\w+?,)|JUVENILE'
     # All names (or starts to our lines) are listed at the end of the raw text given from the PDF, we can skip to the end by finding the 'Arrests:' index
     startIndex = _list.index("Arrests:") + 1
+    _list = _list[startIndex:]
+
     matchElements = []
 
-    newList = _list[startIndex:]
-
-    for i in range(len(newList)):
-        if re.match(pattern, newList[i]):
-            # Add one to get to the name that starts a row in the PDF
-            matchElements.append(newList[i + 1])
+    for i in range(len(_list)):
+        if re.match(pattern, _list[i]):
+            matchElements.append(_list[i])
+            #print(_list[i])
     
     return matchElements
 
@@ -78,7 +79,6 @@ def getNames(_list):
     pattern = '(\d{2}/\d{2}/\d{4})'
     dateIndex = regexFirstLast(_list, pattern)
     return ' '.join(_list[:dateIndex])
-    #print(findFirstOccurence(_list, pattern))
 
 def getBirthdates(_list):
     pattern = '(\d{2}/\d{2}/\d{4})'
@@ -110,8 +110,79 @@ def getLastPart(_list):
     genderIndex = regexFirstLast(_list, pattern) + 2
     return _list[genderIndex:]
 
+def getAddresses(_list):
+    pattern = '(\d{6,})|(\d{4}\w+\d{2,}\w)'
+    _list = getLastPart(_list)
+    arrestIndex = regexFirstLast(_list, pattern)
+    return ' '.join(_list[:arrestIndex])
+
+def countCharges(_list, _pattern):
+    count = 0
+
+    for i in range(len(_list)):
+        if re.search(_pattern, _list[i]):
+            count += 1
+    
+    return count
+
+def trimCharges(_list):
+    pattern = '(\d{6,})'
+    
+    _list = getLastPart(_list)
+    arrestIndex = regexFirstLast(_list, pattern)
+    _list = _list[arrestIndex:]
+
+    trimmed = []
+    count = countCharges(_list, pattern)
+
+    for j in range(count):
+        startIndex = regexFirstLast(_list, pattern, False)
+        trimmed.append(_list[startIndex:])
+            
+        # Trim down list with each arrest found
+        _list = _list[:startIndex]
+        
+    trimmed.reverse()
+    return trimmed
+
+def parseArrests(_list):
+    pattern = '(\d{2}\w{1}\d{6})'
+
+    _list = trimCharges(_list)
+    
+    for i in range(len(_list)):
+        if re.search(pattern, _list[i][0]):
+            return _list[:i]
+
+def parseIncidents(_list):
+    incidentPattern = '(\d{2}\w{1}\d{6})'
+    warrantPattern = '(\d{2}\w{2}\d{6})'
+
+    _list = trimCharges(_list)
+    
+    for i in range(len(_list)):
+        if re.search(warrantPattern, _list[i][0]):
+            _list = _list[:i]
+            break
+    
+    for i in range(len(_list)):
+        if re.search(incidentPattern, _list[i][0]):
+            _list = _list[i:]
+            break
+
+    return _list
+
+def parseWarrants(_list):
+    warrantPattern = '(\d{2}\w{2}\d{6})'
+
+    _list = trimCharges(_list)
+
+    for i in range(len(_list)):
+        if re.search(warrantPattern, _list[i][0]):
+            return _list[i:]
+
 if __name__ == "__main__":
-    parsedText = getRawText('05-15-19 arrest Report.pdf')
+    parsedText = getRawText('05-15-19 Arrest Report.pdf')
 
     rawTextFile = open("rawText.log", "w", encoding='utf-8')
     rawWordsFile = open("rawWords.log", "w", encoding='utf-8')
@@ -119,7 +190,7 @@ if __name__ == "__main__":
     toParse = ''.join(parsedText['content'])
     rawTextFile.write(toParse)
 
-    names, birthdates, dates, ages, times, genders = [], [], [], [], [], []
+    names, birthdates, dates, ages, times, genders, addresses, arrests, incidents, warrants = [], [], [], [], [], [], [], [], [], []
 
     words = toParse.split()
     rawWordsFile.write(''.join(words))
@@ -134,21 +205,15 @@ if __name__ == "__main__":
         ages.append(getAges(s))
         times.append(getTimes(s))
         genders.append(getGenders(s))
-        print('ass', getLastPart(s))
+        addresses.append(getAddresses(s))
+        arrests.append(parseArrests(s))
+        incidents.append(parseIncidents(s))
+        warrants.append(parseWarrants(s))
+        
 
-    print('Name\t\tDate\t\tBirthdate\t\tAge\t\tTime\t\tGender')
+    print('Name\t\tDate\t\tBirthdate\t\tAge\t\tTime\t\tGender\t\tAddress\t\tArrests\t\tIncidents\t\tWarrants')
     for i in range(len(names)):
-        print(names[i], '\t\t', dates[i], '\t\t', birthdates[i], '\t\t', ages[i], '\t\t', times[i], '\t\t', genders[i])
-    #print(birthdates)
-    #print(dates)
-    #print(ages)
+        print(names[i], '\t\t', dates[i], '\t\t', birthdates[i], '\t\t', ages[i], '\t\t', times[i], '\t\t', genders[i], '\t\t', addresses[i], '\t\t', arrests[i], '\t\t', incidents[i], '\t\t', warrants[i])
 
     rawTextFile.close()
     rawWordsFile.close()
-    #print(trimRow(words))
-
-    #for i in trimRows(words):
-        #print(words[i])
-
-
-    
