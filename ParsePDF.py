@@ -37,7 +37,7 @@ def regexFirstLast(_list, _pattern, _min = True):
         return max(i for i, item in enumerate(_list) if re.search(_pattern, item))
 
 def getRowStart(_list):
-    pattern = '(\w+?)-(\w+?,)|(\w+?,)|JUVENILE'
+    pattern = '(\d{2}:\d{2})'
     # All names (or starts to our lines) are listed at the end of the raw text given from the PDF, we can skip to the end by finding the 'Arrests:' index
     startIndex = _list.index("Arrests:") + 1
     _list = _list[startIndex:]
@@ -46,7 +46,7 @@ def getRowStart(_list):
 
     for i in range(len(_list)):
         if re.match(pattern, _list[i]):
-            matchElements.append(_list[i])
+            matchElements.append(_list[i + 1])
             #print(_list[i])
     
     return matchElements
@@ -74,11 +74,12 @@ def trimRows(_list):
         # Trim down list with each word found
         _list = _list[:lastIndex]
 
-    return rows
+    return rows[::-1]
 
 def getNames(_list):
     pattern = '(\d{2}/\d{2}/\d{4})'
     dateIndex = regexFirstLast(_list, pattern)
+    #print(_list[:dateIndex])
     return ' '.join(_list[:dateIndex])
 
 def getBirthdates(_list):
@@ -104,6 +105,7 @@ def getTimes(_list):
 def getGenders(_list):
     pattern = '(\d{2}:\d{2})'
     genderIndex = regexFirstLast(_list, pattern) + 1
+    _list[genderIndex]
     return _list[genderIndex]
 
 def getLastPart(_list):
@@ -147,7 +149,7 @@ def trimCharges(_list):
     return trimmed
 
 def parseArrests(_list):
-    pattern = '(\d{2}\w{1}\d{6})'
+    pattern = '(\d{2}\w{1,}\d{6})'
 
     _list = trimCharges(_list)
     
@@ -164,27 +166,37 @@ def parseArrests(_list):
                 newList = []
                 for row in _list:
                     newList.append(' '.join(row))
-                return '|'.join(newList)
-        #else:
-            #return 'EMPTY'
+                return '+'.join(newList)
+        else:
+            _list = trimCodes(_list)
+            return ' '.join(_list[0])
 
 def parseIncidents(_list):
     incidentPattern = '(\d{2}\w{1}\d{6})'
     warrantPattern = '(\d{2}\w{2}\d{6})'
 
     _list = trimCharges(_list)
+
+    count = 0
     
     for i in range(len(_list)):
         if re.search(warrantPattern, _list[i][0]):
             _list = _list[:i]
+            count += 1
             break
     
     for i in range(len(_list)):
         if re.search(incidentPattern, _list[i][0]):
             _list = _list[i:]
+            count += 1
             break
 
+    if not count:
+        return None
+
     _list = trimCodes(_list)
+
+    expandAbbr(_list)
 
     if len(_list) == 0:
         return None
@@ -194,7 +206,7 @@ def parseIncidents(_list):
         newList = []
         for row in _list:
             newList.append(' '.join(row))
-        return '|'.join(newList)
+        return '+'.join(newList)
 
 def parseWarrants(_list):
     warrantPattern = '(\d{2}\w{2}\d{6})'
@@ -209,8 +221,14 @@ def trimCodes(_list):
     pattern = '(\d{3,})'
     for i, e in enumerate(_list):
         if '-' in _list[i]:
-            _list[i] = _list[i][_list[i].index('-') + 1:]
-        if '-' in _list[i] and re.search(pattern, _list[i][_list[i].index('-') - 1]):
+            print(_list[i])
+            #list[i] = _list[i][_list[i].index('-') + 1:]
+            if not _list[i][_list[i].index('-') - 1].isalpha():
+                _list[i] = _list[i][_list[i].index('-') + 1:]
+                if '-' in _list[i] and not _list[i][_list[i].index('-') - 1].isalpha():
+                    print(_list[i])
+            #print(_list[i])
+        if '-' in _list[i] and not _list[i][_list[i].index('-') - 1].isalpha():
             # Split the index and append the two new lists after deleting the original
             cutIndex = _list[i].index('-')
             str1 = _list[i][:cutIndex - 1]
@@ -223,7 +241,30 @@ def trimCodes(_list):
     return _list
 
 def expandAbbr(_list):
-    print('ass')
+    for i, lofl in enumerate(_list):
+        #print(lofl)
+        _list[i] = ['DOMESTIC VIOLENCE' if element is 'DV' else element for element in lofl]
+    #return _list
+
+def formatLines(_list):
+    rows = []
+    for i, k in enumerate(_list):
+        rows.append([])
+        rows[i].append(getNames(k))
+        rows[i].append(getDates(k))
+        rows[i].append(getBirthdates(k))
+        rows[i].append(getAges(k))
+        rows[i].append(getTimes(k))
+        rows[i].append(getGenders(k))
+        rows[i].append(getAddresses(k))
+        rows[i].append(parseArrests(k))
+        rows[i].append(parseIncidents(k))
+        rows[i].append(parseWarrants(k))
+    return rows
+
+def removeNone(_list):
+    for i, lofl in enumerate(_list):
+        _list[i] = ['-----' if element is None else element for element in lofl]
 
 if __name__ == "__main__":
     parsedText = getRawText('05-15-19 Arrest Report.pdf')
@@ -234,57 +275,28 @@ if __name__ == "__main__":
     toParse = ''.join(parsedText['content'])
     rawTextFile.write(toParse)
 
-    names, birthdates, dates, ages, times, genders, addresses, arrests, incidents, warrants = [], [], [], [], [], [], [], [], [], []
-    dataR, rows = [], []
-
     words = toParse.split()
     rawWordsFile.write(''.join(words))
     
     trimPageHeader(words)
+    words = trimRows(words)
+    words = formatLines(words)
+    removeNone(words)
 
-    for s in reversed(trimRows(words)):
-        #print(*s)
-        #str1 = '||'.join(getNames(s))
-        #str1 = '||'.join(getDates(s))
-        #print(getNames(s) + getDates(s))
-        names.append(getNames(s))
-        dates.append(getDates(s))
-        birthdates.append(getBirthdates(s))
-        ages.append(getAges(s))
-        times.append(getTimes(s))
-        genders.append(getGenders(s))
-        addresses.append(getAddresses(s))
-        arrests.append(parseArrests(s))
-        incidents.append(parseIncidents(s))
-        warrants.append(parseWarrants(s))
-        
-    print(len(names))
-
-    print('Name\t\tDate\t\tBirthdate\t\tAge\t\tTime\t\tGender\t\tAddress\t\tArrests\t\tIncidents\t\tWarrants')
-    for i in range(len(names)):
-        rows.append(names[i])
-        rows.append(dates[i])
-        rows.append(birthdates[i])
-        rows.append(ages[i])
-        rows.append(times[i])
-        rows.append(genders[i])
-        rows.append(addresses[i])
-        rows.append(arrests[i])
-        rows.append(incidents[i])
-        rows.append(warrants[i])
-        print(names[i], '\t\t', dates[i], '\t\t', birthdates[i], '\t\t', ages[i], '\t\t', times[i], '\t\t', genders[i], '\t\t', addresses[i], '\t\t', arrests[i], '\t\t', incidents[i], '\t\t', warrants[i])
+    print('Name Date Birthdate Age Time Gender Address Arrests Incidents Warrants')
+    for i in words:
+        print(*i)
 
     csv.register_dialect('dialect',
         delimiter = '|',
         quoting = csv.QUOTE_NONE,
         skipinitialspace = True)
     
-    print(rows)
-
+    #print(words)
 
     with open('data.csv', 'w') as data:
         writer = csv.writer(data, dialect = 'dialect')
-        #writer.writerows(rows)
+        writer.writerows(words)
 
     data.close()
     rawTextFile.close()
