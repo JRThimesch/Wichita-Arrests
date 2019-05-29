@@ -197,12 +197,7 @@ def parseIncidents(_list):
     if not found or not _list:
         return None
 
-    for i, e in enumerate(_list):
-        e[0] = 'INCIDENT ' + str(i + 1)
-
     _list = trimIncidents(_list)
-
-    print(_list)
 
     if len(_list) == 1:
         return ' '.join(_list[0])
@@ -243,12 +238,18 @@ def trimArrests(_list):
 
 def trimIncidents(_list):
     for i, e in enumerate(_list):
-        if '-' in e:
-            dashIndex = e.index('-')
-            if not e[dashIndex - 1].isalpha():
-                e[dashIndex] = ';'
-                del e[dashIndex - 1]
-                trimIncidents(_list)
+        for k in reversed(getIndices(e, '-')):
+            cutIndex = k + 1
+            codeIndex = k - 1
+            if not e[codeIndex].isalpha():
+                del e[codeIndex:cutIndex]
+                e[codeIndex - 1] += ';' 
+            else:
+                del e[k]
+                e[codeIndex] += ',' 
+        
+        if not e[0].isalpha():
+            e[0] = 'INCIDENT #' + str(i + 1) + ':'
 
     return _list
 
