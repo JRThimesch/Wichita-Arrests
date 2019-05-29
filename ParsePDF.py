@@ -32,9 +32,9 @@ def findLastOccurence(_list, _str):
 
 def regexFirstLast(_list, _pattern, _min = True):
     if _min:
-        return min(i for i, item in enumerate(_list) if re.search(_pattern, item))
+        return min(i for i, element in enumerate(_list) if re.search(_pattern, element))
     else:
-        return max(i for i, item in enumerate(_list) if re.search(_pattern, item))
+        return max(i for i, element in enumerate(_list) if re.search(_pattern, element))
 
 def getRowStart(_list):
     pattern = '(\d{2}:\d{2})'
@@ -148,6 +148,9 @@ def trimCharges(_list):
     trimmed.reverse()
     return trimmed
 
+def getIndices(_list, _word):
+    return [i for i, element in enumerate(_list) if element == _word]
+
 def parseArrests(_list):
     pattern = '(\d{2}\w{1,}\d{6})'
 
@@ -156,20 +159,20 @@ def parseArrests(_list):
     for i in range(len(_list)):
         if re.search(pattern, _list[i][0]):
             _list = _list[:i]
-            _list = trimCodes(_list)
-
-            if len(_list) == 0:
-                return None
-            elif len(_list) == 1:
-                return ' '.join(_list[0])
-            else:
-                newList = []
-                for row in _list:
-                    newList.append(' '.join(row))
-                return '+'.join(newList)
-        else:
-            _list = trimCodes(_list)
+            break
+    
+    if not _list:
+        return None 
+    else:
+        _list = trimArrests(_list)
+        print(_list)
+        if len(_list) == 1:
             return ' '.join(_list[0])
+        else:
+            newList = []
+            for row in _list:
+                newList.append(' '.join(row))
+            return '+'.join(newList)
 
 def parseIncidents(_list):
     incidentPattern = '(\d{2}\w{1}\d{6})'
@@ -177,30 +180,31 @@ def parseIncidents(_list):
 
     _list = trimCharges(_list)
 
-    count = 0
+    found = False
     
-    for i in range(len(_list)):
-        if re.search(warrantPattern, _list[i][0]):
+    for i, e in enumerate(_list):
+        if re.search(warrantPattern, e[0]):
             _list = _list[:i]
-            count += 1
+            found = True
             break
     
-    for i in range(len(_list)):
-        if re.search(incidentPattern, _list[i][0]):
+    for i, e in enumerate(_list):
+        if re.search(incidentPattern, e[0]):
             _list = _list[i:]
-            count += 1
+            found = True
             break
 
-    if not count:
+    if not found or not _list:
         return None
 
-    _list = trimCodes(_list)
+    for i, e in enumerate(_list):
+        e[0] = 'INCIDENT ' + str(i + 1)
 
-    expandAbbr(_list)
+    _list = trimIncidents(_list)
 
-    if len(_list) == 0:
-        return None
-    elif len(_list) == 1:
+    print(_list)
+
+    if len(_list) == 1:
         return ' '.join(_list[0])
     else:
         newList = []
@@ -213,30 +217,38 @@ def parseWarrants(_list):
 
     _list = trimCharges(_list)
 
-    for i in range(len(_list)):
-        if re.search(warrantPattern, _list[i][0]):
-            return len(_list[i:])
+    if not _list:
+        return None
 
-def trimCodes(_list):
-    pattern = '(\d{3,})'
     for i, e in enumerate(_list):
-        if '-' in _list[i]:
-            print(_list[i])
-            #list[i] = _list[i][_list[i].index('-') + 1:]
-            if not _list[i][_list[i].index('-') - 1].isalpha():
-                _list[i] = _list[i][_list[i].index('-') + 1:]
-                if '-' in _list[i] and not _list[i][_list[i].index('-') - 1].isalpha():
-                    print(_list[i])
-            #print(_list[i])
-        if '-' in _list[i] and not _list[i][_list[i].index('-') - 1].isalpha():
-            # Split the index and append the two new lists after deleting the original
-            cutIndex = _list[i].index('-')
-            str1 = _list[i][:cutIndex - 1]
-            str2 = _list[i][cutIndex + 1:]
-            del _list[i]
-            _list.append(str1)
-            _list.append(str2)
-            trimCodes(_list)
+        if re.search(warrantPattern, e[0]):
+            return i
+
+def trimArrests(_list):
+    for i, e in enumerate(_list):
+        for k in reversed(getIndices(e, '-')):
+            cutIndex = k + 1
+            codeIndex = k - 1
+
+            if not e[codeIndex].isalpha():
+                del e[codeIndex:cutIndex]
+            else:
+                del e[k]
+                e[codeIndex] += ',' 
+
+        if not e[0].isalpha():
+            del e[0]
+                
+    return _list
+
+def trimIncidents(_list):
+    for i, e in enumerate(_list):
+        if '-' in e:
+            dashIndex = e.index('-')
+            if not e[dashIndex - 1].isalpha():
+                e[dashIndex] = ';'
+                del e[dashIndex - 1]
+                trimIncidents(_list)
 
     return _list
 
