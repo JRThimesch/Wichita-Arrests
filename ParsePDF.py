@@ -1,5 +1,7 @@
 from tika import parser
 import re
+import os
+import recent
 import csv
 
 def getRawText(_pdf):
@@ -24,11 +26,21 @@ def trimPageHeader(_list):
     if len(startIndexList) is len(endIndexList):
         for i, k in reversed(list(enumerate(startIndexList))):
             del _list[startIndexList[i]:endIndexList[i]]
+    #else:
+        #print("EXCEPTION ERROR")
+
+def isDate(_str):
+    pattern = '(\d{2}/\d{2}/\d{4})'
+    if re.search(pattern, _str):
+        return True
     else:
-        print("EXCEPTION ERROR")
+        return False
 
 def findLastOccurence(_list, _str):
     return max(i for i, item in enumerate(_list) if item == _str)
+
+def findJuvenileStart(_list, _str):
+    return max(i for i, item in enumerate(_list) if item == _str and isDate(_list[i + 1]))
 
 def regexFirstLast(_list, _pattern, _min = True):
     if _min:
@@ -44,8 +56,8 @@ def getRowStart(_list):
 
     matchElements = []
 
-    for i in range(len(_list)):
-        if re.match(pattern, _list[i]):
+    for i, e in enumerate(_list):
+        if re.match(pattern, e):
             matchElements.append(_list[i + 1])
             #print(_list[i])
     
@@ -67,8 +79,11 @@ def trimRows(_list):
     
     for word in reversed(rowStarters):
         # Using .index will find the first index but we need the last index in case there are duplicate rowStarters, which is likely
-        lastIndex = findLastOccurence(_list, word)
-
+        if word == 'JUVENILE':
+            lastIndex = findJuvenileStart(_list, word)
+        else:
+            lastIndex = findLastOccurence(_list, word)
+        
         rows.append(_list[lastIndex:])
 
         # Trim down list with each word found
@@ -79,7 +94,6 @@ def trimRows(_list):
 def getNames(_list):
     pattern = '(\d{2}/\d{2}/\d{4})'
     dateIndex = regexFirstLast(_list, pattern)
-    #print(_list[:dateIndex])
     return ' '.join(_list[:dateIndex])
 
 def getBirthdates(_list):
@@ -165,7 +179,7 @@ def parseArrests(_list):
         return None 
     else:
         _list = trimArrests(_list)
-        print(_list)
+        #print(_list)
         if len(_list) == 1:
             return ' '.join(_list[0])
         else:
@@ -280,37 +294,61 @@ def removeNone(_list):
         _list[i] = ['-----' if element is None else element for element in lofl]
 
 if __name__ == "__main__":
-    parsedText = getRawText('05-15-19 Arrest Report.pdf')
 
-    rawTextFile = open("rawText.log", "w", encoding='utf-8')
-    rawWordsFile = open("rawWords.log", "w", encoding='utf-8')
+    neededFiles = recent.findAlreadyExisting('PDFs/', '.pdf')
+    #existingFiles = recent.findAlreadyExisting('.csv')
 
-    toParse = ''.join(parsedText['content'])
-    rawTextFile.write(toParse)
+    #print(neededFiles)
+    #print(existingFiles)
 
-    words = toParse.split()
-    rawWordsFile.write(''.join(words))
-    
-    trimPageHeader(words)
-    words = trimRows(words)
-    words = formatLines(words)
-    removeNone(words)
+    for file in neededFiles:
+        locationCSV = 'CSVs/'
+        locationPDF = 'PDFs/'
+        fileCSV = locationCSV + file + '.csv'
+        filePDF = locationPDF + file + '.pdf'
+        
+        if recent.doesExist(file, locationCSV):
+            print(file + '.pdf', 'already parsed!')
+            continue
+        
+        print('Parsing', file + '.pdf...')
 
-    print('Name Date Birthdate Age Time Gender Address Arrests Incidents Warrants')
-    for i in words:
-        print(*i)
+        parsedText = getRawText(filePDF)
 
-    csv.register_dialect('dialect',
-        delimiter = '|',
-        quoting = csv.QUOTE_NONE,
-        skipinitialspace = True)
-    
-    #print(words)
+        rawTextFile = open("rawText.log", "w", encoding='utf-8')
+        rawWordsFile = open("rawWords.log", "w", encoding='utf-8')
 
-    with open('data.csv', 'w') as data:
-        writer = csv.writer(data, dialect = 'dialect')
-        writer.writerows(words)
+        toParse = ''.join(parsedText['content'])
+                
+        rawTextFile.write(toParse)
 
-    data.close()
-    rawTextFile.close()
-    rawWordsFile.close()
+        words = toParse.split()
+                
+        rawWordsFile.write(''.join(words))
+                
+        trimPageHeader(words)
+                
+        words = trimRows(words)
+                
+        words = formatLines(words)
+                
+        removeNone(words)
+
+            #print('Name Date Birthdate Age Time Gender Address Arrests Incidents Warrants')
+            #for i in words:
+                #print(*i)
+
+        csv.register_dialect('dialect',
+            delimiter = '|',
+            quoting = csv.QUOTE_NONE,
+            skipinitialspace = True)
+                
+                #print(words)
+
+        with open(fileCSV, 'w') as data:
+            writer = csv.writer(data, dialect = 'dialect')
+            writer.writerows(words)
+
+        data.close()
+        rawTextFile.close()
+        rawWordsFile.close()
