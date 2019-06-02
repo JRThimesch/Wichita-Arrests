@@ -49,7 +49,7 @@ def regexFirstLast(_list, _pattern, _min = True):
         return max(i for i, element in enumerate(_list) if re.search(_pattern, element))
 
 def getRowStart(_list):
-    pattern = '(\d{2}:\d{2})'
+    pattern = '(\w*-?\w*,)|JUVENILE'
     # All names (or starts to our lines) are listed at the end of the raw text given from the PDF, we can skip to the end by finding the 'Arrests:' index
     startIndex = _list.index("Arrests:") + 1
     _list = _list[startIndex:]
@@ -58,7 +58,7 @@ def getRowStart(_list):
 
     for i, e in enumerate(_list):
         if re.match(pattern, e):
-            matchElements.append(_list[i + 1])
+            matchElements.append(_list[i])
             #print(_list[i])
     
     return matchElements
@@ -83,6 +83,8 @@ def trimRows(_list):
             lastIndex = findJuvenileStart(_list, word)
         else:
             lastIndex = findLastOccurence(_list, word)
+
+        print(word)
         
         rows.append(_list[lastIndex:])
 
