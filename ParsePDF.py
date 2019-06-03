@@ -83,8 +83,6 @@ def trimRows(_list):
             lastIndex = findJuvenileStart(_list, word)
         else:
             lastIndex = findLastOccurence(_list, word)
-
-        print(word)
         
         rows.append(_list[lastIndex:])
 
@@ -231,9 +229,11 @@ def parseWarrants(_list):
     if not _list:
         return None
 
+    count = 0
     for i, e in enumerate(_list):
         if re.search(warrantPattern, e[0]):
-            return i
+            count += 1
+    return count
 
 def trimArrests(_list):
     for i, e in enumerate(_list):
