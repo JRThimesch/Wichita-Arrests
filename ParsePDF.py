@@ -26,8 +26,18 @@ def trimPageHeader(_list):
     if len(startIndexList) is len(endIndexList):
         for i, k in reversed(list(enumerate(startIndexList))):
             del _list[startIndexList[i]:endIndexList[i]]
-    #else:
-        #print("EXCEPTION ERROR")
+
+def violFix(_list):
+    # VIOL is used to abbreviate VIOLENCE and VIOLATION which leads to problems when expanding abbreviations
+    # This function alleviates that by finding instances where VIOLENCE should be inserted in place of VIOL
+    for i, e in enumerate(_list):
+        try:
+            violIndex = e.index('VIOL')
+            if e[violIndex - 1] == 'DOM':
+                e[violIndex] = 'VIOLENCE'
+        except ValueError:
+            continue
+    return _list
 
 def isDate(_str):
     pattern = '(\d{2}/\d{2}/\d{4})'
@@ -58,8 +68,13 @@ def getRowStart(_list):
 
     for i, e in enumerate(_list):
         if re.match(pattern, e):
+            # This if statement fixes last names that have whitespaces in them.
+            # Deincrement until one of these statements becomes true
+            # Finds the index that the last name with whitespaces REALLY starts at
+            while ',' not in _list[i - 2] and ',' not in _list[i - 3] and len(_list[i - 1]) is not 1 and not ':' in _list[i - 1]:
+                i -= 1
+            
             matchElements.append(_list[i])
-            #print(_list[i])
     
     return matchElements
 
@@ -98,8 +113,8 @@ def getNames(_list):
 
 def getBirthdates(_list):
     pattern = '(\d{2}/\d{2}/\d{4})'
-    dateIndex = regexFirstLast(_list, pattern)
-    return _list[dateIndex]
+    dobIndex = regexFirstLast(_list, pattern)
+    return _list[dobIndex]
 
 def getDates(_list):
     pattern = '(\d{2}/\d{2}/\d{4})'
@@ -119,13 +134,27 @@ def getTimes(_list):
 def getGenders(_list):
     pattern = '(\d{2}:\d{2})'
     genderIndex = regexFirstLast(_list, pattern) + 1
-    _list[genderIndex]
-    return _list[genderIndex]
+    return expandGenders(_list[genderIndex])
+
+def expandGenders(_str):
+    replacements = {
+        'W' : 'WHITE',
+        'B' : 'BLACK',
+        'A' : 'ASIAN',
+        'I' : 'INDIAN',
+        'H' : 'HISPANIC',
+        'M' : 'MALE',
+        'F' : 'FEMALE'
+    }
+    chars = list(_str)
+    for i, char in enumerate(chars):
+        chars[i] = replacements[char]
+    return ' '.join(chars)
 
 def getLastPart(_list):
     pattern = '(\d{2}:\d{2})'
-    genderIndex = regexFirstLast(_list, pattern) + 2
-    return _list[genderIndex:]
+    index = regexFirstLast(_list, pattern) + 2
+    return _list[index:]
 
 def getAddresses(_list):
     pattern = '(\d{6,})|(\d{4}\w+\d{2,}\w)|No'
@@ -167,9 +196,13 @@ def getIndices(_list, _word):
 
 def parseArrests(_list):
     pattern = '(\d{2}\w{1,}\d{6})'
-
-    _list = trimCharges(_list)
     
+    
+    _list = trimCharges(_list)
+    _list = violFix(_list)
+    _list = spaceSlashes(_list)
+    
+
     for i in range(len(_list)):
         if re.search(pattern, _list[i][0]):
             _list = _list[:i]
@@ -178,7 +211,9 @@ def parseArrests(_list):
     if not _list:
         return None 
     else:
+        _list = expandAbbr(_list)
         _list = trimArrests(_list)
+        
         #print(_list)
         if len(_list) == 1:
             return ' '.join(_list[0])
@@ -193,6 +228,8 @@ def parseIncidents(_list):
     warrantPattern = '(\d{2}\w{2}\d{6})'
 
     _list = trimCharges(_list)
+    _list = violFix(_list)
+    _list = spaceSlashes(_list)
 
     found = False
     
@@ -211,8 +248,9 @@ def parseIncidents(_list):
     if not found or not _list:
         return None
 
+    _list = expandAbbr(_list)
     _list = trimIncidents(_list)
-
+    
     if len(_list) == 1:
         return ' '.join(_list[0])
     else:
@@ -269,11 +307,39 @@ def trimIncidents(_list):
 
     return _list
 
+def spaceSlashes(_list):
+    slashPattern = '(\w{2,})\/(\w{2,})'
+    for i, k in enumerate(_list):
+        for j, word in enumerate(k):
+            if re.search(slashPattern, word):
+                k[j] = word.replace('/', ' / ')
+    return _list
+            
 def expandAbbr(_list):
+    abbr = {
+        'DV' : 'DOMESTIC VIOLENCE',
+        'VIOL' : 'VIOLATION',
+        'SUSP' : 'SUSPENDED',
+        'PROP' : 'PROPERTY',
+        'POL' : 'POLICE'
+    }
+
     for i, lofl in enumerate(_list):
-        #print(lofl)
-        _list[i] = ['DOMESTIC VIOLENCE' if element is 'DV' else element for element in lofl]
-    #return _list
+        print(lofl)
+        for j, element in enumerate(lofl):
+            wordsList = str(element)
+            wordsList = wordsList.split()
+            for k, word in enumerate(wordsList):
+                try:
+                    wordsList[k] = abbr[word]
+                    
+                    print('MATCH:', word)
+                except KeyError:
+                    continue
+            lofl[j] = ' '.join(wordsList)
+        _list[i] = lofl
+    return _list
+
 
 def formatLines(_list):
     rows = []
