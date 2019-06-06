@@ -2,6 +2,7 @@ from tika import parser
 import re
 import os
 import recent
+import argparse
 import csv
 
 def getRawText(_pdf):
@@ -172,7 +173,7 @@ def countCharges(_list, _pattern):
     return count
 
 def trimCharges(_list):
-    pattern = '(\d{6,})'
+    pattern = '(\d{5,})'
     
     _list = getLastPart(_list)
     arrestIndex = regexFirstLast(_list, pattern)
@@ -213,8 +214,7 @@ def parseArrests(_list):
     else:
         _list = expandAbbr(_list)
         _list = trimArrests(_list)
-        
-        #print(_list)
+
         if len(_list) == 1:
             return ' '.join(_list[0])
         else:
@@ -308,7 +308,7 @@ def trimIncidents(_list):
     return _list
 
 def spaceSlashes(_list):
-    slashPattern = '(\w{2,})\/(\w{2,})'
+    slashPattern = '(\w{2,})\/(\w*)'
     for i, k in enumerate(_list):
         for j, word in enumerate(k):
             if re.search(slashPattern, word):
@@ -316,30 +316,18 @@ def spaceSlashes(_list):
     return _list
             
 def expandAbbr(_list):
-    abbr = {
-        'DV' : 'DOMESTIC VIOLENCE',
-        'VIOL' : 'VIOLATION',
-        'SUSP' : 'SUSPENDED',
-        'PROP' : 'PROPERTY',
-        'POL' : 'POLICE'
-    }
-
     for i, lofl in enumerate(_list):
-        print(lofl)
         for j, element in enumerate(lofl):
             wordsList = str(element)
             wordsList = wordsList.split()
             for k, word in enumerate(wordsList):
                 try:
                     wordsList[k] = abbr[word]
-                    
-                    print('MATCH:', word)
                 except KeyError:
                     continue
             lofl[j] = ' '.join(wordsList)
         _list[i] = lofl
     return _list
-
 
 def formatLines(_list):
     rows = []
@@ -361,62 +349,68 @@ def removeNone(_list):
     for i, lofl in enumerate(_list):
         _list[i] = ['-----' if element is None else element for element in lofl]
 
+def getAbbreviations(_file):
+    with open(_file) as f:
+        print('Loading abbreviations...')
+        _dict = dict([(line.split()[0], ' '.join(line.split()[1:])) for line in f])
+        print('Abbreviations loaded')
+    return _dict
+
+def getParsedFiles(_file):
+    with open(_file) as f:
+        print('Loading already parsed files...')
+        _list = [line.replace('\n', '') for line in f]
+        print('Parsed files loaded')
+    return _list
+
+def splitDates(_words):
+    dates = list(set([l[1] for l in words]))
+
+    for e in dates:
+        toWrite = []
+        fileCSV = 'CSVs/' + e.replace('/', '-') + '.csv'
+        with open(fileCSV, 'w') as data:
+            for l in _words:
+                writer = csv.writer(data, dialect = 'dialect')
+                if l[1] == e:
+                    toWrite.append(l)
+                        
+            writer.writerows(toWrite)
+
 if __name__ == "__main__":
 
-    neededFiles = recent.findAlreadyExisting('PDFs/', '.pdf')
-    #existingFiles = recent.findAlreadyExisting('.csv')
+    csv.register_dialect('dialect',
+        delimiter = '|',
+        quoting = csv.QUOTE_NONE,
+        skipinitialspace = True)
 
-    #print(neededFiles)
-    #print(existingFiles)
+    neededFiles = recent.findAlreadyExisting('PDFs/', '.pdf')
+    abbr = getAbbreviations('abbreviations.txt')
+    parsedFiles = getParsedFiles('parsed.txt')
 
     for file in neededFiles:
-        locationCSV = 'CSVs/'
         locationPDF = 'PDFs/'
-        fileCSV = locationCSV + file + '.csv'
         filePDF = locationPDF + file + '.pdf'
         
-        if recent.doesExist(file, locationCSV):
+        if file in parsedFiles:
             print(file + '.pdf', 'already parsed!')
             continue
         
         print('Parsing', file + '.pdf...')
 
         parsedText = getRawText(filePDF)
-
-        rawTextFile = open("rawText.log", "w", encoding='utf-8')
-        rawWordsFile = open("rawWords.log", "w", encoding='utf-8')
-
         toParse = ''.join(parsedText['content'])
-                
-        rawTextFile.write(toParse)
+        words = toParse.split()  
 
-        words = toParse.split()
-                
-        rawWordsFile.write(''.join(words))
-                
         trimPageHeader(words)
-                
         words = trimRows(words)
-                
         words = formatLines(words)
-                
         removeNone(words)
+        splitDates(words)
 
-            #print('Name Date Birthdate Age Time Gender Address Arrests Incidents Warrants')
-            #for i in words:
-                #print(*i)
+        with open('rawText.txt', "w", encoding='utf-8') as f:
+            f.write(toParse)
 
-        csv.register_dialect('dialect',
-            delimiter = '|',
-            quoting = csv.QUOTE_NONE,
-            skipinitialspace = True)
-                
-                #print(words)
-
-        with open(fileCSV, 'w') as data:
-            writer = csv.writer(data, dialect = 'dialect')
-            writer.writerows(words)
-
-        data.close()
-        rawTextFile.close()
-        rawWordsFile.close()
+        with open('parsed.txt', 'a') as f:
+            f.write(file)
+            f.write("\n")
