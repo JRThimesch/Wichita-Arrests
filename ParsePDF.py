@@ -107,6 +107,16 @@ def trimRows(_list):
 
     return rows[::-1]
 
+def getFirstPart(_list):
+    pattern = '(\d{2}:\d{2})'
+    timeIndex = regexFirstLast(_list, pattern)
+    return _list[:timeIndex]
+
+def getLastPart(_list):
+    pattern = '(\d{2}:\d{2})'
+    index = regexFirstLast(_list, pattern) + 2
+    return _list[index:]
+
 def getNames(_list):
     pattern = '(\d{2}/\d{2}/\d{4})'
     dateIndex = regexFirstLast(_list, pattern)
@@ -119,12 +129,12 @@ def getBirthdates(_list):
 
 def getDates(_list):
     pattern = '(\d{2}/\d{2}/\d{4})'
-    dateIndex = regexFirstLast(_list, pattern, False)
+    dateIndex = regexFirstLast(getFirstPart(_list), pattern, False)
     return _list[dateIndex][-10:]
 
 def getAges(_list):
     pattern = '(\d{2}/\d{2}/\d{4})'
-    ageIndex = regexFirstLast(_list, pattern, False)
+    ageIndex = regexFirstLast(getFirstPart(_list), pattern, False)
     return _list[ageIndex][:-10]
 
 def getTimes(_list):
@@ -151,11 +161,6 @@ def expandGenders(_str):
     for i, char in enumerate(chars):
         chars[i] = replacements[char]
     return ' '.join(chars)
-
-def getLastPart(_list):
-    pattern = '(\d{2}:\d{2})'
-    index = regexFirstLast(_list, pattern) + 2
-    return _list[index:]
 
 def getAddresses(_list):
     pattern = '(\d{6,})|(\d{4}\w+\d{2,}\w)|No'
@@ -404,8 +409,11 @@ if __name__ == "__main__":
 
         trimPageHeader(words)
         words = trimRows(words)
+        # SOMETHING WRONG HERE vvvvv
         words = formatLines(words)
+        print(words)
         removeNone(words)
+        print(words)
         splitDates(words)
 
         with open('rawText.txt', "w", encoding='utf-8') as f:
