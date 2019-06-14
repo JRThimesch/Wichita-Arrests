@@ -4,6 +4,7 @@ import os
 import recent
 import argparse
 import csv
+from geopy.geocoders import GoogleV3
 
 def getRawText(_pdf):
     return parser.from_file(_pdf)
@@ -163,7 +164,7 @@ def expandGenders(_str):
     return ' '.join(chars)
 
 def getAddresses(_list):
-    pattern = '(\d{6,})|(\d{4}\w+\d{2,}\w)|No'
+    pattern = '(0\d{4,})|\d{6,}|(\d{4}\w+\d{2,}\w)|No'
     _list = getLastPart(_list)
     arrestIndex = regexFirstLast(_list, pattern)
     return ' '.join(_list[:arrestIndex])
@@ -178,7 +179,7 @@ def countCharges(_list, _pattern):
     return count
 
 def trimCharges(_list):
-    pattern = '(\d{5,})'
+    pattern = '(0\d{4,}|\d{6,})'
     
     _list = getLastPart(_list)
     arrestIndex = regexFirstLast(_list, pattern)
@@ -348,7 +349,21 @@ def formatLines(_list):
         rows[i].append(parseArrests(k))
         rows[i].append(parseIncidents(k))
         rows[i].append(parseWarrants(k))
+        rows[i].append(getCoords(k))
     return rows
+
+def getCoords(_list):
+    address = getAddresses(_list)
+    fullAddress = address + " Wichita"
+    try:
+        g = GoogleV3(api_key="GOOD TRY")
+        location = g.geocode(fullAddress)
+        print(fullAddress, (location.latitude, location.longitude))
+        return location.latitude, location.longitude
+    except Exception as e:
+        print('Error with address:', fullAddress)
+        print(e)
+        return 'BLANK'
 
 def removeNone(_list):
     for i, lofl in enumerate(_list):
@@ -409,11 +424,8 @@ if __name__ == "__main__":
 
         trimPageHeader(words)
         words = trimRows(words)
-        # SOMETHING WRONG HERE vvvvv
         words = formatLines(words)
-        print(words)
         removeNone(words)
-        print(words)
         splitDates(words)
 
         with open('rawText.txt', "w", encoding='utf-8') as f:
