@@ -1,7 +1,6 @@
 from tika import parser
 import re
 import os
-import recent
 import argparse
 import csv
 from geopy.geocoders import GoogleV3
@@ -385,7 +384,6 @@ def getParsedFiles(_file):
 
 def splitDates(_words):
     dates = list(set([l[1] for l in words]))
-
     for e in dates:
         toWrite = []
         fileCSV = 'CSVs/' + e.replace('/', '-') + '.csv'
@@ -397,6 +395,10 @@ def splitDates(_words):
                         
             writer.writerows(toWrite)
 
+def findAlreadyExisting(_path = '.'):
+    files = os.listdir(_path)
+    return[os.path.splitext(file)[0] for file in files if file.endswith('.pdf')]
+
 if __name__ == "__main__":
 
     csv.register_dialect('dialect',
@@ -404,7 +406,7 @@ if __name__ == "__main__":
         quoting = csv.QUOTE_NONE,
         skipinitialspace = True)
 
-    neededFiles = recent.findAlreadyExisting('PDFs/', '.pdf')
+    neededFiles = findAlreadyExisting('PDFs/')
     abbr = getAbbreviations('abbreviations.txt')
     parsedFiles = getParsedFiles('parsed.txt')
 
