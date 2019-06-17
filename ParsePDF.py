@@ -118,9 +118,10 @@ def getLastPart(_list):
     return _list[index:]
 
 def getNames(_list):
+    # Finds the index of the date of birth and slices everything before it to get the name
     pattern = '(\d{2}/\d{2}/\d{4})'
-    dateIndex = regexFirstLast(_list, pattern)
-    return ' '.join(_list[:dateIndex])
+    dobIndex = regexFirstLast(_list, pattern)
+    return ' '.join(_list[:dobIndex])
 
 def getBirthdates(_list):
     pattern = '(\d{2}/\d{2}/\d{4})'
@@ -128,11 +129,13 @@ def getBirthdates(_list):
     return _list[dobIndex]
 
 def getDates(_list):
+    # Age and date are concatenated so we need to seperate the two with slicing
     pattern = '(\d{2}/\d{2}/\d{4})'
     dateIndex = regexFirstLast(getFirstPart(_list), pattern, False)
     return _list[dateIndex][-10:]
 
 def getAges(_list):
+    # Age and date are concatenated so we need to seperate the two with slicing
     pattern = '(\d{2}/\d{2}/\d{4})'
     ageIndex = regexFirstLast(getFirstPart(_list), pattern, False)
     return _list[ageIndex][:-10]
@@ -143,6 +146,7 @@ def getTimes(_list):
     return _list[timeIndex]
 
 def getGenders(_list):
+    # Returns the index after the time index
     pattern = '(\d{2}:\d{2})'
     genderIndex = regexFirstLast(_list, pattern) + 1
     return expandGenders(_list[genderIndex])
@@ -157,16 +161,25 @@ def expandGenders(_str):
         'M' : 'MALE',
         'F' : 'FEMALE'
     }
+
     chars = list(_str)
     for i, char in enumerate(chars):
         chars[i] = replacements[char]
     return ' '.join(chars)
 
 def getAddresses(_list):
-    pattern = '(0\d{4,})|\d{6,}|(\d{4}\w+\d{2,}\w)|No'
+    pattern = '(0\d{4,})|\d{6,}|(\d{4}\w+\d{2,}\w)'
     _list = getLastPart(_list)
+    if noAddressListed(_list):
+        return noAddressListed(_list)
     arrestIndex = regexFirstLast(_list, pattern)
     return ' '.join(_list[:arrestIndex])
+
+def noAddressListed(_list):
+    if 'No' in _list:
+        return '-----'
+    else:
+        return False
 
 def countCharges(_list, _pattern):
     count = 0
@@ -181,7 +194,12 @@ def trimCharges(_list):
     pattern = '(0\d{4,}|\d{6,})'
     
     _list = getLastPart(_list)
-    arrestIndex = regexFirstLast(_list, pattern)
+
+    try:
+        arrestIndex = regexFirstLast(_list, pattern)
+    except:
+        return None
+
     _list = _list[arrestIndex:]
 
     trimmed = []
@@ -203,14 +221,16 @@ def getIndices(_list, _word):
 def parseArrests(_list):
     pattern = '(\d{2}\w{1,}\d{6})'
     
-    
-    _list = trimCharges(_list)
+    if trimCharges(_list) is not None:
+        _list = trimCharges(_list)
+    else:
+        return 'No data provided.'
+
     _list = violFix(_list)
     _list = spaceSlashes(_list)
-    
 
-    for i in range(len(_list)):
-        if re.search(pattern, _list[i][0]):
+    for i, e in enumerate(_list):
+        if re.search(pattern, e[0]):
             _list = _list[:i]
             break
     
@@ -223,16 +243,17 @@ def parseArrests(_list):
         if len(_list) == 1:
             return ' '.join(_list[0])
         else:
-            newList = []
-            for row in _list:
-                newList.append(' '.join(row))
-            return '+'.join(newList)
+            return '+'.join([' '.join(row) for row in _list])
 
 def parseIncidents(_list):
     incidentPattern = '(\d{2}\w{1}\d{6})'
     warrantPattern = '(\d{2}\w{2}\d{6})'
 
-    _list = trimCharges(_list)
+    if trimCharges(_list) is not None:
+        _list = trimCharges(_list)
+    else:
+        return 'No data provided.'
+
     _list = violFix(_list)
     _list = spaceSlashes(_list)
 
@@ -259,24 +280,22 @@ def parseIncidents(_list):
     if len(_list) == 1:
         return ' '.join(_list[0])
     else:
-        newList = []
-        for row in _list:
-            newList.append(' '.join(row))
-        return '+'.join(newList)
+        return '+'.join([' '.join(row) for row in _list])
 
 def parseWarrants(_list):
     warrantPattern = '(\d{2}\w{2}\d{6})'
 
-    _list = trimCharges(_list)
+    if trimCharges(_list) is not None:
+        _list = trimCharges(_list)
+    else:
+        return 'No data provided.'
 
-    if not _list:
-        return None
+    listOfWarrants = [e[0] for e in _list if re.search(warrantPattern, e[0])]
 
-    count = 0
-    for i, e in enumerate(_list):
-        if re.search(warrantPattern, e[0]):
-            count += 1
-    return count
+    if not listOfWarrants:
+        return '-----'
+    else:
+        return '+'.join(listOfWarrants)
 
 def trimArrests(_list):
     for i, e in enumerate(_list):
@@ -348,21 +367,38 @@ def formatLines(_list):
         rows[i].append(parseArrests(k))
         rows[i].append(parseIncidents(k))
         rows[i].append(parseWarrants(k))
+        rows[i].append(getCensoredAddress(k))
         rows[i].append(getCoords(k))
     return rows
 
 def getCoords(_list):
     address = getAddresses(_list)
-    fullAddress = address + " Wichita"
+    fullAddress = address + " Wichita, Kansas, USA"
     try:
-        g = GoogleV3(api_key="GOOD TRY")
+        g = GoogleV3(api_key="AIzaSyDUfEWFUwRP1EAtFrAw2pEVysDm8OYEcDQ#######")
         location = g.geocode(fullAddress)
         print(fullAddress, (location.latitude, location.longitude))
         return location.latitude, location.longitude
     except Exception as e:
         print('Error with address:', fullAddress)
         print(e)
-        return 'BLANK'
+        return ''
+
+def getCensoredAddress(_list):
+    address = getAddresses(_list)
+    firstWord = address.split(' ', 1)[0]
+
+    if firstWord.isnumeric():
+        firstWord = firstWord[:-2] + 'XX'
+        address = firstWord + ' ' + address.split(' ', 1)[1]
+        
+    try:
+        apptIndex = address.index('#')
+        address = address[:apptIndex - 1]
+    except:
+        pass
+
+    return address
 
 def removeNone(_list):
     for i, lofl in enumerate(_list):
@@ -406,9 +442,10 @@ if __name__ == "__main__":
         quoting = csv.QUOTE_NONE,
         skipinitialspace = True)
 
-    neededFiles = findAlreadyExisting('PDFs/')
     abbr = getAbbreviations('abbreviations.txt')
     parsedFiles = getParsedFiles('parsed.txt')
+
+    neededFiles = findAlreadyExisting('PDFs/')
 
     for file in neededFiles:
         locationPDF = 'PDFs/'
