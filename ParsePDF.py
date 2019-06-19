@@ -1,7 +1,6 @@
 from tika import parser
 import re
 import os
-import argparse
 import csv
 from geopy.geocoders import GoogleV3
 
@@ -59,25 +58,34 @@ def regexFirstLast(_list, _pattern, _min = True):
     else:
         return max(i for i, element in enumerate(_list) if re.search(_pattern, element))
 
-def getRowStart(_list):
-    pattern = '(\w*-?\w*,)|JUVENILE'
-    # All names (or starts to our lines) are listed at the end of the raw text given from the PDF, we can skip to the end by finding the 'Arrests:' index
-    startIndex = _list.index("Arrests:") + 1
-    _list = _list[startIndex:]
+def getRowStart(_str):
+    # Separate by newlines
+    splitText = toParse.splitlines()
 
-    matchElements = []
+    # All names (or starts to our lines) are listed at the end of the raw text given from the PDF, we can skip to the end by finding the index containing .rpt
+    # For this, it's better to reverse the list so we can find the index sooner since it's toward the end of the file
+    for e in reversed(splitText):
+        if '.rpt' in e:
+            startIndex = splitText.index(e)
+            break
 
-    for i, e in enumerate(_list):
-        if re.match(pattern, e):
-            # This if statement fixes last names that have whitespaces in them.
-            # Deincrement until one of these statements becomes true
-            # Finds the index that the last name with whitespaces REALLY starts at
-            while ',' not in _list[i - 2] and ',' not in _list[i - 3] and len(_list[i - 1]) is not 1 and not ':' in _list[i - 1]:
-                i -= 1
-            
-            matchElements.append(_list[i])
+    # Create a new list for the lines that contain a comma or the word JUVENILE
+    starters = [e for e in splitText[startIndex:] if ',' in e or 'JUVENILE' in e]
+
+    # Remove the tabs from the lines
+    for i, e in enumerate(starters):
+        starters[i] = e.replace('\t', '')
+
+    # Finally create a final list containing the strings that will be matched to the row starts
+    rowStarters = []
+    for e in starters:
+        if e.find(',') is not -1:
+            endIndex = e.index(',')
+            rowStarters.append(e[:endIndex + 1].split(' ', 1)[0])
+        if 'JUVENILE' in e:
+            rowStarters.append('JUVENILE')
     
-    return matchElements
+    return rowStarters
 
 def trimEnd(_list):
     # startIndex needs to be one less to make sure we get the ##Total word out of the list
@@ -86,7 +94,7 @@ def trimEnd(_list):
 
 def trimRows(_list):
     # First we need to get a list of rowStarters
-    rowStarters = getRowStart(_list)
+    rowStarters = getRowStart(toParse)
 
     # Now we can trim the end of the document since we retrieved the rowStarters
     _list = trimEnd(_list)
@@ -94,6 +102,7 @@ def trimRows(_list):
     rows = []
     
     for word in reversed(rowStarters):
+
         # Using .index will find the first index but we need the last index in case there are duplicate rowStarters, which is likely
         if word == 'JUVENILE':
             lastIndex = findJuvenileStart(_list, word)
@@ -332,11 +341,13 @@ def trimIncidents(_list):
     return _list
 
 def spaceSlashes(_list):
-    slashPattern = '(\w{2,})\/(\w*)'
+    slashPattern = '(\w{2,}).?\/(\w*)|(\D{2,})-(\D*)'
     for i, k in enumerate(_list):
-        for j, word in enumerate(k):
+        for j, word in enumerate(k):  
             if re.search(slashPattern, word):
-                k[j] = word.replace('/', ' / ')
+                word = word.replace('/', ' / ')
+                word = word.replace('-', ' - ')
+                k[j] = word
     return _list
             
 def expandAbbr(_list):
@@ -387,11 +398,10 @@ def getCoords(_list):
 def getCensoredAddress(_list):
     address = getAddresses(_list)
     firstWord = address.split(' ', 1)[0]
-
     if firstWord.isnumeric():
         firstWord = firstWord[:-2] + 'XX'
         address = firstWord + ' ' + address.split(' ', 1)[1]
-        
+
     try:
         apptIndex = address.index('#')
         address = address[:apptIndex - 1]
@@ -409,6 +419,7 @@ def getAbbreviations(_file):
         print('Loading abbreviations...')
         _dict = dict([(line.split()[0], ' '.join(line.split()[1:])) for line in f])
         print('Abbreviations loaded')
+        
     return _dict
 
 def getParsedFiles(_file):
@@ -416,10 +427,17 @@ def getParsedFiles(_file):
         print('Loading already parsed files...')
         _list = [line.replace('\n', '') for line in f]
         print('Parsed files loaded')
+
     return _list
 
 def splitDates(_words):
+    csv.register_dialect('dialect',
+        delimiter = '|',
+        quoting = csv.QUOTE_NONE,
+        skipinitialspace = True)
+
     dates = list(set([l[1] for l in words]))
+    dates.sort()
     for e in dates:
         toWrite = []
         fileCSV = 'CSVs/' + e.replace('/', '-') + '.csv'
@@ -436,15 +454,8 @@ def findAlreadyExisting(_path = '.'):
     return[os.path.splitext(file)[0] for file in files if file.endswith('.pdf')]
 
 if __name__ == "__main__":
-
-    csv.register_dialect('dialect',
-        delimiter = '|',
-        quoting = csv.QUOTE_NONE,
-        skipinitialspace = True)
-
     abbr = getAbbreviations('abbreviations.txt')
     parsedFiles = getParsedFiles('parsed.txt')
-
     neededFiles = findAlreadyExisting('PDFs/')
 
     for file in neededFiles:
@@ -459,6 +470,10 @@ if __name__ == "__main__":
 
         parsedText = getRawText(filePDF)
         toParse = ''.join(parsedText['content'])
+
+        with open('rawText.txt', "w", encoding='utf-8') as f:
+            f.write(toParse)
+
         words = toParse.split()  
 
         trimPageHeader(words)
@@ -466,9 +481,6 @@ if __name__ == "__main__":
         words = formatLines(words)
         removeNone(words)
         splitDates(words)
-
-        with open('rawText.txt', "w", encoding='utf-8') as f:
-            f.write(toParse)
 
         with open('parsed.txt', 'a') as f:
             f.write(file)
