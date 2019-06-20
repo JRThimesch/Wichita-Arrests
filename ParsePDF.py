@@ -52,7 +52,7 @@ def findLastOccurence(_list, _str):
 def findJuvenileStart(_list, _str):
     return max(i for i, item in enumerate(_list) if item == _str and isDate(_list[i + 1]))
 
-def regexFirstLast(_list, _pattern, _min = True):
+def regexFronttoBack(_list, _pattern, _min = True):
     if _min:
         return min(i for i, element in enumerate(_list) if re.search(_pattern, element))
     else:
@@ -118,46 +118,46 @@ def trimRows(_list):
 
 def getFirstPart(_list):
     pattern = '(\d{2}:\d{2})'
-    timeIndex = regexFirstLast(_list, pattern)
+    timeIndex = regexFronttoBack(_list, pattern)
     return _list[:timeIndex]
 
 def getLastPart(_list):
     pattern = '(\d{2}:\d{2})'
-    index = regexFirstLast(_list, pattern) + 2
+    index = regexFronttoBack(_list, pattern) + 2
     return _list[index:]
 
 def getNames(_list):
     # Finds the index of the date of birth and slices everything before it to get the name
     pattern = '(\d{2}/\d{2}/\d{4})'
-    dobIndex = regexFirstLast(_list, pattern)
+    dobIndex = regexFronttoBack(_list, pattern)
     return ' '.join(_list[:dobIndex])
 
 def getBirthdates(_list):
     pattern = '(\d{2}/\d{2}/\d{4})'
-    dobIndex = regexFirstLast(_list, pattern)
+    dobIndex = regexFronttoBack(_list, pattern)
     return _list[dobIndex]
 
 def getDates(_list):
     # Age and date are concatenated so we need to seperate the two with slicing
     pattern = '(\d{2}/\d{2}/\d{4})'
-    dateIndex = regexFirstLast(getFirstPart(_list), pattern, False)
+    dateIndex = regexFronttoBack(getFirstPart(_list), pattern, False)
     return _list[dateIndex][-10:]
 
 def getAges(_list):
     # Age and date are concatenated so we need to seperate the two with slicing
     pattern = '(\d{2}/\d{2}/\d{4})'
-    ageIndex = regexFirstLast(getFirstPart(_list), pattern, False)
+    ageIndex = regexFronttoBack(getFirstPart(_list), pattern, False)
     return _list[ageIndex][:-10]
 
 def getTimes(_list):
     pattern = '(\d{2}:\d{2})'
-    timeIndex = regexFirstLast(_list, pattern)
+    timeIndex = regexFronttoBack(_list, pattern)
     return _list[timeIndex]
 
 def getGenders(_list):
     # Returns the index after the time index
     pattern = '(\d{2}:\d{2})'
-    genderIndex = regexFirstLast(_list, pattern) + 1
+    genderIndex = regexFronttoBack(_list, pattern) + 1
     return expandGenders(_list[genderIndex])
 
 def expandGenders(_str):
@@ -173,15 +173,21 @@ def expandGenders(_str):
 
     chars = list(_str)
     for i, char in enumerate(chars):
-        chars[i] = replacements[char]
+        if chars[i] in replacements:
+            chars[i] = replacements[char]
+        else:
+            print('Unknown key:', chars[i])
     return ' '.join(chars)
 
 def getAddresses(_list):
     pattern = '(0\d{4,})|\d{6,}|(\d{4}\w+\d{2,}\w)'
     _list = getLastPart(_list)
+    
     if noAddressListed(_list):
         return noAddressListed(_list)
-    arrestIndex = regexFirstLast(_list, pattern)
+        
+    arrestIndex = regexFronttoBack(_list, pattern)
+
     return ' '.join(_list[:arrestIndex])
 
 def noAddressListed(_list):
@@ -205,7 +211,7 @@ def trimCharges(_list):
     _list = getLastPart(_list)
 
     try:
-        arrestIndex = regexFirstLast(_list, pattern)
+        arrestIndex = regexFronttoBack(_list, pattern)
     except:
         return None
 
@@ -215,7 +221,7 @@ def trimCharges(_list):
     count = countCharges(_list, pattern)
 
     for j in range(count):
-        startIndex = regexFirstLast(_list, pattern, False)
+        startIndex = regexFronttoBack(_list, pattern, False)
         trimmed.append(_list[startIndex:])
             
         # Trim down list with each arrest found
@@ -330,7 +336,7 @@ def trimIncidents(_list):
             codeIndex = k - 1
             if not e[codeIndex].isalpha():
                 del e[codeIndex:cutIndex]
-                e[codeIndex - 1] += ';' 
+                e[codeIndex - 1] += '+' 
             else:
                 del e[k]
                 e[codeIndex] += ',' 
