@@ -192,7 +192,7 @@ def getAddresses(_list):
 
 def noAddressListed(_list):
     if 'No' in _list:
-        return '-----'
+        return ''
     else:
         return False
 
@@ -308,7 +308,7 @@ def parseWarrants(_list):
     listOfWarrants = [e[0] for e in _list if re.search(warrantPattern, e[0])]
 
     if not listOfWarrants:
-        return '-----'
+        return ''
     else:
         return '+'.join(listOfWarrants)
 
@@ -385,14 +385,17 @@ def formatLines(_list):
         rows[i].append(parseIncidents(k))
         rows[i].append(parseWarrants(k))
         rows[i].append(getCensoredAddress(k))
-        rows[i].append(getCoords(k))
+
+        lat, long = getCoords(k)
+        rows[i].append(lat)
+        rows[i].append(long)
     return rows
 
 def getCoords(_list):
     address = getAddresses(_list)
     fullAddress = address + " Wichita, Kansas, USA"
     try:
-        g = GoogleV3(api_key="AIzaSyDUfEWFUwRP1EAtFrAw2pEVysDm8OYEcDQ#######")
+        g = GoogleV3(api_key="AIzaSyDUfEWFUwRP1EAtFrAw2pEVysDm8OYEcDQ")
         location = g.geocode(fullAddress)
         print(fullAddress, (location.latitude, location.longitude))
         return location.latitude, location.longitude
@@ -418,7 +421,7 @@ def getCensoredAddress(_list):
 
 def removeNone(_list):
     for i, lofl in enumerate(_list):
-        _list[i] = ['-----' if element is None else element for element in lofl]
+        _list[i] = ['' if element is None else element for element in lofl]
 
 def getAbbreviations(_file):
     with open(_file) as f:
