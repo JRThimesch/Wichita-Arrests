@@ -79,7 +79,7 @@ if __name__ == "__main__":
         date = os.path.splitext(e)[0]
         
         if verifyDate(filePDF, date):
-            print(e, 'downloaded')
+            print(e, 'successfully downloaded!')
         else:
             os.remove(filePDF)
             print('\t************')
