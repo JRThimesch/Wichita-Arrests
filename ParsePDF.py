@@ -2,7 +2,7 @@ from tika import parser
 import re
 import os
 import csv
-from geopy.geocoders import GoogleV3
+import sys
 
 def getRawText(_pdf):
     return parser.from_file(_pdf)
@@ -182,19 +182,14 @@ def expandGenders(_str):
 def getAddresses(_list):
     pattern = '(0\d{4,})|\d{6,}|(\d{4}\w+\d{2,}\w)'
     _list = getLastPart(_list)
-    
-    if noAddressListed(_list):
-        return noAddressListed(_list)
+
+    # For 'No address listed...'
+    if 'No' in (_list):
+        return ''
         
     arrestIndex = regexFronttoBack(_list, pattern)
 
     return ' '.join(_list[:arrestIndex])
-
-def noAddressListed(_list):
-    if 'No' in _list:
-        return ''
-    else:
-        return False
 
 def countCharges(_list, _pattern):
     count = 0
@@ -385,24 +380,8 @@ def formatLines(_list):
         rows[i].append(parseIncidents(k))
         rows[i].append(parseWarrants(k))
         rows[i].append(getCensoredAddress(k))
-
-        lat, long = getCoords(k)
-        rows[i].append(lat)
-        rows[i].append(long)
+        rows[i].append(getIdentifiers(rows[i][7], rows[i][8], rows[i][9]))
     return rows
-
-def getCoords(_list):
-    address = getAddresses(_list)
-    fullAddress = address + " Wichita, Kansas, USA"
-    try:
-        g = GoogleV3(api_key="AIzaSyDUfEWFUwRP1EAtFrAw2pEVysDm8OYEcDQ")
-        location = g.geocode(fullAddress)
-        print(fullAddress, (location.latitude, location.longitude))
-        return location.latitude, location.longitude
-    except Exception as e:
-        print('Error with address:', fullAddress)
-        print(e)
-        return ''
 
 def getCensoredAddress(_list):
     address = getAddresses(_list)
@@ -423,7 +402,7 @@ def removeNone(_list):
     for i, lofl in enumerate(_list):
         _list[i] = ['' if element is None else element for element in lofl]
 
-def getAbbreviations(_file):
+def loadAbbreviations(_file):
     with open(_file) as f:
         print('Loading abbreviations...')
         _dict = dict([(line.split()[0], ' '.join(line.split()[1:])) for line in f])
@@ -431,13 +410,21 @@ def getAbbreviations(_file):
         
     return _dict
 
-def getParsedFiles(_file):
+def loadParsedFiles(_file):
     with open(_file) as f:
         print('Loading already parsed files...')
         _list = [line.replace('\n', '') for line in f]
         print('Parsed files loaded')
 
     return _list
+
+def loadIdentifiers(_file):
+    with open(_file) as f:
+        print('Loading identifiers...')
+        _dict = dict([(line.split('|')[0], (line.split('|')[1].replace('\n', ''))) for line in f])
+        print('Identifiers loaded')
+        
+    return _dict
 
 def splitDates(_words):
     csv.register_dialect('dialect',
@@ -458,13 +445,28 @@ def splitDates(_words):
                         
             writer.writerows(toWrite)
 
+def getIdentifiers(_arrests, _incidents, _warrants):
+    if _warrants:
+        return 'warrant'
+
+    for key in indentifiers:
+        try:
+            if _arrests.find(key) is not -1:
+                return indentifiers[key]
+        except:
+            pass
+
+    return 'other'
+
+
 def findAlreadyExisting(_path = '.'):
     files = os.listdir(_path)
     return[os.path.splitext(file)[0] for file in files if file.endswith('.pdf')]
 
 if __name__ == "__main__":
-    abbr = getAbbreviations('abbreviations.txt')
-    parsedFiles = getParsedFiles('parsed.txt')
+    indentifiers = loadIdentifiers('identifiers.txt')
+    abbr = loadAbbreviations('abbreviations.txt')
+    parsedFiles = loadParsedFiles('parsed.txt')
     neededFiles = findAlreadyExisting('PDFs/')
 
     for file in neededFiles:
@@ -472,8 +474,9 @@ if __name__ == "__main__":
         filePDF = locationPDF + file + '.pdf'
         
         if file in parsedFiles:
-            print(file + '.pdf', 'already parsed!')
-            continue
+            if len(sys.argv) is 1 or sys.argv[1] is not 'r':
+                print(file + '.pdf', 'already parsed!')
+                continue
         
         print('Parsing', file + '.pdf...')
 
