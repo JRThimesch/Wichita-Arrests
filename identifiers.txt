@@ -1,0 +1,37 @@
+HOMICIDE|violence-related
+MURDER|violence-related
+MANSLAUGHTER|violence-related
+RAPE|sex-related
+ARSON|violence-related
+TRAFFICKING|sex-related
+BURGLARY|property-related
+BATTERY|violence-related
+DOMESTIC VIOLENCE|violence-related
+ASSAULT|violence-related
+SEXUAL|sex-related
+THEFT|property-related
+LARCENY|property-related
+STOLEN|property-related
+DUI|vehicle-related
+DRIVE UNDER|vehicle-related
+METH|drug-related
+MARIJUANA|drug-related
+NARCOTIC|drug-related
+RUNAWAY|other
+VEHICLES|vehicle-related
+VEHICLE|vehicle-related
+DRIVING|vehicle-related
+RESIST ARREST|other
+OBSTRUCT|other
+ALCOHOL|other
+FALSE POLICE REPORT|other
+INTIMIDATION|violence-related
+BODILY HARM|violence-related
+DISORDERLY CONDUCT|other
+SHOPLIFT|property-related
+STOLEN|property-related
+PROPERTY|property-related
+PUBLIC NUDITY|sex-related
+DRUG|drug-related
+INHALATION|drug-related
+TRESPASS|property-related
