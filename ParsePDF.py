@@ -1,8 +1,5 @@
 from tika import parser
-import re
-import os
-import csv
-import sys
+import re, os, csv, sys, json
 
 def getRawText(_pdf):
     return parser.from_file(_pdf)
@@ -168,7 +165,8 @@ def expandGenders(_str):
         'I' : 'INDIAN',
         'H' : 'HISPANIC',
         'M' : 'MALE',
-        'F' : 'FEMALE'
+        'F' : 'FEMALE',
+        'U' : 'UNKNOWN'
     }
 
     chars = list(_str)
@@ -180,16 +178,20 @@ def expandGenders(_str):
     return ' '.join(chars)
 
 def getAddresses(_list):
-    pattern = '(0\d{4,})|\d{6,}|(\d{4}\w+\d{2,}\w)'
-    _list = getLastPart(_list)
+    pattern = '((0|8)\d{4,})|\d{6,}|(\d{4}\w+\d{2,}\w)'
+    lastPart = getLastPart(_list)
 
     # For 'No address listed...'
-    if 'No' in (_list):
+    if 'No' in (lastPart):
         return ''
         
-    arrestIndex = regexFronttoBack(_list, pattern)
+    arrestIndex = regexFronttoBack(lastPart, pattern)
 
-    return ' '.join(_list[:arrestIndex])
+    address = ' '.join(lastPart[:arrestIndex])
+    if len(address) > 30:
+        print('\nAbnormally large address:', address)
+        print('\n\t', _list)
+    return address
 
 def countCharges(_list, _pattern):
     count = 0
@@ -247,8 +249,10 @@ def parseArrests(_list):
     if not _list:
         return None 
     else:
-        _list = expandAbbr(_list)
         _list = trimArrests(_list)
+        _list = expandAbbreviations(_list)
+        _list = expandPhrases(_list)
+        
 
         if len(_list) == 1:
             return ' '.join(_list[0])
@@ -284,8 +288,10 @@ def parseIncidents(_list):
     if not found or not _list:
         return None
 
-    _list = expandAbbr(_list)
     _list = trimIncidents(_list)
+    _list = expandAbbreviations(_list)
+    _list = expandPhrases(_list)
+    
     
     if len(_list) == 1:
         return ' '.join(_list[0])
@@ -337,7 +343,7 @@ def trimIncidents(_list):
                 e[codeIndex] += ',' 
         
         if not e[0].isalpha():
-            e[0] = 'INCIDENT #' + str(i + 1) + ':'
+            del e[0]
 
     return _list
 
@@ -351,18 +357,26 @@ def spaceSlashes(_list):
                 k[j] = word
     return _list
             
-def expandAbbr(_list):
+def expandAbbreviations(_list):
     for i, lofl in enumerate(_list):
         for j, element in enumerate(lofl):
             wordsList = str(element)
             wordsList = wordsList.split()
             for k, word in enumerate(wordsList):
                 try:
-                    wordsList[k] = abbr[word]
+                    wordsList[k] = abbreviations[word]
                 except KeyError:
                     continue
             lofl[j] = ' '.join(wordsList)
         _list[i] = lofl
+    return _list
+
+def expandPhrases(_list):
+    for i, sentence in enumerate(_list):
+        sentenceStr = ' '.join(sentence)
+        for phrase in phrases:
+            sentenceStr = sentenceStr.replace(phrase, phrases[phrase])
+        _list[i] = sentenceStr.split()
     return _list
 
 def formatLines(_list):
@@ -380,7 +394,7 @@ def formatLines(_list):
         rows[i].append(parseIncidents(k))
         rows[i].append(parseWarrants(k))
         rows[i].append(getCensoredAddress(k))
-        rows[i].append(getIdentifiers(rows[i][7], rows[i][8], rows[i][9]))
+        rows[i].append(getIdentifiers(rows[i][7], rows[i][9]))
     return rows
 
 def getCensoredAddress(_list):
@@ -402,12 +416,9 @@ def removeNone(_list):
     for i, lofl in enumerate(_list):
         _list[i] = ['' if element is None else element for element in lofl]
 
-def loadAbbreviations(_file):
+def loadJSON(_file):
     with open(_file) as f:
-        print('Loading abbreviations...')
-        _dict = dict([(line.split()[0], ' '.join(line.split()[1:])) for line in f])
-        print('Abbreviations loaded')
-        
+        _dict = json.load(f)
     return _dict
 
 def loadParsedFiles(_file):
@@ -417,14 +428,6 @@ def loadParsedFiles(_file):
         print('Parsed files loaded')
 
     return _list
-
-def loadIdentifiers(_file):
-    with open(_file) as f:
-        print('Loading identifiers...')
-        _dict = dict([(line.split('|')[0], (line.split('|')[1].replace('\n', ''))) for line in f])
-        print('Identifiers loaded')
-        
-    return _dict
 
 def splitDates(_words):
     csv.register_dialect('dialect',
@@ -445,27 +448,27 @@ def splitDates(_words):
                         
             writer.writerows(toWrite)
 
-def getIdentifiers(_arrests, _incidents, _warrants):
-    if _warrants:
+def getIdentifiers(_arrests, _warrants):
+    if _warrants and _arrests is None:
         return 'warrant'
 
-    for key in indentifiers:
+    for key in identifiers:
         try:
             if _arrests.find(key) is not -1:
-                return indentifiers[key]
+                return identifiers[key]
         except:
             pass
 
     return 'other'
-
 
 def findAlreadyExisting(_path = '.'):
     files = os.listdir(_path)
     return[os.path.splitext(file)[0] for file in files if file.endswith('.pdf')]
 
 if __name__ == "__main__":
-    indentifiers = loadIdentifiers('identifiers.txt')
-    abbr = loadAbbreviations('abbreviations.txt')
+    identifiers = loadJSON('identifiers.json')
+    abbreviations = loadJSON('abbreviations.json')
+    phrases = loadJSON('phrases.json')
     parsedFiles = loadParsedFiles('parsed.txt')
     neededFiles = findAlreadyExisting('PDFs/')
 
