@@ -47,7 +47,7 @@ def findLastOccurence(_list, _str):
     return max(i for i, item in enumerate(_list) if item == _str)
 
 def findJuvenileStart(_list, _str):
-    return max(i for i, item in enumerate(_list) if item == _str and isDate(_list[i + 1]))
+    return max(i for i, item in enumerate(_list) if item == _str and _list[i - 1] is not 'BY' and isDate(_list[i + 1]))
 
 def regexFronttoBack(_list, _pattern, _min = True):
     if _min:
@@ -102,7 +102,9 @@ def trimRows(_list):
 
         # Using .index will find the first index but we need the last index in case there are duplicate rowStarters, which is likely
         if word == 'JUVENILE':
+            print(_list)
             lastIndex = findJuvenileStart(_list, word)
+            print(_list)
         else:
             lastIndex = findLastOccurence(_list, word)
         
@@ -178,7 +180,7 @@ def expandGenders(_str):
     return ' '.join(chars)
 
 def getAddresses(_list):
-    pattern = '((0|8)\d{4,})|\d{6,}|(\d{4}\w+\d{2,}\w)'
+    pattern = '((0|8)\d{4,})|\d{6,}|(\d{4}\w+\d{2,}\w|\w{3}\d{1}\w{1}\d{1}\w{1}\d{1,})'
     lastPart = getLastPart(_list)
 
     # For 'No address listed...'
@@ -203,7 +205,7 @@ def countCharges(_list, _pattern):
     return count
 
 def trimCharges(_list):
-    pattern = '(0\d{4,}|\d{6,})'
+    pattern = '((0|8)\d{4,}|\d{6,}|\w{3}\d{1}\w{1}\d{1}\w{1}\d{1,})'
     
     _list = getLastPart(_list)
 
