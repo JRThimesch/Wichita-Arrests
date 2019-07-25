@@ -44,16 +44,16 @@ def isDate(_str):
         return False
 
 def findLastOccurence(_list, _str):
-    return max(i for i, item in enumerate(_list) if item == _str)
+    return max(i for i, e in enumerate(_list) if e == _str)
 
-def findJuvenileStart(_list, _str):
-    return max(i for i, item in enumerate(_list) if item == _str and _list[i - 1] is not 'BY' and isDate(_list[i + 1]))
+def findJuvenileStart(_list):
+    return max(i for i, e in enumerate(_list) if e == 'JUVENILE' and _list[i - 1] != 'BY' and isDate(_list[i + 1]))
 
 def regexFronttoBack(_list, _pattern, _min = True):
     if _min:
-        return min(i for i, element in enumerate(_list) if re.search(_pattern, element))
+        return min(i for i, e in enumerate(_list) if re.search(_pattern, e))
     else:
-        return max(i for i, element in enumerate(_list) if re.search(_pattern, element))
+        return max(i for i, e in enumerate(_list) if re.search(_pattern, e))
 
 def getRowStart(_str):
     # Separate by newlines
@@ -77,8 +77,8 @@ def getRowStart(_str):
     rowStarters = []
     for e in starters:
         if e.find(',') is not -1:
-            endIndex = e.index(',')
-            rowStarters.append(e[:endIndex + 1].split(' ', 1)[0])
+            endIndex = e.index(',') + 1
+            rowStarters.append(e[:endIndex].split(' ', 1)[0])
         if 'JUVENILE' in e:
             rowStarters.append('JUVENILE')
     
@@ -95,16 +95,13 @@ def trimRows(_list):
 
     # Now we can trim the end of the document since we retrieved the rowStarters
     _list = trimEnd(_list)
-
     rows = []
     
     for word in reversed(rowStarters):
 
         # Using .index will find the first index but we need the last index in case there are duplicate rowStarters, which is likely
         if word == 'JUVENILE':
-            print(_list)
-            lastIndex = findJuvenileStart(_list, word)
-            print(_list)
+            lastIndex = findJuvenileStart(_list)
         else:
             lastIndex = findLastOccurence(_list, word)
         
