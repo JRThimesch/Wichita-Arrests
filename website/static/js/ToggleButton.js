@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import "./styles.css";
 
 class ToggleButton extends React.Component {
   constructor(props) {
@@ -9,6 +8,34 @@ class ToggleButton extends React.Component {
       toggled: false,
       isHovered: false,
     };
+    this.toggleActive = this.toggleActive.bind(this);
+  }
+
+  toggleActive = () => {
+    this.setState({
+      toggled: !this.state.toggled,
+    });
+  }
+
+  render() {
+    return (
+      <div onClick={this.toggleActive}>
+        {this.props.type}
+        {this.state.toggled.toString()}
+      </div>
+    );
+  }
+}
+
+class Filter extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      toggled: false,
+      isHovered: false,
+    };
+    this.toggleActive = this.toggleActive.bind(this);
+    this.toggleIsHovered = this.toggleIsHovered.bind(this);
   }
 
   toggleActive = () => {
@@ -24,19 +51,16 @@ class ToggleButton extends React.Component {
   }
 
   render() {
-    return (
-      <div class="button" onClick={this.toggleActive} onMouseEnter={this.toggleIsHovered} onMouseLeave={this.toggleIsHovered}>
-        {this.state.isHovered.toString()}
-        {this.state.toggled.toString()}
-      </div>
-    );
-  }
-}
-
-class Filter extends React.Component {
-  render() {
     return(
-      <ToggleButton/>
+      <div onMouseEnter={this.toggleIsHovered} onMouseLeave={this.toggleIsHovered}>
+        <ToggleButton type="violence" />
+        <ToggleButton type="drugs" />
+        <ToggleButton type="property" />
+        <ToggleButton type="vehicles" />
+        <ToggleButton type="sex" />
+        <ToggleButton type="warrants" />
+        <ToggleButton type="other" />
+      </div>
     );
   }
 }
