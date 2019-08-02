@@ -18,7 +18,7 @@ def doesFileExist(_file, _path = '.'):
     return False
 
 def getFileNames(_links):
-    datePattern = '(\d{2}-\d{1,2}-\d{2})'
+    datePattern = '(\d{2}-\d{1,2}-\d{2,4})'
     fileNames = []
     for e in _links:
         match = re.search(datePattern, e)
@@ -44,11 +44,14 @@ def verifyDate(_pdf, _date):
     toParse = ''.join(parsedText['content'])
     words = toParse.split()
 
-    _date = _date.replace('-', '/')
-    year = '20' + _date[-2:]
-    _date = _date[:-2] + year
+    dateList = _date.split('-')
+    
+    if len(dateList[2]) == 2:
+        dateList[2] = '20' + dateList[2]
 
-    if _date in words:
+    newDate = '/'.join(dateList)
+
+    if newDate in words:
         return True
     else:
         return False
