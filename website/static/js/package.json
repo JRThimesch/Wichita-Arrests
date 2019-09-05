@@ -5,9 +5,17 @@
   "main": "Maps.js",
   "devDependencies": {
     "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-transform-arrow-functions": "^7.2.0",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.6",
+    "css-loader": "^3.2.0",
+    "google-map-react": "^1.1.4",
+    "leaflet": "^1.5.1",
+    "moment": "^2.24.0",
+    "pikaday": "^1.8.0",
+    "style-loader": "^1.0.0",
     "webpack": "^4.39.2",
     "webpack-cli": "^3.3.7"
   },
@@ -17,5 +25,6 @@
     "watch": "webpack --progress --watch"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {}
 }

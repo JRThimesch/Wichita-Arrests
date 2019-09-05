@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { LeafMap } from "./classes/LeafMap"
+import Map from "./Map";
 
 ReactDOM.render(
-    <LeafMap/>, 
+    <Map center={[37.6872, -97.3301]} zoom={13} />, 
     document.getElementById('leaflet-map')
 );
