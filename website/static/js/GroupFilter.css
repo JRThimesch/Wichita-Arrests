@@ -1,16 +1,18 @@
-.Filter-label {
+.GroupFilter-label {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #fdfaf3;
+    background-color: #f9f5ed;
 }
 
-.Filter-img {
+.GroupFilter-img {
     height: 26px;
     margin: 2px 5px 2px 5px;
 }
 
-.Filter-title {
+.GroupFilter-title {
     text-decoration: none;
     font-family: QuickSand;
+    font-size: 1.1em;
+    font-weight: 300;
 }

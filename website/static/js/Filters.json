@@ -1,15 +1,7 @@
 [
     {
         "type": "Violence",
-        "title": "Violence"
-    }, 
-    {
-        "type": "Violence",
         "title": "General"
-    },
-    {
-        "type": "Drug",
-        "title": "Drugs"
     },
     {
         "type": "Drug",
@@ -17,15 +9,7 @@
     },
     {
         "type": "Property",
-        "title": "Property"
-    },
-    {
-        "type": "Property",
         "title": "General"
-    },
-    {
-        "type": "Vehicle",
-        "title": "Vehicles"
     },
     {
         "type": "Vehicle",
@@ -33,23 +17,11 @@
     },
     {
         "type": "Sex",
-        "title": "Sex"
-    },
-    {
-        "type": "Sex",
         "title": "General"
     },
     {
         "type": "Warrant",
-        "title": "Warrants"
-    },
-    {
-        "type": "Warrant",
         "title": "General"
-    },
-    {
-        "type": "Other",
-        "title": "Other"
     },
     {
         "type": "Other",

@@ -1,20 +1,17 @@
 import React from "react";
 import Filter from "./Filter";
+import GroupContainer from "./GroupContainer";
 import "./FilterContainer.css";
 
 const Filters = require("./Filters.json");
-var filterArray = Filters.map((filterObject, i) => {
-    //let groupID = groupTypes.indexOf(filterObject.type);
-    return <Filter key={i} inputid={i} type={filterObject.type} title={filterObject.title} />
+
+var groupTypes = new Set();
+
+Filters.forEach(filterObject => {
+    groupTypes.add(filterObject.type)
 });
 
-//var groupTypes = new Set();
-
-//Filters.forEach(filterObject => {
-//    groupTypes.add(filterObject.type)
-//});
-
-//groupTypes = Array.from(groupTypes);
+groupTypes = Array.from(groupTypes);
 
 export default class FilterContainer extends React.Component {
     constructor(props){
@@ -41,9 +38,8 @@ export default class FilterContainer extends React.Component {
         return (
             <div className="FilterContainer" onMouseEnter={this.mouseHovered} onMouseLeave={this.mouseNotHovered}>
                 {text}
-                {Filters.map((filterObject, i) => {
-                    //let groupID = groupTypes.indexOf(filterObject.type);
-                    return <Filter key={i} inputid={i} type={filterObject.type} title={filterObject.title} style={{display: display}} />
+                {groupTypes.map((groupType, i) => {
+                    return <GroupContainer key={i} style={{display: display}} type={groupType} groupid={i} />;
                 })}
             </div>
         );
