@@ -2,7 +2,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f9f5ed;
 }
 
 .GroupFilter-img {
@@ -15,4 +14,12 @@
     font-family: QuickSand;
     font-size: 1.1em;
     font-weight: 300;
+}
+
+.GroupFilter-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: #f9f5ed;
 }

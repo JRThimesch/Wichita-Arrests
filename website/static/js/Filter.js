@@ -23,6 +23,14 @@ export default class Filter extends React.Component {
         this.setState({checked: event.target.checked})
     }
 
+    componentDidUpdate = (prevProps) => {
+        if(this.props.istoggled !== prevProps.istoggled) {
+            this.setState(prevState => ({
+                checked: !prevState.checked
+            }));
+        }
+    }
+
     render = () => {
         let opacity = this.state.checked ? 1 : .25;
 

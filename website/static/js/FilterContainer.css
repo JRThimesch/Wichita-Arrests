@@ -3,10 +3,9 @@
     width: 40px;
     background-color: rgb(255, 255, 255);
     position: absolute;
-    top: 0px;
-    right: 0px;
+    top: 60px;
+    right: 10px;
     z-index: 0;
-    margin: 60px 10px 10px auto;
     box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
     border-radius: 2px;
 }
@@ -14,4 +13,10 @@
 .FilterContainer:hover {
     width: 120px;
     height: auto;
+}
+
+.FilterContainer-img {
+    height: 26px;
+    width: 26px;
+    margin: 7px;
 }

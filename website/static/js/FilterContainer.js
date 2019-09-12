@@ -30,16 +30,16 @@ export default class FilterContainer extends React.Component {
     }
     
     render() {
-        let text, display;
+        let displayNotHovered, displayHovered;
 
-        text = this.state.isHovered ? "" : "Filters";
-        display = this.state.isHovered ? "flex" : "none";
+        displayNotHovered = this.state.isHovered ? "none" : "flex";
+        displayHovered = this.state.isHovered ? "flex" : "none";
 
         return (
             <div className="FilterContainer" onMouseEnter={this.mouseHovered} onMouseLeave={this.mouseNotHovered}>
-                {text}
+                <img className="FilterContainer-img" src="static/images/filters.png" style={{display: displayNotHovered}}/>
                 {groupTypes.map((groupType, i) => {
-                    return <GroupContainer key={i} style={{display: display}} type={groupType} groupid={i} />;
+                    return <GroupContainer key={i} style={{display: displayHovered}} type={groupType} groupid={i} />
                 })}
             </div>
         );
