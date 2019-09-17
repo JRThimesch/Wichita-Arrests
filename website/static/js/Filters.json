@@ -1,23 +1,23 @@
 [
     {
         "type": "Violence",
-        "title": "General"
+        "title": "Dom Violence"
     },
     {
         "type": "Drug",
-        "title": "General"
+        "title": "Marijuana"
     },
     {
         "type": "Property",
-        "title": "General"
+        "title": "Larceny"
     },
     {
         "type": "Vehicle",
-        "title": "General"
+        "title": "Theft"
     },
     {
         "type": "Sex",
-        "title": "General"
+        "title": "Prostitution"
     },
     {
         "type": "Warrant",
@@ -26,5 +26,9 @@
     {
         "type": "Other",
         "title": "General"
-    }
+    },
+	{
+		"type": "Violence",
+		"title": "Murder"
+	}
 ]

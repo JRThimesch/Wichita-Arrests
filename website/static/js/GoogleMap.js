@@ -42,8 +42,8 @@ export class GoogleMap extends React.Component {
       return <Marker key={i} position={{lat: markerObject.lat, lng: markerObject.lng}} icon={{url: `static/images/${markerObject.identifier}.png`}} type={markerObject.identifier} />
     });
 
-    this.setState({markers: {markerArray}});
-    this.forceUpdate();
+    this.setState({markers: markerArray});
+
   }
 
   componentDidMount = () => {
@@ -51,10 +51,12 @@ export class GoogleMap extends React.Component {
   }
 
   render() {
+    console.log(this.state.markers)
+
     return (
       <Map google={this.props.google} initialCenter={{lat: 37.6872, lng: -97.3301}} zoom={this.props.zoom}>
         <FilterContainer/>
-        {this.state.markers.markerArray}
+        {this.state.markers}
       </Map>
     );
   }

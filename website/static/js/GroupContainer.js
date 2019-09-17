@@ -8,9 +8,21 @@ const Filters = require("./Filters.json");
 export default class GroupContainer extends React.Component {
     constructor(props) {
         super(props);
+        this.handleGroupCheck = this.handleGroupCheck.bind(this);
+        this.handleSingleCheck = this.handleSingleCheck.bind(this);
         this.state = {
             isDropped: false,
-            isToggled: true
+            isToggled: true,
+            objects: Filters.filter((filterObject, i) => {
+                if(filterObject.type === this.props.type) {
+                    filterObject.id = i;
+                    return filterObject;
+                }
+            }),
+            checkedFilters: Filters.map((filterObject, i) => {
+                if(filterObject.type === this.props.type)
+                    return i;
+            })
         };
     }
 
@@ -20,27 +32,52 @@ export default class GroupContainer extends React.Component {
         }));
     }
 
-    toggleFilters = () => {
-        this.setState(prevState => ({
-            isToggled: !prevState.isToggled
-        }));
+    handleGroupCheck = (event) => {
+        const { checked } = event.target;
+        const { objects } = this.state;
+        const IDs = [];
+
+        if(checked) {
+            for(const filter of objects) {
+                IDs.push(filter.id);
+            }
+        }
+
+        this.setState({
+            checkedFilters: IDs,
+            isToggled: checked
+        });
+
+    }
+
+    handleSingleCheck = (event) => {
+        const { value, checked } = event.target;
+
+        if (checked) {
+            this.setState(prevState => ({
+                checkedFilters: [...prevState.checkedFilters, value * 1]
+            }));
+        } else {
+            this.setState(prevState => ({
+                checkedFilters: prevState.checkedFilters.filter(item => item != value)
+            }));
+        }
     }
 
     render = () => {
-        let isDropped = this.state.isDropped;
-        let isToggled = this.state.isToggled;
+        console.log(this.state.checkedFilters)
+        let isDropped = this.state.isDropped ? 1 : 0;
+        let display = this.state.isDropped && this.props.hovered ? "flex" : "none";
 
-        let advancedFilters = Filters.map((filterObject, i) => {
-            if(filterObject.type === this.props.type)
-                if(isDropped)
-                    return <Filter {...this.props} istoggled={isToggled.toString()} key={i} title={filterObject.title}  />
-                else
-                    return <Filter {...this.props} istoggled={isToggled.toString()} style={{display: 'none'}} key={i} title={filterObject.title}  />
+        let isToggled = this.state.isToggled ? 1 : 0;
+
+        let advancedFilters = this.state.objects.map((filterObject, i) => {
+            return <Filter {...this.props} style={{display: display}} title={filterObject.title} key={filterObject.id} filterid={filterObject.id} checkedFilters={this.state.checkedFilters} handleSingleCheck={this.handleSingleCheck} />
         })
 
         return (
             <div className="GroupContainer">
-                <GroupFilter {...this.props} istoggled={isToggled.toString()} ischecked={this.state.isDropped} togglefilters={this.toggleFilters} toggledropdown={this.toggleDropdown}/>
+                <GroupFilter {...this.props} istoggled={isToggled} handlegroupcheck={this.handleGroupCheck} isdropped={isDropped} toggledropdown={this.toggleDropdown}/>
                 {advancedFilters}
             </div>
         );

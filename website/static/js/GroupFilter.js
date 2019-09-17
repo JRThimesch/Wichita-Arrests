@@ -1,42 +1,19 @@
 import React from "react";
-import "./GroupFilter.css"
 import DropdownButton from "./DropdownButton";
+import "./GroupFilter.css"
 
 export default class GroupFilter extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            checked: true
-        }
-    }
-
-    static defaultProps = {
-        type: null
-    };
-
-    handleCheck = event => {
-        this.setState({checked: event.target.checked})
-    }
-
-    componentDidUpdate = (prevProps) => {
-        if(this.props.istoggled !== prevProps.istoggled) {
-            this.setState(prevState => ({
-                checked: !prevState.checked
-            }));
-        }
-    }
-
     render = () => {
-        let opacity = this.state.checked ? 1 : .25;
+        let opacity = this.props.istoggled ? 1 : .25;
 
         return (
             <div className="GroupFilter-container">
-                <label {...this.props} style={{opacity: opacity}} className="GroupFilter-label">
-                    <img {...this.props} className="GroupFilter-img" src={`static/images/${this.props.type}.png`}></img>
-                    <input {...this.props} style={{display: "none"}} className="GroupFilter-checkbox" type="checkbox" checked={this.state.checked} onChange={this.props.togglefilters}/>
-                    <span {...this.props} className="GroupFilter-title">{this.props.type}</span>
+                <label style={{opacity: opacity}} type={this.props.type} groupid={this.props.groupid} className="GroupFilter-label">
+                    <img style={this.props.style} type={this.props.type} groupid={this.props.groupid} className="GroupFilter-img" src={`static/images/${this.props.type}.png`}></img>
+                    <input style={{display: "none"}} type={this.props.type} groupid={this.props.groupid} className="GroupFilter-checkbox" type="checkbox" checked={this.props.istoggled} onChange={this.props.handlegroupcheck}/>
+                    <span style={this.props.style} type={this.props.type} groupid={this.props.groupid} className="GroupFilter-title">{this.props.type}</span>
                 </label>
-                <DropdownButton ischecked={this.props.ischecked} toggledropdown={this.props.toggledropdown} style={this.props.style}/>
+                <DropdownButton isdropped={this.props.isdropped} toggledropdown={this.props.toggledropdown} style={this.props.style}/>
             </div>
         );
     }
