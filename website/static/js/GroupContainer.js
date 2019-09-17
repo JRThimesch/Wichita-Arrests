@@ -8,8 +8,6 @@ const Filters = require("./Filters.json");
 export default class GroupContainer extends React.Component {
     constructor(props) {
         super(props);
-        this.handleGroupCheck = this.handleGroupCheck.bind(this);
-        this.handleSingleCheck = this.handleSingleCheck.bind(this);
         this.state = {
             isDropped: false,
             isToggled: true,
