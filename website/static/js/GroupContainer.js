@@ -12,13 +12,13 @@ export default class GroupContainer extends React.Component {
             isDropped: false,
             isToggled: true,
             objects: Filters.filter((filterObject, i) => {
-                if(filterObject.type === this.props.type) {
+                if(filterObject.type === this.props.grouptype) {
                     filterObject.id = i;
                     return filterObject;
                 }
             }),
             checkedFilters: Filters.map((filterObject, i) => {
-                if(filterObject.type === this.props.type)
+                if(filterObject.type === this.props.grouptype)
                     return i;
             })
         };
@@ -51,6 +51,8 @@ export default class GroupContainer extends React.Component {
     handleSingleCheck = (event) => {
         const { value, checked } = event.target;
 
+        this.props.updatetags(event.target.getAttribute("grouptype"))
+
         if (checked) {
             this.setState(prevState => ({
                 checkedFilters: [...prevState.checkedFilters, value * 1]
@@ -63,14 +65,13 @@ export default class GroupContainer extends React.Component {
     }
 
     render = () => {
-        console.log(this.state.checkedFilters)
         let isDropped = this.state.isDropped ? 1 : 0;
         let display = this.state.isDropped && this.props.hovered ? "flex" : "none";
 
         let isToggled = this.state.isToggled ? 1 : 0;
 
         let advancedFilters = this.state.objects.map((filterObject, i) => {
-            return <Filter {...this.props} style={{display: display}} title={filterObject.title} key={filterObject.id} filterid={filterObject.id} checkedFilters={this.state.checkedFilters} handleSingleCheck={this.handleSingleCheck} />
+            return <Filter {...this.props} style={{display: display}} tag={filterObject.title} grouptype={this.props.grouptype} key={filterObject.id} filterid={filterObject.id} checkedfilters={this.state.checkedFilters} handlesinglecheck={this.handleSingleCheck} />
         })
 
         return (

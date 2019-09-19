@@ -1,5 +1,4 @@
 import React from "react";
-import Filter from "./Filter";
 import GroupContainer from "./GroupContainer";
 import "./FilterContainer.css";
 
@@ -30,16 +29,17 @@ export default class FilterContainer extends React.Component {
     }
     
     render() {
-        let displayNotHovered, displayHovered;
+        let filterImage = <img className="FilterContainer-img" src="static/images/filters.png" style={{display: displayNotHovered}}/>;
 
-        displayNotHovered = this.state.isHovered ? "" : <img className="FilterContainer-img" src="static/images/filters.png" style={{display: displayNotHovered}}/>;
-        displayHovered = this.state.isHovered ? "flex" : "none";
+        let isHovered = this.state.isHovered ? 1 : 0;
+        let displayNotHovered = this.state.isHovered ? "" : filterImage;
+        let displayHovered = this.state.isHovered ? "flex" : "none";
 
         return (
             <div className="FilterContainer" onMouseEnter={this.mouseHovered} onMouseLeave={this.mouseNotHovered}>
                 {displayNotHovered}
                 {groupTypes.map((groupType, i) => {
-                    return <GroupContainer key={i} style={{display: displayHovered}} hovered={this.state.isHovered} type={groupType} groupid={i} />
+                    return <GroupContainer updatetags={this.props.updatetags} key={i} style={{display: displayHovered}} hovered={isHovered} grouptype={groupType} />
                 })}
             </div>
         );
