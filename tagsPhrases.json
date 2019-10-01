@@ -1,6 +1,19 @@
 {
-    "drive suspend revok cancel fraudul driver licens": "Traffic Violation",
+    "driver licens": "License",
+    "drive licens": "License",
     "hit run": "Hit and Run",
-    "drive licens cancel suspend revok": "Traffic Violation",
-    "drive influenc": "DUI"
+    "sale sexual": "Procurement",
+    "red light": "Traffic Violation",
+    "drive influenc": "DUI",
+    "seat belt": "Traffic Violation",
+    "damag properti": "Property Damage",
+    "solicit child": "Child",
+    "liberti child": "Child",
+    "child endanger": "Child Endangerment",
+    "stop sign": "Traffic Violation",
+    "imped traffic flow": "Speed Limit",
+    "public nuditi": "Public Nudity",
+    "destruct properti": "Property Damage",
+    "cruelti anim": "Animal Cruelty",
+    "unlaw assembl": "Disturbance"
 }
