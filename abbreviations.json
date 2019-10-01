@@ -6,6 +6,7 @@
     "LARC": "LARCENY",
     "POSS": "POSSESSION",
     "MARIJ": "MARIJUANA",
+    "BLDNG": "BUILDING",
     "EFF": "EFFECTIVE",
     "PVT": "PRIVATE",
     "PROP.": "PROPERTY",
@@ -55,5 +56,6 @@
     "LTS": "LIGHTS",
     "CERT": "CERTIFIED",
     "SUSP.": "SUSPENDED",
-    "TRAF": "TRAFFIC"
+    "TRAF": "TRAFFIC",
+    "PED": "PEDESTRIAN"
 }
