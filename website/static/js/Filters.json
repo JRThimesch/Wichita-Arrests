@@ -1,34 +1,119 @@
 [
     {
         "type": "violence",
-        "title": "Dom Violence"
+        "title": "Domestic Violence"
+    },
+    {
+        "type": "violence",
+        "title": "Arson"
+    },
+    {
+        "type": "violence",
+        "title": "Assault"
+    },
+    {
+        "type": "violence",
+        "title": "Robbery"
+    },
+    {
+        "type": "violence",
+        "title": "Firearms"
     },
     {
         "type": "drug",
         "title": "Marijuana"
     },
     {
-        "type": "property",
-        "title": "Larceny"
+        "type": "drug",
+        "title": "Meth"
+    },
+    {
+        "type": "drug",
+        "title": "Narcotics"
+    },
+    {
+        "type": "drug",
+        "title": "Paraphernalia"
     },
     {
         "type": "vehicle",
-        "title": "Theft"
+        "title": "Vehicle Theft"
     },
     {
         "type": "sex",
-        "title": "Prostitution"
+        "title": "Rape"
+    },
+    {
+        "type": "sex",
+        "title": "Procurement"
+    },
+    {
+        "type": "sex",
+        "title": "Public Nudity"
+    },
+    {
+        "type": "sex",
+        "title": "Trafficking"
+    },
+    {
+        "type": "other",
+        "title": "Alcohol"
+    },
+    {
+        "type": "other",
+        "title": "Runaway"
     },
     {
         "type": "warrant",
         "title": "General"
     },
-    {
-        "type": "other",
-        "title": "General"
-    },
 	{
 		"type": "violence",
+		"title": "Homicide"
+    },
+    {
+		"type": "violence",
 		"title": "Murder"
-	}
+    },
+    {
+		"type": "violence",
+		"title": "Battery"
+    },
+    {
+		"type": "vehicle",
+		"title": "DUI"
+    },
+    {
+		"type": "vehicle",
+		"title": "Speeding"
+    },
+    {
+		"type": "vehicle",
+		"title": "Traffic Violation"
+    },
+    {
+		"type": "vehicle",
+		"title": "Hit and Run"
+    },
+    {
+		"type": "property",
+		"title": "Theft"
+    },
+    {
+		"type": "property",
+		"title": "Damage"
+    },
+    {
+		"type": "property",
+		"title": "Burglary"
+    },
+    {
+		"type": "property",
+        "title": "Trespass"
+    },
+    {
+		"type": "other",
+        "title": "Kidnapping"
+    } 
+    
 ]
