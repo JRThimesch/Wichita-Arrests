@@ -9,11 +9,17 @@
     "damag properti": "Property Damage",
     "solicit child": "Child",
     "liberti child": "Child",
+    "exploit child": "Child",
     "child endanger": "Child Endangerment",
     "stop sign": "Traffic Violation",
     "imped traffic flow": "Speed Limit",
     "public nuditi": "Public Nudity",
     "destruct properti": "Property Damage",
     "cruelti anim": "Animal Cruelty",
-    "unlaw assembl": "Disturbance"
+    "unlaw assembl": "Disturbance",
+    "disorderli conduct": "Disturbance",
+    "fals alarm": "Disturbance",
+    "child restraint": "Traffic Violation",
+    "open contain": "Alcohol",
+    "fals imperson": "Identity Theft"
 }
