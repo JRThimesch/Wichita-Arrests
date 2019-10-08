@@ -55,14 +55,21 @@ def getNames(_pdfObj):
             continue
     return nameArray
 
-def sliceAtNames(_fullText, _nameArrayReversed):
-    pass
-
+def sliceAtNames(_fullText, _nameArray):
+    try:
+        name = _nameArray.pop()
+        partitionedText = _fullText.partition(name)
+        _fullText = partitionedText[0]
+        fullRecord = partitionedText[1] + partitionedText[2]
+        sliceAtNames(_fullText, _nameArray)
+    except IndexError:
+        return None
+    
 if __name__ == "__main__":
     with open('text.txt', 'w') as file:
         pdfObject = openPDF('PDFs/08-12-19.pdf')
         nameArray = getNames(pdfObject)
-        print(nameArray)
+        #print(nameArray)
         
         fullText = ''
         for page in getPageRange(pdfObject):
@@ -71,6 +78,6 @@ if __name__ == "__main__":
             pageTextSpaced = fixTextSpacing(pageText)
             fullText += pageTextSpaced + ' '
             
-        sliceAtNames(fullText, nameArray[::-1])
+        sliceAtNames(fullText, nameArray)
         file.write(fullText)
         #print(fullText)
