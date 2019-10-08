@@ -1,5 +1,5 @@
 import PyPDF2
-import re
+import re, json
 
 HEADER_STR = 'Incidents with Offenses / Warrants'
 HEADER_OFFSET = len('Incidents with Offenses / Warrants')
@@ -16,8 +16,8 @@ def getPageRange(_pdfObj):
 def regexSplitandJoin(_str, _pattern):
     return ' '.join(re.split(_pattern, _str))
 
-def getTrimmedPageText(_page):
-    pageTextFull = pdfObject.getPage(page).extractText()
+def getTrimmedPageText(_pageObject):
+    pageTextFull = _pageObject.extractText()
 
     # Header is trimmed from the string defined at the top
     # An offset is added since the find function finds the beginning index
@@ -40,13 +40,27 @@ def fixTextSpacing(_fullText):
     _fullText = _fullText.replace('Sedgwick County Warrant', ' Sedgwick County Warrant ')
     return _fullText
 
+def getNames(_pdfObj):
+    # PDF files store hidden characteristics within each file
+    # Names of each person arrested are included here, so it's possible to get all names
+    nameArray = []
+    for outline in _pdfObj.outlines[1]:
+        try:
+            nameArray.append(outline[0].title)
+        except:
+            # Exception occurs specifically when the found data is not a name
+            continue
+    return nameArray
+
 if __name__ == "__main__":
     with open('text.txt', 'w') as file:
         pdfObject = openPDF('PDFs/08-12-19.pdf')
+        
         fullText = ''
         for page in getPageRange(pdfObject):
-            pageText = getTrimmedPageText(page)
+            pageObject = pdfObject.getPage(page)
+            pageText = getTrimmedPageText(pageObject)
             pageTextSpaced = fixTextSpacing(pageText)
             fullText += pageTextSpaced + ' '
         file.write(fullText)
-        print(fullText)
+        #print(fullText)
