@@ -46,15 +46,23 @@ def getNames(_pdfObj):
     nameArray = []
     for outline in _pdfObj.outlines[1]:
         try:
-            nameArray.append(outline[0].title)
+            # Some arrests happen at the same time, leading to multiple entries
+            for name in outline:
+                nameArray.append(name.title)
         except:
-            # Exception occurs specifically when the found data is not a name
+            # Exception occurs specifically when there is no title at outline[0]
+            # This also signals no name, so skips
             continue
     return nameArray
+
+def sliceAtNames(_fullText, _nameArrayReversed):
+    pass
 
 if __name__ == "__main__":
     with open('text.txt', 'w') as file:
         pdfObject = openPDF('PDFs/08-12-19.pdf')
+        nameArray = getNames(pdfObject)
+        print(nameArray)
         
         fullText = ''
         for page in getPageRange(pdfObject):
@@ -62,5 +70,7 @@ if __name__ == "__main__":
             pageText = getTrimmedPageText(pageObject)
             pageTextSpaced = fixTextSpacing(pageText)
             fullText += pageTextSpaced + ' '
+            
+        sliceAtNames(fullText, nameArray[::-1])
         file.write(fullText)
         #print(fullText)
