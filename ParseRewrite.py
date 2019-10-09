@@ -57,6 +57,7 @@ def fixTextSpacing(_fullText):
     _fullText = regexSplitandJoin(_fullText, '(\d{2}/\d{2}/\d{4})')
     _fullText = regexSplitandJoin(_fullText, '(\d{2}:\d{2})')
     _fullText = _fullText.replace('Sedgwick County Warrant', ' Sedgwick County Warrant ')
+    findRaceGender(_fullText)
     return ' '.join(_fullText.split())
 
 def findNthRegex(_str, _pattern, n):
@@ -64,10 +65,10 @@ def findNthRegex(_str, _pattern, n):
 
 def getRowBeforeEmpty(_fullText):
     # Dates occur only once per record, making them useful for finding a new record
-    # By finding the second date and subtracting an offset, the empty name can be fixed
-    secondDate = findNthRegex(_fullText, '(\d{2}:\d{2})', 2)
-    secondDateIndex = _fullText.index(findNthRegex(_fullText, '(\d{2}:\d{2})', 2))
-    sliceIndex = secondDateIndex - 11
+    # By finding the second time and subtracting an offset, the empty name can be fixed
+    secondTime = findNthRegex(_fullText, '(\d{2}:\d{2})', 2)
+    secondTimeIndex = _fullText.index(findNthRegex(_fullText, '(\d{2}:\d{2})', 2))
+    sliceIndex = secondTimeIndex - 11
     return _fullText[:sliceIndex]
 
 def getRows(_fullText, _nameArray):
@@ -115,5 +116,5 @@ if __name__ == "__main__":
                 fullText += pageTextSpaced + ' '
                 
             for row in getRows(fullText, nameArray):
-                print(row)
+                #print(row)
                 file.write(row + '\n')
