@@ -71,6 +71,10 @@ def getRowBeforeEmpty(_fullText):
     sliceIndex = secondTimeIndex - 11
     return _fullText[:sliceIndex]
 
+def findRaceGender(_fullText):
+    index = re.search('(\d{2}:\d{2})', _fullText).start()
+    print(_fullText[index + 6:index + 9])
+
 def getRows(_fullText, _nameArray):
     try:
         for index, name in enumerate(_nameArray):
