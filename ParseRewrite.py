@@ -32,6 +32,14 @@ def getPageRange(_pdfObj):
     numOfPages = _pdfObj.getNumPages()
     return range(numOfPages)
 
+def combinePages(_pdfObj):
+    combinedText = ''
+    for page in getPageRange(_pdfObj):
+        pageObject = _pdfObj.getPage(page)
+        trimmedPagedText = getTrimmedPageText(pageObject)
+        combinedText += trimmedPagedText + ' '
+    return combinedText
+
 def getTrimmedPageText(_pageObject):
     pageTextFull = _pageObject.extractText()
 
@@ -56,8 +64,8 @@ def regexSplitandJoin(_str, _pattern):
 def fixTextSpacing(_fullText):
     _fullText = regexSplitandJoin(_fullText, '(\d{2}/\d{2}/\d{4})')
     _fullText = regexSplitandJoin(_fullText, '(\d{2}:\d{2})')
+    _fullText = findRaceGender(_fullText)
     _fullText = _fullText.replace('Sedgwick County Warrant', ' Sedgwick County Warrant ')
-    findRaceGender(_fullText)
     return ' '.join(_fullText.split())
 
 def findNthRegex(_str, _pattern, n):
@@ -71,9 +79,48 @@ def getRowBeforeEmpty(_fullText):
     sliceIndex = secondTimeIndex - 11
     return _fullText[:sliceIndex]
 
+def getExpandedGenderInfo(_abbreviation):
+    replacements = {
+        'W' : 'WHITE',
+        'B' : 'BLACK',
+        'A' : 'ASIAN',
+        'I' : 'INDIAN',
+        'H' : 'HISPANIC',
+        'M' : 'MALE ',
+        'F' : 'FEMALE ',
+        'U' : 'UNKNOWN'
+    }
+
+    try:
+        abbreviationList = [replacements[char] for char in _abbreviation]
+    except:
+        print('Unknown key in abbreviation:', _abbreviation)
+    return ' '.join(abbreviationList)
+
 def findRaceGender(_fullText):
-    index = re.search('(\d{2}:\d{2})', _fullText).start()
-    print(_fullText[index + 6:index + 9])
+    # The index for times is useful as the gender info is contained right after
+    times = re.findall('(\d{2}:\d{2})', _fullText)
+    lastIndex, spacingOffset = 0, 6
+    genderChar = ('M', 'F')
+    for time in times:
+        # lastIndex is used to ensure duplicate times are not a problem
+        currentIndex = _fullText.find(time, lastIndex)
+        currentIndexWithOffset = currentIndex + spacingOffset
+        
+        genderInfo = _fullText[currentIndexWithOffset:currentIndexWithOffset + 3]
+
+        # Remove last character if it is not actual info
+        if not genderInfo.endswith(genderChar):
+            genderInfo = genderInfo[:-1]
+
+        expandedGenderInfo = getExpandedGenderInfo(genderInfo)
+        endOfGenderInfoIndex = currentIndexWithOffset + len(genderInfo)
+
+        # Replacement of the genderInfo with expandedGenderInfo
+        # Cannot use .replace as that will replace parts in names/arrests/etc.
+        _fullText = _fullText[:currentIndexWithOffset] + expandedGenderInfo + _fullText[endOfGenderInfoIndex:]
+        lastIndex = currentIndex + len(expandedGenderInfo)
+    return _fullText
 
 def getRows(_fullText, _nameArray):
     try:
@@ -111,14 +158,9 @@ if __name__ == "__main__":
         for pdf in getPDFs('PDFs/'):
             pdfObject = openPDF(pdf)
             nameArray = getNames(pdfObject)
-            
-            fullText = ''
-            for page in getPageRange(pdfObject):
-                pageObject = pdfObject.getPage(page)
-                pageText = getTrimmedPageText(pageObject)
-                pageTextSpaced = fixTextSpacing(pageText)
-                fullText += pageTextSpaced + ' '
-                
-            for row in getRows(fullText, nameArray):
+            fullText = combinePages(pdfObject)
+            fullTextSpaced = fixTextSpacing(fullText) 
+            for row in getRows(fullTextSpaced, nameArray):
                 #print(row)
                 file.write(row + '\n')
+            
