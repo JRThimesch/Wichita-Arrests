@@ -61,13 +61,6 @@ def getTrimmedPageText(_pageObject):
 def regexSplitandJoin(_str, _pattern):
     return ' '.join(re.split(_pattern, _str))
 
-def fixTextSpacing(_fullText):
-    _fullText = regexSplitandJoin(_fullText, '(\d{2}/\d{2}/\d{4})')
-    _fullText = regexSplitandJoin(_fullText, '(\d{2}:\d{2})')
-    _fullText = findRaceGender(_fullText)
-    _fullText = _fullText.replace('Sedgwick County Warrant', ' Sedgwick County Warrant ')
-    return ' '.join(_fullText.split())
-
 def findNthRegex(_str, _pattern, n):
     return re.findall(_pattern, _str)[n - 1]
 
@@ -122,6 +115,29 @@ def findRaceGender(_fullText):
         lastIndex = currentIndex + len(expandedGenderInfo)
     return _fullText
 
+def isPartOfAddress(_word):
+    if not _word.isalpha() and not _word.isdigit() and not _word[0].isdigit():
+        return False
+    else:
+        return True
+
+def addressSpacing(_fullText):
+    # Address appears right after gender info
+    # 'MALE' appears in both MALE and FEMALE, making it a useful split
+    for substring in _fullText.split('MALE ')[1:]:
+        for word in substring.split():
+            if not isPartOfAddress(word):
+                print(word)
+                break
+
+def fixFullTextSpacing(_fullText):
+    _fullText = regexSplitandJoin(_fullText, '(\d{2}/\d{2}/\d{4})')
+    _fullText = regexSplitandJoin(_fullText, '(\d{2}:\d{2})')
+    _fullText = findRaceGender(_fullText)
+    _fullText = _fullText.replace('Sedgwick County Warrant', ' Sedgwick County Warrant ')
+    addressSpacing(_fullText)
+    return ' '.join(_fullText.split())
+
 def getRows(_fullText, _nameArray):
     try:
         for index, name in enumerate(_nameArray):
@@ -148,6 +164,7 @@ def getRows(_fullText, _nameArray):
                 yield rowBeforeEmpty
                 _fullText = 'NO NAME FOUND ' + _fullText.replace(rowBeforeEmpty, '')
                 continue
+
     except IndexError:
         # An index error exception occurs at last in list
         # At this point _fullText is trimmed of all but the last record
@@ -159,7 +176,7 @@ if __name__ == "__main__":
             pdfObject = openPDF(pdf)
             nameArray = getNames(pdfObject)
             fullText = combinePages(pdfObject)
-            fullTextSpaced = fixTextSpacing(fullText) 
+            fullTextSpaced = fixFullTextSpacing(fullText)
             for row in getRows(fullTextSpaced, nameArray):
                 #print(row)
                 file.write(row + '\n')
