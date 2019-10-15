@@ -1,5 +1,6 @@
 import PyPDF2
 import os, re, json
+import pandas as pd
 
 HEADER_STR = 'Incidents with Offenses / Warrants'
 HEADER_OFFSET = len('Incidents with Offenses / Warrants')
@@ -13,7 +14,7 @@ def openPDF(_filePath):
     pdfObject = PyPDF2.PdfFileReader(pdfFile)
     return pdfObject
 
-def getNames(_pdfObj):
+def getNamesFromPDF(_pdfObj):
     # PDF files store hidden characteristics within each file
     # Names of each person arrested are included here, so it's possible to get all names
     nameArray = []
@@ -124,18 +125,32 @@ def isPartOfAddress(_word):
 def addressSpacing(_fullText):
     # Address appears right after gender info
     # 'MALE' appears in both MALE and FEMALE, making it a useful split
-    for substring in _fullText.split('MALE ')[1:]:
+    sliceChar = ''
+    textSplitAtMale = _fullText.split('MALE ')
+    newText = textSplitAtMale[1]
+    #print(newText)
+    for substring in textSplitAtMale[1:]:
         for word in substring.split():
             if not isPartOfAddress(word):
-                print(word)
+                for char in word:
+                    if not char.isalpha():
+                        sliceChar = char
+                        break
+                
+
                 break
+        newText += 'MALE ' + substring[:substring.find(sliceChar)] + ' ' + substring[substring.find(sliceChar):]
+    return newText
 
 def fixFullTextSpacing(_fullText):
     _fullText = regexSplitandJoin(_fullText, '(\d{2}/\d{2}/\d{4})')
     _fullText = regexSplitandJoin(_fullText, '(\d{2}:\d{2})')
     _fullText = findRaceGender(_fullText)
+    #_fullText = addressSpacing(_fullText)
+    _fullText = regexSplitandJoin(_fullText, '(\d{2}C\d{6})')
+    _fullText = regexSplitandJoin(_fullText, '(\d{2}\w{2}\d{6})')
     _fullText = _fullText.replace('Sedgwick County Warrant', ' Sedgwick County Warrant ')
-    addressSpacing(_fullText)
+
     return ' '.join(_fullText.split())
 
 def getRows(_fullText, _nameArray):
@@ -162,7 +177,7 @@ def getRows(_fullText, _nameArray):
                 # Occurs when an empty name is in the nameArray
                 rowBeforeEmpty = getRowBeforeEmpty(_fullText)
                 yield rowBeforeEmpty
-                _fullText = 'NO NAME FOUND ' + _fullText.replace(rowBeforeEmpty, '')
+                _fullText = 'No name found. ' + _fullText.replace(rowBeforeEmpty, '')
                 continue
 
     except IndexError:
@@ -170,14 +185,118 @@ def getRows(_fullText, _nameArray):
         # At this point _fullText is trimmed of all but the last record
         yield _fullText
 
+def findFirstDigit(_str):
+    firstDigit = re.search('\d', _str)
+    return firstDigit.start()
+
+def getNamesFromRow(_rowText):
+    # First digit signals the beginning of the date, ergo, the end of the name entry
+    sliceIndex = findFirstDigit(_rowText) - 1
+    name = _rowText[:sliceIndex]
+    return name
+
+def getDateAndBirthdateFromRow(_rowText):
+    datesAndBirthdates = re.findall('\d{2}/\d{2}/\d{4}', _rowText)
+    try:
+        birthdate, date = datesAndBirthdates[0], datesAndBirthdates[1]
+    except IndexError:
+        birthdate, date = 'No birthdate found.', datesAndBirthdates[0]
+    return birthdate, date
+
+def getAgeFromRow(_rowText):
+    try:
+        age = re.search('\d{2}\/\d{2}\/\d{4}(.+?)\d{2}\/\d{2}\/\d{4}', _rowText).group(1)
+        return age.strip()
+    except AttributeError:
+        return 'No age found.'
+
+def getRaceFromRow(_rowText):
+    pattern = '\d{2}:\d{2}(.+?)' + getSexFromRow(_rowText)
+    race = re.search(pattern, _rowText).group(1)
+    return race.strip()
+
+def getSexFromRow(_rowText):
+    if 'FEMALE' in _rowText:
+        return 'FEMALE'
+    else:
+        return 'MALE'
+
+def getTimeFromRow(_rowText):
+    return re.search('(\d{2}:\d{2})', _rowText).group(1)
+
+def trimOutWarrantsFromIncidents(_incidentText):
+    warrantPattern = '(\d{2}[A-Z]{2}\d{6})'
+    try:
+        warrantMatchIndex = re.search(warrantPattern, _incidentText).start()
+        _incidentText = _incidentText[:warrantMatchIndex - 1]
+    except AttributeError:
+        pass
+    return _incidentText.strip()
+
+def trimOutExcessInfoFromIncidents(_incidentText):
+    incidentPattern = '\d{2}C\d{6}'
+    try:
+        incidentMatchIndex = re.search(incidentPattern, _incidentText).start()
+        _incidentText = _incidentText[incidentMatchIndex:]
+        return _incidentText
+    except AttributeError:
+        return 'No incidents.'
+
+def getListOfIncidents(_incidentText):
+    incidentIdPattern = '\s?\d{2}C\d{6,}\s\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
+    listOfIncidentsUntrimmed = re.split(incidentIdPattern, _incidentText)
+    listOfIncidentsTrimmed = list(filter(None, listOfIncidentsUntrimmed))
+    return listOfIncidentsTrimmed
+
+def getCleanedIncidents(_incidentText):
+    incidentCodePattern = '\d{3,}\w?\s-\s'
+    cleanedIncidents = [', '.join(re.split(incidentCodePattern, e)) for e in getListOfIncidents(_incidentText)]
+    return cleanedIncidents
+
+def getIncidentsFromRow(_rowText):
+    incidentText = _rowText
+    incidentText = trimOutWarrantsFromIncidents(incidentText)
+    incidentText = trimOutExcessInfoFromIncidents(incidentText)
+    cleanedIncidents = getCleanedIncidents(incidentText)
+    return cleanedIncidents
+
+def getWarrantsFromRow(_rowText):
+    warrantPattern = '(\d{2}[A-Z]{2}\d{6})'
+    warrantTags = re.findall(warrantPattern, _rowText)
+    return warrantTags
+
 if __name__ == "__main__":
     with open('text.txt', 'w') as file:
         for pdf in getPDFs('PDFs/'):
             pdfObject = openPDF(pdf)
-            nameArray = getNames(pdfObject)
+            nameArray = getNamesFromPDF(pdfObject)
             fullText = combinePages(pdfObject)
             fullTextSpaced = fixFullTextSpacing(fullText)
-            for row in getRows(fullTextSpaced, nameArray):
-                #print(row)
-                file.write(row + '\n')
+            rowsAsList = []
             
+            for row in getRows(fullTextSpaced, nameArray):
+                birthdate, date = getDateAndBirthdateFromRow(row)
+                file.write(row + '\n')
+                rowsAsList.append([
+                    getNamesFromRow(row),
+                    birthdate,
+                    getAgeFromRow(row),
+                    getRaceFromRow(row),
+                    getSexFromRow(row),
+                    date,
+                    getTimeFromRow(row),
+                    None,
+                    None,
+                    getIncidentsFromRow(row),
+                    getWarrantsFromRow(row)
+                ])
+            
+            df = pd.DataFrame(rowsAsList, columns=[
+                'Name', 'Birthdate', 'Age', 
+                'Race', 'Sex', 'Date', 
+                'Time', 'Address', 'Arrests', 
+                'Incidents', 'Warrants'
+            ])
+
+            print(df)
+                
