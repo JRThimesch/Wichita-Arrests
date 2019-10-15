@@ -59,17 +59,33 @@ def getTrimmedPageText(_pageObject):
 
     return pageTextTrimmed
 
-def regexSplitandJoin(_str, _pattern):
+def regexSplitandJoin(_pattern, _str):
     return ' '.join(re.split(_pattern, _str))
 
-def findNthRegex(_str, _pattern, n):
+def regexFindNth(_pattern, _str, n):
     return re.findall(_pattern, _str)[n - 1]
+
+def regexTrimLeftOrRight(_pattern, _str, _left = True):
+    try:
+        matchIndex = re.search(_pattern, _str).start()
+        if _left:
+            _str = _str[matchIndex:]
+        else:
+            _str = _str[:matchIndex - 1]
+    except AttributeError:
+        pass
+    return _str
+
+def regexSplitAndTrim(_pattern, _str):
+    listSplit = re.split(_pattern, _str)
+    listSplitAndTrimmed = list(filter(None, listSplit))
+    return listSplitAndTrimmed
 
 def getRowBeforeEmpty(_fullText):
     # Dates occur only once per record, making them useful for finding a new record
     # By finding the second time and subtracting an offset, the empty name can be fixed
-    secondTime = findNthRegex(_fullText, '(\d{2}:\d{2})', 2)
-    secondTimeIndex = _fullText.index(findNthRegex(_fullText, '(\d{2}:\d{2})', 2))
+    secondTime = regexFindNth('(\d{2}:\d{2})', _fullText, 2)
+    secondTimeIndex = _fullText.index(regexFindNth('(\d{2}:\d{2})', _fullText, 2))
     sliceIndex = secondTimeIndex - 11
     return _fullText[:sliceIndex]
 
@@ -116,41 +132,14 @@ def findRaceGender(_fullText):
         lastIndex = currentIndex + len(expandedGenderInfo)
     return _fullText
 
-def isPartOfAddress(_word):
-    if not _word.isalpha() and not _word.isdigit() and not _word[0].isdigit():
-        return False
-    else:
-        return True
-
-def addressSpacing(_fullText):
-    # Address appears right after gender info
-    # 'MALE' appears in both MALE and FEMALE, making it a useful split
-    sliceChar = ''
-    textSplitAtMale = _fullText.split('MALE ')
-    newText = textSplitAtMale[1]
-    #print(newText)
-    for substring in textSplitAtMale[1:]:
-        for word in substring.split():
-            if not isPartOfAddress(word):
-                for char in word:
-                    if not char.isalpha():
-                        sliceChar = char
-                        break
-                
-
-                break
-        newText += 'MALE ' + substring[:substring.find(sliceChar)] + ' ' + substring[substring.find(sliceChar):]
-    return newText
-
 def fixFullTextSpacing(_fullText):
-    _fullText = regexSplitandJoin(_fullText, '(\d{2}/\d{2}/\d{4})')
-    _fullText = regexSplitandJoin(_fullText, '(\d{2}:\d{2})')
-    _fullText = findRaceGender(_fullText)
-    #_fullText = addressSpacing(_fullText)
-    _fullText = regexSplitandJoin(_fullText, '(\d{2}C\d{6})')
-    _fullText = regexSplitandJoin(_fullText, '(\d{2}\w{2}\d{6})')
+    _fullText = regexSplitandJoin('(\d{2}/\d{2}/\d{4})', _fullText)
+    _fullText = regexSplitandJoin('(\d{2}:\d{2})', _fullText)
+    _fullText = regexSplitandJoin('(\d{2}C\d{6})', _fullText)
+    _fullText = regexSplitandJoin('(\d{2}\w{2}\d{6})', _fullText)
     _fullText = _fullText.replace('Sedgwick County Warrant', ' Sedgwick County Warrant ')
-
+    _fullText = findRaceGender(_fullText)
+    
     return ' '.join(_fullText.split())
 
 def getRows(_fullText, _nameArray):
@@ -224,40 +213,29 @@ def getSexFromRow(_rowText):
 def getTimeFromRow(_rowText):
     return re.search('(\d{2}:\d{2})', _rowText).group(1)
 
-def trimOutWarrantsFromIncidents(_incidentText):
-    warrantPattern = '(\d{2}[A-Z]{2}\d{6})'
-    try:
-        warrantMatchIndex = re.search(warrantPattern, _incidentText).start()
-        _incidentText = _incidentText[:warrantMatchIndex - 1]
-    except AttributeError:
-        pass
-    return _incidentText.strip()
-
-def trimOutExcessInfoFromIncidents(_incidentText):
-    incidentPattern = '\d{2}C\d{6}'
-    try:
-        incidentMatchIndex = re.search(incidentPattern, _incidentText).start()
-        _incidentText = _incidentText[incidentMatchIndex:]
-        return _incidentText
-    except AttributeError:
-        return 'No incidents.'
-
 def getListOfIncidents(_incidentText):
     incidentIdPattern = '\s?\d{2}C\d{6,}\s\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
-    listOfIncidentsUntrimmed = re.split(incidentIdPattern, _incidentText)
-    listOfIncidentsTrimmed = list(filter(None, listOfIncidentsUntrimmed))
-    return listOfIncidentsTrimmed
+    listOfIncidents = regexSplitAndTrim(incidentIdPattern, _incidentText)
+    return listOfIncidents
 
 def getCleanedIncidents(_incidentText):
     incidentCodePattern = '\d{3,}\w?\s-\s'
-    cleanedIncidents = [', '.join(re.split(incidentCodePattern, e)) for e in getListOfIncidents(_incidentText)]
+    incidents = getListOfIncidents(_incidentText)
+    cleanedIncidents = []
+
+    for incident in incidents:
+        incidentsTrimmed = regexSplitAndTrim(incidentCodePattern, incident)
+        cleanedIncident = ', '.join(incidentsTrimmed)
+        cleanedIncidents.append(cleanedIncident)
     return cleanedIncidents
 
 def getIncidentsFromRow(_rowText):
     incidentText = _rowText
-    incidentText = trimOutWarrantsFromIncidents(incidentText)
-    incidentText = trimOutExcessInfoFromIncidents(incidentText)
-    cleanedIncidents = getCleanedIncidents(incidentText)
+    incidentTextRightTrimmed = regexTrimLeftOrRight('(\d{2}[A-Z]{2}\d{6})', incidentText, False)
+    incidentTextTrimmed = regexTrimLeftOrRight('\d{2}C\d{6}', incidentTextRightTrimmed)
+    if incidentTextRightTrimmed == incidentTextTrimmed:
+        return 'No incidents found.'
+    cleanedIncidents = getCleanedIncidents(incidentTextTrimmed)
     return cleanedIncidents
 
 def getWarrantsFromRow(_rowText):
