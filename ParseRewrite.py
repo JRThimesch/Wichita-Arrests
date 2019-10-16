@@ -139,7 +139,7 @@ def fixFullTextSpacing(_fullText):
     _fullText = regexSplitandJoin('(\d{2}\w{2}\d{6})', _fullText)
     _fullText = _fullText.replace('Sedgwick County Warrant', ' Sedgwick County Warrant ')
     _fullText = findRaceGender(_fullText)
-    
+
     return ' '.join(_fullText.split())
 
 def getRows(_fullText, _nameArray):
@@ -200,8 +200,8 @@ def getAgeFromRow(_rowText):
         return 'No age found.'
 
 def getRaceFromRow(_rowText):
-    pattern = '\d{2}:\d{2}(.+?)' + getSexFromRow(_rowText)
-    race = re.search(pattern, _rowText).group(1)
+    racePattern = '\d{2}:\d{2}(.+?)' + getSexFromRow(_rowText)
+    race = re.search(racePattern, _rowText).group(1)
     return race.strip()
 
 def getSexFromRow(_rowText):
@@ -213,6 +213,55 @@ def getSexFromRow(_rowText):
 def getTimeFromRow(_rowText):
     return re.search('(\d{2}:\d{2})', _rowText).group(1)
 
+def getAddressFromRow(_rowText):
+    addressPattern = 'MALE\s(.+?)(#|No|\d{2}C|\s*\d{4,}\w\d?\s?)'
+    try:
+        address = re.search(addressPattern, _rowText).group(1).strip()
+        print(address)
+        if not address:
+            return 'No address listed.'
+        return address
+    except AttributeError:
+        return _rowText.split('MALE', 1)[1]
+
+def containsAlphaAndNum(_str):
+    return not _str.isdigit() and not _str.isalpha()
+
+def beginsAndEndsWithNum(_str):
+    return _str[0].isdigit() and _str[-1].isdigit()
+
+def needsAddressTrimming(_str):
+    ordinals = ('ST', 'ND', 'RD', 'TH')
+    return not _str.endswith(ordinals) and containsAlphaAndNum(_str)
+
+def charsUntilNumber(_str):
+    for i, char in enumerate(_str):
+        if char.isalpha():
+            continue
+        return i
+
+def getAddressFromRowNew(_rowText):
+    # Trim down the passed _rowText significantly
+    
+    slicedText = _rowText.rpartition('MALE')[2]
+    slicedText = slicedText.partition('-')[0]
+    slicedText = slicedText.partition('#')[0]
+    slicedText = slicedText.partition('No')[0]
+    slicedText = slicedText.partition('Sedgwick')[0]
+
+    highways = ('I135, K96, I235')
+
+    slicedTextList = slicedText.split()
+
+    # Remove all items that are only numbers or only alpha
+    slicedTextList = list(filter(lambda i: needsAddressTrimming(i), slicedTextList))
+
+    #if slicedTextList:
+        #print('\t', slicedTextList)
+        #print(slicedTextList[0][:charsUntilNumber(slicedTextList[0])])
+
+    return None
+    
 def getListOfIncidents(_incidentText):
     incidentIdPattern = '\s?\d{2}C\d{6,}\s\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
     listOfIncidents = regexSplitAndTrim(incidentIdPattern, _incidentText)
@@ -263,7 +312,7 @@ if __name__ == "__main__":
                     getSexFromRow(row),
                     date,
                     getTimeFromRow(row),
-                    None,
+                    getAddressFromRowNew(row),
                     None,
                     getIncidentsFromRow(row),
                     getWarrantsFromRow(row)
@@ -276,5 +325,5 @@ if __name__ == "__main__":
                 'Incidents', 'Warrants'
             ])
 
-            print(df)
+            #print(df)
                 
