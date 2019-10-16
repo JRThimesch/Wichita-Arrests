@@ -213,52 +213,84 @@ def getSexFromRow(_rowText):
 def getTimeFromRow(_rowText):
     return re.search('(\d{2}:\d{2})', _rowText).group(1)
 
-def getAddressFromRow(_rowText):
-    addressPattern = 'MALE\s(.+?)(#|No|\d{2}C|\s*\d{4,}\w\d?\s?)'
-    try:
-        address = re.search(addressPattern, _rowText).group(1).strip()
-        print(address)
-        if not address:
-            return 'No address listed.'
-        return address
-    except AttributeError:
-        return _rowText.split('MALE', 1)[1]
-
-def containsAlphaAndNum(_str):
-    return not _str.isdigit() and not _str.isalpha()
-
 def beginsAndEndsWithNum(_str):
     return _str[0].isdigit() and _str[-1].isdigit()
 
-def needsAddressTrimming(_str):
-    ordinals = ('ST', 'ND', 'RD', 'TH')
-    return not _str.endswith(ordinals) and containsAlphaAndNum(_str)
+def removeTrailingNumbersFromList(_list):
+    try:
+        lastWordInList = _list[-1]
+        if beginsAndEndsWithNum(lastWordInList):
+            del _list[-1]
+            removeTrailingNumbersFromList(_list)
+    except IndexError:
+        pass
 
-def charsUntilNumber(_str):
+def doesContainAlphaAndNum(_str):
+    # True when a word contains both numbers and alpha
+    # False when a word is either only numbers or only alpha
+    return not _str.isdigit() and not _str.isalpha()
+
+def doesAddressNeedTrimming(_str):
+    # Returns True when the word is not an ordinal/alpha/numeric
+    ordinals = ('ST', 'ND', 'RD', 'TH')
+    return not _str.endswith(ordinals) and doesContainAlphaAndNum(_str)
+
+def getLastWordInAddress(_addressList):
+    # Last words in the address can be difficult to differentiate from arrest records
+    # Often, the address contains a steet name concatenated with an arrest code
+    # Example: E 2ND N215706
+    # Besides '2ND', 'N215706' is the only word that contains both numbers and letters
+    # By filtering out any ordinal/alpha/numeric words, the only word remaining is the last
+    return list(filter(lambda word: doesAddressNeedTrimming(word), _addressList))[0]
+
+def numOfCharUntilNumber(_str):
+    # 
     for i, char in enumerate(_str):
         if char.isalpha():
             continue
         return i
 
+def findHighwaysInAddress(_address):
+    highways = ('I 135', 'K 96', 'I 235')
+    if any(highway in _address for highway in highways):
+        for highway in highways:
+            partitionedAddress = _address.partition(highway)
+            _address =  partitionedAddress[0] + partitionedAddress[1]
+        return _address
+    return None
+
+def trimRowTextForAddress(_rowText):
+    # Getting as close to the actual address is beneficial for performance and utility
+    address = _rowText.rpartition('MALE')[2]
+    address = address.partition('-')[0]
+    address = address.partition('#')[0]
+    address = address.partition('No')[0]
+    address = address.partition('Sedgwick')[0]
+    return address.strip()
+
 def getAddressFromRowNew(_rowText):
-    # Trim down the passed _rowText significantly
+    addressText = trimRowTextForAddress(_rowText)        
+
+    # Typically addresses do not end in numbers, however, highways do
+    # There is no way to differentiate an address ending number from an arrest code
+    # Therefore, the easiest solution is to look for those highways before continuing on
+    highwayAddressFound = findHighwaysInAddress(addressText)
+    if highwayAddressFound:
+        return highwayAddressFound
+
+    addressTextList = addressText.split()
+
+    try:
+        lastWordInAddress = getLastWordInAddress(addressTextList)
+        lastWordInAddressIndex = slicedText.find(lastWordInAddress)
+        trimmedWordLenOffset = numOfCharUntilNumber(lastWordInAddress)
+        sliceIndexForAddress = lastWordInAddressIndex + trimmedWordLenOffset
+        trimmedAddress = addressText[:sliceIndexForAddress]
+    except:
+        removeTrailingNumbersFromList(addressTextList)
+        trimmedAddress = ' '.join(addressTextList)
     
-    slicedText = _rowText.rpartition('MALE')[2]
-    slicedText = slicedText.partition('-')[0]
-    slicedText = slicedText.partition('#')[0]
-    slicedText = slicedText.partition('No')[0]
-    slicedText = slicedText.partition('Sedgwick')[0]
-
-    highways = ('I135, K96, I235')
-
-    slicedTextList = slicedText.split()
-
-    # Remove all items that are only numbers or only alpha
-    slicedTextList = list(filter(lambda i: needsAddressTrimming(i), slicedTextList))
-
-    #if slicedTextList:
-        #print('\t', slicedTextList)
-        #print(slicedTextList[0][:charsUntilNumber(slicedTextList[0])])
+    print(trimmedAddress)
 
     return None
     
