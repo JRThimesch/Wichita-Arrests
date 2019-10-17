@@ -213,17 +213,25 @@ def getSexFromRow(_rowText):
 def getTimeFromRow(_rowText):
     return re.search('(\d{2}:\d{2})', _rowText).group(1)
 
-def beginsAndEndsWithNum(_str):
-    return _str[0].isdigit() and _str[-1].isdigit()
+def getTrimmedAddressText(_rowText):
+    # Get as close to the actual address as possible
+    address = _rowText.rpartition('MALE')[2]
+    address = address.partition('-')[0]
+    address = address.partition('#')[0]
+    address = address.partition('No')[0]
+    address = address.partition('Sedgwick')[0]
+    return address.strip()
 
-def removeTrailingNumbersFromList(_list):
-    try:
-        lastWordInList = _list[-1]
-        if beginsAndEndsWithNum(lastWordInList):
-            del _list[-1]
-            removeTrailingNumbersFromList(_list)
-    except IndexError:
-        pass
+def findHighwaysInAddress(_address):
+    # The only highways that appear are in the tuple 'highways'
+    # If a highway is in the address, the address will get trimmed down to match it
+    highways = ('I 135', 'K 96', 'I 235')
+    if any(highway in _address for highway in highways):
+        for highway in highways:
+            partitionedAddress = _address.partition(highway)
+            _address =  partitionedAddress[0] + partitionedAddress[1]
+        return _address.strip()
+    return None
 
 def doesContainAlphaAndNum(_str):
     # True when a word contains both numbers and alpha
@@ -244,33 +252,45 @@ def getLastWordInAddress(_addressList):
     return list(filter(lambda word: doesAddressNeedTrimming(word), _addressList))[0]
 
 def numOfCharUntilNumber(_str):
-    # 
+    # Returns the index of the last alpha character
     for i, char in enumerate(_str):
         if char.isalpha():
             continue
         return i
 
-def findHighwaysInAddress(_address):
-    highways = ('I 135', 'K 96', 'I 235')
-    if any(highway in _address for highway in highways):
-        for highway in highways:
-            partitionedAddress = _address.partition(highway)
-            _address =  partitionedAddress[0] + partitionedAddress[1]
-        return _address
-    return None
+def doesBeginAndEndWithNum(_str):
+    # ex. 19C123090 needs to be trimmed, but .isdigit() would return False
+    return _str[0].isdigit() and _str[-1].isdigit()
 
-def trimRowTextForAddress(_rowText):
-    # Getting as close to the actual address is beneficial for performance and utility
-    address = _rowText.rpartition('MALE')[2]
-    address = address.partition('-')[0]
-    address = address.partition('#')[0]
-    address = address.partition('No')[0]
-    address = address.partition('Sedgwick')[0]
-    return address.strip()
+def removeTrailingNumbersAndCodesFromList(_list):
+    try:
+        lastWordInList = _list[-1]
+        if doesBeginAndEndWithNum(lastWordInList):
+            del _list[-1]
+            removeTrailingNumbersAndCodesFromList(_list)
+    except IndexError:
+        pass
 
-def getAddressFromRowNew(_rowText):
-    addressText = trimRowTextForAddress(_rowText)        
+def getTrimmedAddress(_addressText):
+    try:
+        addressTextList = _addressText.split()
+        # Many times there is info that is incorrectly concatenated to the end of an address
+        # By finding the last word, that info can be trimmed out
+        lastWordInAddress = getLastWordInAddress(addressTextList)
+        lastWordInAddressIndex = _addressText.find(lastWordInAddress)
+        trimmedWordLenOffset = numOfCharUntilNumber(lastWordInAddress)
+        trimIndex = lastWordInAddressIndex + trimmedWordLenOffset
+        trimmedAddress = _addressText[:trimIndex]
+    except:
+        # Exception occurs when the address does NOT contain incorrectly concatenated info
+        # However, sometime numbers remain at the end that aren't needed, so they're trimmed
+        removeTrailingNumbersAndCodesFromList(addressTextList)
+        trimmedAddress = ' '.join(addressTextList)
 
+    return trimmedAddress
+
+def getAddressFromRow(_rowText):
+    addressText = getTrimmedAddressText(_rowText)        
     # Typically addresses do not end in numbers, however, highways do
     # There is no way to differentiate an address ending number from an arrest code
     # Therefore, the easiest solution is to look for those highways before continuing on
@@ -278,51 +298,57 @@ def getAddressFromRowNew(_rowText):
     if highwayAddressFound:
         return highwayAddressFound
 
-    addressTextList = addressText.split()
-
-    try:
-        lastWordInAddress = getLastWordInAddress(addressTextList)
-        lastWordInAddressIndex = slicedText.find(lastWordInAddress)
-        trimmedWordLenOffset = numOfCharUntilNumber(lastWordInAddress)
-        sliceIndexForAddress = lastWordInAddressIndex + trimmedWordLenOffset
-        trimmedAddress = addressText[:sliceIndexForAddress]
-    except:
-        removeTrailingNumbersFromList(addressTextList)
-        trimmedAddress = ' '.join(addressTextList)
-    
-    print(trimmedAddress)
-
-    return None
+    trimmedAddress = getTrimmedAddress(addressText)
+    return trimmedAddress.strip()
     
 def getListOfIncidents(_incidentText):
     incidentIdPattern = '\s?\d{2}C\d{6,}\s\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
     listOfIncidents = regexSplitAndTrim(incidentIdPattern, _incidentText)
     return listOfIncidents
 
-def getCleanedIncidents(_incidentText):
-    incidentCodePattern = '\d{3,}\w?\s-\s'
+def getCleanedIncidentsAndOffenses(_incidentText):
+    # Incidents come with one or more offenses in them
+    # The offenses need to be cleaned after the incident code has been cleaned
+    offenseCodePattern = '\d{3,}\w?\s-\s'
     incidents = getListOfIncidents(_incidentText)
-    cleanedIncidents = []
+    cleanedIncidentsAndOffenses = []
 
     for incident in incidents:
-        incidentsTrimmed = regexSplitAndTrim(incidentCodePattern, incident)
-        cleanedIncident = ', '.join(incidentsTrimmed)
-        cleanedIncidents.append(cleanedIncident)
-    return cleanedIncidents
+        offensesTrimmed = regexSplitAndTrim(offenseCodePattern, incident)
+        cleanedIncident = ', '.join(offensesTrimmed)
+        cleanedIncidentsAndOffenses.append(cleanedIncident)
+    return cleanedIncidentsAndOffenses
 
 def getIncidentsFromRow(_rowText):
     incidentText = _rowText
+    # Right trimming removes any warrants
     incidentTextRightTrimmed = regexTrimLeftOrRight('(\d{2}[A-Z]{2}\d{6})', incidentText, False)
+    # Left trimming removes any before info not related to incidents
     incidentTextTrimmed = regexTrimLeftOrRight('\d{2}C\d{6}', incidentTextRightTrimmed)
     if incidentTextRightTrimmed == incidentTextTrimmed:
         return 'No incidents found.'
-    cleanedIncidents = getCleanedIncidents(incidentTextTrimmed)
-    return cleanedIncidents
+    cleanedIncidentsAndOffenses = getCleanedIncidentsAndOffenses(incidentTextTrimmed)
+    return cleanedIncidentsAndOffenses
+
+def getWarrantCodes(_rowText):
+    try:
+        # Each warrant can be found by spotting the warrantText and subtracting the code offset
+        warrantText = ' Sedgwick County Warrant'
+        warrantIndex = _rowText.index(warrantText)
+        # Each warrant is 10 characters long
+        warrantCodeOffset = warrantIndex - 10
+        # Code lies before the warrantText
+        warrantCode = _rowText[warrantCodeOffset:warrantIndex]
+        # Recursion requires the warrantText to be removed from the _rowText
+        trimmedText = _rowText.replace(warrantText, '', 1)
+        yield warrantCode
+        yield from getWarrantCodes(trimmedText)
+    except ValueError:
+        # Exits recursion when .index does not find a warrant
+        pass
 
 def getWarrantsFromRow(_rowText):
-    warrantPattern = '(\d{2}[A-Z]{2}\d{6})'
-    warrantTags = re.findall(warrantPattern, _rowText)
-    return warrantTags
+    return [code for code in getWarrantCodes(_rowText)]
 
 if __name__ == "__main__":
     with open('text.txt', 'w') as file:
@@ -344,7 +370,7 @@ if __name__ == "__main__":
                     getSexFromRow(row),
                     date,
                     getTimeFromRow(row),
-                    getAddressFromRowNew(row),
+                    getAddressFromRow(row),
                     None,
                     getIncidentsFromRow(row),
                     getWarrantsFromRow(row)
@@ -357,5 +383,5 @@ if __name__ == "__main__":
                 'Incidents', 'Warrants'
             ])
 
-            #print(df)
+            print(df)
                 
