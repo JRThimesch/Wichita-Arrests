@@ -1,13 +1,14 @@
 import PyPDF2
-import os, re, json
+import os, re, json, logging
 import pandas as pd
 
 HEADER_STR = 'Incidents with Offenses / Warrants'
 HEADER_OFFSET = len('Incidents with Offenses / Warrants')
+logging.basicConfig(level=logging.INFO, filename='runtime.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 
 def getPDFs(_path):
     files = os.listdir(_path)
-    return[_path + file for file in files if file.endswith('.pdf')]
+    return [_path + file for file in files if file.endswith('.pdf')]
 
 def openPDF(_filePath):
     pdfFile = open(_filePath, 'rb')
@@ -63,7 +64,7 @@ def regexSplitandJoin(_pattern, _str):
     return ' '.join(re.split(_pattern, _str))
 
 def regexFindNth(_pattern, _str, n):
-    return re.findall(_pattern, _str)[n - 1]
+    return re.findall(_pattern, _str)[n]
 
 def regexTrimLeftOrRight(_pattern, _str, _left = True):
     try:
@@ -81,21 +82,13 @@ def regexSplitAndTrim(_pattern, _str):
     listSplitAndTrimmed = list(filter(None, listSplit))
     return listSplitAndTrimmed
 
-def getRowBeforeEmpty(_fullText):
-    # Dates occur only once per record, making them useful for finding a new record
-    # By finding the second time and subtracting an offset, the empty name can be fixed
-    secondTime = regexFindNth('(\d{2}:\d{2})', _fullText, 2)
-    secondTimeIndex = _fullText.index(regexFindNth('(\d{2}:\d{2})', _fullText, 2))
-    sliceIndex = secondTimeIndex - 11
-    return _fullText[:sliceIndex]
-
 def getExpandedGenderInfo(_abbreviation):
     replacements = {
         'W' : 'WHITE',
         'B' : 'BLACK',
         'A' : 'ASIAN',
-        'I' : 'INDIAN',
         'H' : 'HISPANIC',
+        'I' : 'INDIAN',
         'M' : 'MALE ',
         'F' : 'FEMALE ',
         'U' : 'UNKNOWN'
@@ -103,8 +96,11 @@ def getExpandedGenderInfo(_abbreviation):
 
     try:
         abbreviationList = [replacements[char] for char in _abbreviation]
-    except:
+    except KeyError as e:
+        logging.critical('Unknown key in abbreviation: %s', _abbreviation, exc_info=True)
         print('Unknown key in abbreviation:', _abbreviation)
+        print(e)
+        
     return ' '.join(abbreviationList)
 
 def findRaceGender(_fullText):
@@ -142,45 +138,70 @@ def fixFullTextSpacing(_fullText):
 
     return ' '.join(_fullText.split())
 
-def getRows(_fullText, _nameArray):
+def numOfCharUntilNumber(_str):
+    # Returns the index of the last non-digit character
+    for i, char in enumerate(_str):
+        if not char.isdigit():
+            continue
+        return i
+
+def getLastJuvenileIndex(_fullText):
+    # The purpose of this function is to recurse until a valid row is found
+    # This is done by checking for a date after a found JUVENILE word
+    # The chance of a date validly occurring in arrests/incidents is incredibly low
+    juvenileIndex = _fullText.rindex('JUVENILE')
+    # 9 is the length of JUVENILE plus 1 for a space char
+    juvenileIndexOffset = juvenileIndex + 9
+    # 10 is the length of a valid date
+    potentialDateIndex = juvenileIndexOffset + 10
+    potentialDate = _fullText[juvenileIndexOffset:potentialDateIndex]
+
+    if potentialDate.count('/') == 2:
+        # Exit recursion when a valid date is found
+        return juvenileIndex
+    
+    # Trims out JUVENILE if it is not a row starter
+    newText = _fullText[:juvenileIndex]
+    return getLastJuvenileIndex(newText)
+
+def getLastJuvenileRow(_fullText):
+    juvenileRow = _fullText[getLastJuvenileIndex(_fullText):]
+    return juvenileRow
+
+def getRowBeforeEmpty(_fullText):
+    # Dates occur only once per record, making them useful for finding a new record
+    # By finding the last time and subtracting an offset for the date, the empty name can be fixed
+    lastTime = regexFindNth('(\d{2}:\d{2})', _fullText, -1)
+    lastTimeIndex = _fullText.index(lastTime)
+    fixedRowIndex = lastTimeIndex - 11
+    return _fullText[fixedRowIndex:]
+
+def splitRows(_fullText, _nameArray):
     try:
-        for index, name in enumerate(_nameArray):
-            try:
-                # Search for the next name to get full row
-                nextName = _nameArray[index + 1]
-                partitionedText = _fullText.partition(nextName)
-
-                # Partitioning will not work correctly if there are same names in a row
-                # A second partition needs to be done on the first partition
-                if name == nextName:
-                    secondPartition = partitionedText[2].partition(nextName)
-                    _fullText = secondPartition[1] + secondPartition[2]
-                    yield partitionedText[1] + secondPartition[0]
-                    continue
-                
-                # Yield before the found name and remove the row from the text
-                _fullText = partitionedText[1] + partitionedText[2]
-                yield partitionedText[0]
-
-            except ValueError:
-                # Occurs when an empty name is in the nameArray
-                rowBeforeEmpty = getRowBeforeEmpty(_fullText)
-                yield rowBeforeEmpty
-                _fullText = 'No name found. ' + _fullText.replace(rowBeforeEmpty, '')
-                continue
-
+        currentName = _nameArray.pop().strip()
+        if currentName:
+            if currentName == 'JUVENILE':
+                # Juveniles have high tendency to cause issues
+                # This is due to the word JUVENILE being contained in arrests and incidents
+                currentRow = getLastJuvenileRow(_fullText)
+            else:
+                # Unique names can be partitioned out from the end
+                currentRowPartitioned = _fullText.rpartition(currentName)
+                currentRow = currentRowPartitioned[1] + currentRowPartitioned[2]
+            
+            # Replace the row from the text instead of slicing
+            _fullText = _fullText.replace(currentRow, '', 1)
+            yield currentRow.strip()
+        else:
+            # If the name is None, then the row needs to be fixed
+            yield 'No name listed. ' + getRowBeforeEmpty(_fullText)
+        yield from splitRows(_fullText, _nameArray)
     except IndexError:
-        # An index error exception occurs at last in list
-        # At this point _fullText is trimmed of all but the last record
-        yield _fullText
-
-def findFirstDigit(_str):
-    firstDigit = re.search('\d', _str)
-    return firstDigit.start()
+        pass
 
 def getNamesFromRow(_rowText):
     # First digit signals the beginning of the date, ergo, the end of the name entry
-    sliceIndex = findFirstDigit(_rowText) - 1
+    sliceIndex = numOfCharUntilNumber(_rowText)
     name = _rowText[:sliceIndex]
     return name
 
@@ -194,7 +215,8 @@ def getDateAndBirthdateFromRow(_rowText):
 
 def getAgeFromRow(_rowText):
     try:
-        age = re.search('\d{2}\/\d{2}\/\d{4}(.+?)\d{2}\/\d{2}\/\d{4}', _rowText).group(1)
+        agePattern = ('\d{2}\/\d{2}\/\d{4}(.+?)\d{2}\/\d{2}\/\d{4}')
+        age = re.search(agePattern, _rowText).group(1)
         return age.strip()
     except AttributeError:
         return 'No age found.'
@@ -211,7 +233,8 @@ def getSexFromRow(_rowText):
         return 'MALE'
 
 def getTimeFromRow(_rowText):
-    return re.search('(\d{2}:\d{2})', _rowText).group(1)
+    timePattern = '(\d{2}:\d{2})'
+    return re.search(timePattern, _rowText).group(1)
 
 def getTrimmedAddressText(_rowText):
     # Get as close to the actual address as possible
@@ -250,13 +273,6 @@ def getLastWordInAddress(_addressList):
     # Besides '2ND', 'N215706' is the only word that contains both numbers and letters
     # By filtering out any ordinal/alpha/numeric words, the only word remaining is the last
     return list(filter(lambda word: doesAddressNeedTrimming(word), _addressList))[0]
-
-def numOfCharUntilNumber(_str):
-    # Returns the index of the last alpha character
-    for i, char in enumerate(_str):
-        if char.isalpha():
-            continue
-        return i
 
 def doesBeginAndEndWithNum(_str):
     # ex. 19C123090 needs to be trimmed, but .isdigit() would return False
@@ -351,37 +367,42 @@ def getWarrantsFromRow(_rowText):
     return [code for code in getWarrantCodes(_rowText)]
 
 if __name__ == "__main__":
-    with open('text.txt', 'w') as file:
-        for pdf in getPDFs('PDFs/'):
-            pdfObject = openPDF(pdf)
-            nameArray = getNamesFromPDF(pdfObject)
-            fullText = combinePages(pdfObject)
-            fullTextSpaced = fixFullTextSpacing(fullText)
-            rowsAsList = []
-            
-            for row in getRows(fullTextSpaced, nameArray):
-                birthdate, date = getDateAndBirthdateFromRow(row)
-                file.write(row + '\n')
-                rowsAsList.append([
-                    getNamesFromRow(row),
-                    birthdate,
-                    getAgeFromRow(row),
-                    getRaceFromRow(row),
-                    getSexFromRow(row),
-                    date,
-                    getTimeFromRow(row),
-                    getAddressFromRow(row),
-                    None,
-                    getIncidentsFromRow(row),
-                    getWarrantsFromRow(row)
-                ])
-            
-            df = pd.DataFrame(rowsAsList, columns=[
-                'Name', 'Birthdate', 'Age', 
-                'Race', 'Sex', 'Date', 
-                'Time', 'Address', 'Arrests', 
-                'Incidents', 'Warrants'
-            ])
+    pd.set_option('display.max_rows', 1000)
+    for pdf in getPDFs('PDFs/'):
+        logging.info('Parsing... %s', pdf)
+        print('Parsing...', pdf)
+        
+        pdfObject = openPDF(pdf)
+        nameArray = getNamesFromPDF(pdfObject)
+        fullText = combinePages(pdfObject)
+        fullTextSpaced = fixFullTextSpacing(fullText)
+        rowsAsList = []
+        
+        for row in splitRows(fullTextSpaced, nameArray):
+            logging.info(row)
 
-            print(df)
-                
+            birthdate, date = getDateAndBirthdateFromRow(row)
+            rowsAsList.append([
+                getNamesFromRow(row),
+                birthdate,
+                getAgeFromRow(row),
+                getRaceFromRow(row),
+                getSexFromRow(row),
+                date,
+                getTimeFromRow(row),
+                getAddressFromRow(row),
+                None,
+                getIncidentsFromRow(row),
+                getWarrantsFromRow(row)
+            ])
+            
+        
+        df = pd.DataFrame(rowsAsList, columns=[
+            'Name', 'Birthdate', 'Age', 
+            'Race', 'Sex', 'Date', 
+            'Time', 'Address', 'Arrests', 
+            'Incidents', 'Warrants'
+        ])
+
+        print(df)
+            
