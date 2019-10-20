@@ -72,7 +72,7 @@ def regexTrimLeftOrRight(_pattern, _str, _left = True):
         if _left:
             _str = _str[matchIndex:]
         else:
-            _str = _str[:matchIndex - 1]
+            _str = _str[:matchIndex]
     except AttributeError:
         pass
     return _str
@@ -138,7 +138,7 @@ def fixFullTextSpacing(_fullText):
 
     return ' '.join(_fullText.split())
 
-def numOfCharUntilNumber(_str):
+def getNumOfCharUntilNumber(_str):
     # Returns the index of the last non-digit character
     for i, char in enumerate(_str):
         if not char.isdigit():
@@ -201,17 +201,42 @@ def splitRows(_fullText, _nameArray):
 
 def getNamesFromRow(_rowText):
     # First digit signals the beginning of the date, ergo, the end of the name entry
-    sliceIndex = numOfCharUntilNumber(_rowText)
+    sliceIndex = getNumOfCharUntilNumber(_rowText)
     name = _rowText[:sliceIndex]
     return name
 
-def getDateAndBirthdateFromRow(_rowText):
-    datesAndBirthdates = re.findall('\d{2}/\d{2}/\d{4}', _rowText)
-    try:
-        birthdate, date = datesAndBirthdates[0], datesAndBirthdates[1]
-    except IndexError:
-        birthdate, date = 'No birthdate found.', datesAndBirthdates[0]
-    return birthdate, date
+def isBirthdateFound(_trimmedRowText):
+    # Ideally, the row gets trimmed into a {birthdate} {age} {date} format
+    # So if that were the case, there would be four '/' char, otherwise the birthdate is missing
+    numOfSlashes = _trimmedRowText.count('/')
+    if numOfSlashes == 4:
+        return True
+    else:
+        return False
+
+def getTrimmedRowForDateAndBirthdate(_rowText):
+    # Trims the row into a {birthdate} {age} {date} format
+    trimNameIndex = getNumOfCharUntilNumber(_rowText)
+    trimmedRowAtName = _rowText[trimNameIndex:]
+    remainingTimeCharOffset = -3
+    trimmedRowAtTime = trimmedRowAtName.partition(':')[0][:remainingTimeCharOffset]
+    return trimmedRowAtTime
+
+def getDateFromRow(_rowText):
+    trimmedRow = getTrimmedRowForDateAndBirthdate(_rowText)
+    if isBirthdateFound(trimmedRow):
+        date = trimmedRow.rpartition(' ')[2]
+    else:
+        date = trimmedRow.partition(' ')[0]
+    return date
+
+def getBirthdateFromRow(_rowText):
+    trimmedRow = getTrimmedRowForDateAndBirthdate(_rowText)
+    if isBirthdateFound(trimmedRow):
+        birthdate = trimmedRow.partition(' ')[0]
+    else:
+        birthdate = 'No birthdate found.'
+    return birthdate
 
 def getAgeFromRow(_rowText):
     try:
@@ -294,7 +319,7 @@ def getTrimmedAddress(_addressText):
         # By finding the last word, that info can be trimmed out
         lastWordInAddress = getLastWordInAddress(addressTextList)
         lastWordInAddressIndex = _addressText.find(lastWordInAddress)
-        trimmedWordLenOffset = numOfCharUntilNumber(lastWordInAddress)
+        trimmedWordLenOffset = getNumOfCharUntilNumber(lastWordInAddress)
         trimIndex = lastWordInAddressIndex + trimmedWordLenOffset
         trimmedAddress = _addressText[:trimIndex]
     except:
@@ -316,6 +341,23 @@ def getAddressFromRow(_rowText):
 
     trimmedAddress = getTrimmedAddress(addressText)
     return trimmedAddress.strip()
+
+def getTrimmedArrestsText(_rowText):
+    # Get as close to the actual arrests as possible
+    arrests = _rowText.rpartition('MALE')[2]
+    arrests = arrests.partition('No Arrest')[0]
+    arrests = arrests.partition('Sedgwick')[0]
+    return arrests.strip()
+
+def getArrestsFromRow(_rowText):
+    incidentIdPattern = '\s?\d{2}C\d{6,}\ss\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
+    warrantPattern = '\d{2}[A-Z]{2}\d{6}'
+    trimmedRowText = getTrimmedArrestsText(_rowText)
+    print(trimmedRowText)
+    trimmedIncidents = regexTrimLeftOrRight(incidentIdPattern, trimmedRowText, False)
+    trimmedWarrantsAndIncidents = regexTrimLeftOrRight(warrantPattern, trimmedIncidents, False)
+    print(trimmedWarrantsAndIncidents)
+    return None
     
 def getListOfIncidents(_incidentText):
     incidentIdPattern = '\s?\d{2}C\d{6,}\s\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
@@ -371,7 +413,7 @@ if __name__ == "__main__":
     for pdf in getPDFs('PDFs/'):
         logging.info('Parsing... %s', pdf)
         print('Parsing...', pdf)
-        
+
         pdfObject = openPDF(pdf)
         nameArray = getNamesFromPDF(pdfObject)
         fullText = combinePages(pdfObject)
@@ -380,22 +422,21 @@ if __name__ == "__main__":
         
         for row in splitRows(fullTextSpaced, nameArray):
             logging.info(row)
-
-            birthdate, date = getDateAndBirthdateFromRow(row)
             rowsAsList.append([
                 getNamesFromRow(row),
-                birthdate,
+                getBirthdateFromRow(row),
                 getAgeFromRow(row),
                 getRaceFromRow(row),
                 getSexFromRow(row),
-                date,
+                getDateFromRow(row),
                 getTimeFromRow(row),
                 getAddressFromRow(row),
-                None,
+                getArrestsFromRow(row),
                 getIncidentsFromRow(row),
                 getWarrantsFromRow(row)
             ])
-            
+
+        rowsAsList.reverse()
         
         df = pd.DataFrame(rowsAsList, columns=[
             'Name', 'Birthdate', 'Age', 
