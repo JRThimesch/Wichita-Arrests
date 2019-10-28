@@ -5,9 +5,11 @@ import pandas as pd
 HEADER_STR = 'Incidents with Offenses / Warrants'
 HEADER_OFFSET = len('Incidents with Offenses / Warrants')
 logging.basicConfig(level=logging.INFO, filename='runtime.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
+pd.set_option('display.max_rows', 1000)
 
 def getPDFs(_path):
     files = os.listdir(_path)
+    return ['PDFs/10-18-19.pdf']
     return [_path + file for file in files if file.endswith('.pdf')]
 
 def openPDF(_filePath):
@@ -96,12 +98,9 @@ def getExpandedGenderInfo(_abbreviation):
 
     try:
         abbreviationList = [replacements[char] for char in _abbreviation]
-    except KeyError as e:
-        logging.critical('Unknown key in abbreviation: %s', _abbreviation, exc_info=True)
-        print('Unknown key in abbreviation:', _abbreviation)
-        print(e)
-        
-    return ' '.join(abbreviationList)
+        return ' '.join(abbreviationList)
+    except KeyError:
+        raise RuntimeError
 
 def findRaceGender(_fullText):
     # The index for times is useful as the gender info is contained right after
@@ -246,10 +245,26 @@ def getAgeFromRow(_rowText):
     except AttributeError:
         return 'No age found.'
 
+def getRaceFromExceptionRow(_rowText):
+    trimmedRowText = _rowText.partition('No address listed...')[0]
+    trimmedRowText = trimmedRowText.rpartition(' ')[2]
+    raceGenderInfo = ''.join(filter(lambda i: i.isalpha(), trimmedRowText))
+    if not raceGenderInfo or len(raceGenderInfo) > 3:
+        raise RuntimeError('UNUSUAL FORMATTING FOUND, REGEX FAILED, ALTERNATE SOLUTION FAILED')
+    expandedRaceGenderInfo = getExpandedGenderInfo(raceGenderInfo).strip()
+    race = expandedRaceGenderInfo.rpartition(' ')[0]
+    return race
+
 def getRaceFromRow(_rowText):
-    racePattern = '\d{2}:\d{2}(.+?)' + getSexFromRow(_rowText)
-    race = re.search(racePattern, _rowText).group(1)
-    return race.strip()
+    try:
+        racePattern = '\d{2}:\d{2}(.+?)' + getSexFromRow(_rowText)
+        race = re.search(racePattern, _rowText).group(1)
+        return race.strip()
+    except:
+        try:
+            return getRaceFromExceptionRow(_rowText)
+        except:
+            raise RuntimeError('UNUSUAL FORMATTING FOUND, REGEX FAILED')
 
 def getSexFromRow(_rowText):
     if 'FEMALE' in _rowText:
@@ -258,8 +273,12 @@ def getSexFromRow(_rowText):
         return 'MALE'
 
 def getTimeFromRow(_rowText):
-    timePattern = '(\d{2}:\d{2})'
-    return re.search(timePattern, _rowText).group(1)
+    try:
+        timePattern = '(\d{2}:\d{2})'
+        return re.search(timePattern, _rowText).group(1)
+    except:
+        logging.warning('No time found in row text: \n\t' + _rowText)
+        return 'No time found.'
 
 def getTrimmedAddressText(_rowText):
     # Get as close to the actual address as possible
@@ -331,6 +350,8 @@ def getTrimmedAddress(_addressText):
     return trimmedAddress
 
 def getAddressFromRow(_rowText):
+    if 'No address listed...' in _rowText:
+        return ''
     addressText = getTrimmedAddressText(_rowText)        
     # Typically addresses do not end in numbers, however, highways do
     # There is no way to differentiate an address ending number from an arrest code
@@ -347,16 +368,19 @@ def getTrimmedArrestsText(_rowText):
     arrests = _rowText.rpartition('MALE')[2]
     arrests = arrests.partition('No Arrest')[0]
     arrests = arrests.partition('Sedgwick')[0]
+    if ' - ' in arrests:
+        logging.info(arrests.partition(' - ')[0])
+        #print(arrests.partition(' - '))
     return arrests.strip()
 
 def getArrestsFromRow(_rowText):
     incidentIdPattern = '\s?\d{2}C\d{6,}\ss\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
     warrantPattern = '\d{2}[A-Z]{2}\d{6}'
     trimmedRowText = getTrimmedArrestsText(_rowText)
-    print(trimmedRowText)
+    #print(trimmedRowText)
     trimmedIncidents = regexTrimLeftOrRight(incidentIdPattern, trimmedRowText, False)
     trimmedWarrantsAndIncidents = regexTrimLeftOrRight(warrantPattern, trimmedIncidents, False)
-    print(trimmedWarrantsAndIncidents)
+    #print(trimmedWarrantsAndIncidents)
     return None
     
 def getListOfIncidents(_incidentText):
@@ -408,42 +432,48 @@ def getWarrantCodes(_rowText):
 def getWarrantsFromRow(_rowText):
     return [code for code in getWarrantCodes(_rowText)]
 
+def logProblemWithPDF(_pdf, _exception):
+    logging.critical('PROBLEM FOUND FOR ' + _pdf)
+    logging.exception(_exception)
+    logging.critical('EXITING FOR ' + _pdf)
+
 if __name__ == "__main__":
-    pd.set_option('display.max_rows', 1000)
     for pdf in getPDFs('PDFs/'):
-        logging.info('Parsing... %s', pdf)
-        print('Parsing...', pdf)
+        try:
+            logging.info('Parsing... %s', pdf)
+            print('Parsing...', pdf)
 
-        pdfObject = openPDF(pdf)
-        nameArray = getNamesFromPDF(pdfObject)
-        fullText = combinePages(pdfObject)
-        fullTextSpaced = fixFullTextSpacing(fullText)
-        rowsAsList = []
-        
-        for row in splitRows(fullTextSpaced, nameArray):
-            logging.info(row)
-            rowsAsList.append([
-                getNamesFromRow(row),
-                getBirthdateFromRow(row),
-                getAgeFromRow(row),
-                getRaceFromRow(row),
-                getSexFromRow(row),
-                getDateFromRow(row),
-                getTimeFromRow(row),
-                getAddressFromRow(row),
-                getArrestsFromRow(row),
-                getIncidentsFromRow(row),
-                getWarrantsFromRow(row)
-            ])
-
-        rowsAsList.reverse()
-        
-        df = pd.DataFrame(rowsAsList, columns=[
-            'Name', 'Birthdate', 'Age', 
-            'Race', 'Sex', 'Date', 
-            'Time', 'Address', 'Arrests', 
-            'Incidents', 'Warrants'
-        ])
-
-        print(df)
+            pdfObject = openPDF(pdf)
+            nameArray = getNamesFromPDF(pdfObject)
+            fullText = combinePages(pdfObject)
+            fullTextSpaced = fixFullTextSpacing(fullText)
+            rowsAsList = []
             
+            for row in splitRows(fullTextSpaced, nameArray):
+                logging.info(row)
+                rowsAsList.append([
+                    getNamesFromRow(row),
+                    getBirthdateFromRow(row),
+                    getAgeFromRow(row),
+                    getRaceFromRow(row),
+                    getSexFromRow(row),
+                    getDateFromRow(row),
+                    getTimeFromRow(row),
+                    getAddressFromRow(row),
+                    getArrestsFromRow(row),
+                    getIncidentsFromRow(row),
+                    getWarrantsFromRow(row)
+                ])
+
+            rowsAsList.reverse()
+            
+            df = pd.DataFrame(rowsAsList, columns=[
+                'Name', 'Birthdate', 'Age', 
+                'Race', 'Sex', 'Date', 
+                'Time', 'Address', 'Arrests', 
+                'Incidents', 'Warrants'
+            ])
+            print(df)
+        except Exception as e:
+            logProblemWithPDF(pdf, e)
+            continue
