@@ -244,15 +244,22 @@ def getAgeFromRow(_rowText):
         return age.strip()
     except AttributeError:
         return 'No age found.'
-
-def getRaceFromExceptionRow(_rowText):
+    
+def getExpandedRaceGenderInfoFromException(_rowText):
     trimmedRowText = _rowText.partition('No address listed...')[0]
     trimmedRowText = trimmedRowText.rpartition(' ')[2]
     raceGenderInfo = ''.join(filter(lambda i: i.isalpha(), trimmedRowText))
     if not raceGenderInfo or len(raceGenderInfo) > 3:
         raise RuntimeError('UNUSUAL FORMATTING FOUND, REGEX FAILED, ALTERNATE SOLUTION FAILED')
     expandedRaceGenderInfo = getExpandedGenderInfo(raceGenderInfo).strip()
-    race = expandedRaceGenderInfo.rpartition(' ')[0]
+    return expandedRaceGenderInfo.rpartition(' ')
+
+def getSexFromExceptionRow(_rowText):
+    sex = getExpandedRaceGenderInfoFromException[2]
+    return sex
+
+def getRaceFromExceptionRow(_rowText):
+    race = getExpandedRaceGenderInfoFromException[0]
     return race
 
 def getRaceFromRow(_rowText):
@@ -261,23 +268,26 @@ def getRaceFromRow(_rowText):
         race = re.search(racePattern, _rowText).group(1)
         return race.strip()
     except:
-        try:
-            return getRaceFromExceptionRow(_rowText)
-        except:
-            raise RuntimeError('UNUSUAL FORMATTING FOUND, REGEX FAILED')
+        logging.warning('Race not found in row text: \n\t' + _rowText)
+        logging.warning('Deferring to alternate solution')
+        return getRaceFromExceptionRow(_rowText)
 
 def getSexFromRow(_rowText):
     if 'FEMALE' in _rowText:
         return 'FEMALE'
-    else:
+    elif 'MALE' in _rowText:
         return 'MALE'
+    else:
+        logging.warning('Sex not found in row text: \n\t' + _rowText)
+        logging.warning('Deferring to alternate solution')
+        return getSexFromExceptionRow(_rowText)
 
 def getTimeFromRow(_rowText):
     try:
         timePattern = '(\d{2}:\d{2})'
         return re.search(timePattern, _rowText).group(1)
     except:
-        logging.warning('No time found in row text: \n\t' + _rowText)
+        logging.warning('Time not found in row text: \n\t' + _rowText)
         return 'No time found.'
 
 def getTrimmedAddressText(_rowText):
