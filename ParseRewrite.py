@@ -373,7 +373,7 @@ def getTrimmedAddress(_addressText):
 
 def getAddressFromRow(_rowText):
     if 'No address listed...' in _rowText:
-        return ''
+        return 'No address listed.'
     addressText = getTrimmedAddressText(_rowText)        
     # Typically addresses do not end in numbers, however, highways do
     # There is no way to differentiate an address ending number from an arrest code
@@ -388,21 +388,29 @@ def getAddressFromRow(_rowText):
 def getTrimmedArrestsText(_rowText):
     # Get as close to the actual arrests as possible
     arrests = _rowText.rpartition('MALE')[2]
-    arrests = arrests.partition('No Arrest')[0]
     arrests = arrests.partition('Sedgwick')[0]
+
     if ' - ' in arrests:
-        logging.info(arrests.partition(' - ')[0])
-        #print(arrests.partition(' - '))
+        arrests = arrests.partition(' - ')[2]
+    else:
+        return ''
     return arrests.strip()
+
+def getRightTrimOfAddressFromRow(_rowText):
+    address = getAddressFromRow(_rowText)
+    rightTrimmedText = _rowText.partition(address)[2]
+    rightTrimmedText = rightTrimmedText.replace(address, '', 1)
+    return rightTrimmedText.strip()
 
 def getArrestsFromRow(_rowText):
     incidentIdPattern = '\s?\d{2}C\d{6,}\ss\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
     warrantPattern = '\d{2}[A-Z]{2}\d{6}'
     trimmedRowText = getTrimmedArrestsText(_rowText)
-    #print(trimmedRowText)
+    if not trimmedRowText:
+        return 'No arrests listed.'
     trimmedIncidents = regexTrimLeftOrRight(incidentIdPattern, trimmedRowText, False)
     trimmedWarrantsAndIncidents = regexTrimLeftOrRight(warrantPattern, trimmedIncidents, False)
-    #print(trimmedWarrantsAndIncidents)
+    print(trimmedWarrantsAndIncidents)
     return None
     
 def getListOfIncidents(_incidentText):
