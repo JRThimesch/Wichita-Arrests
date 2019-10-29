@@ -9,7 +9,6 @@ pd.set_option('display.max_rows', 1000)
 
 def getPDFs(_path):
     files = os.listdir(_path)
-    return ['PDFs/10-18-19.pdf']
     return [_path + file for file in files if file.endswith('.pdf')]
 
 def openPDF(_filePath):
@@ -206,12 +205,13 @@ def getNamesFromRow(_rowText):
 
 def isBirthdateFound(_trimmedRowText):
     # Ideally, the row gets trimmed into a {birthdate} {age} {date} format
-    # So if that were the case, there would be four '/' char, otherwise the birthdate is missing
-    numOfSlashes = _trimmedRowText.count('/')
-    if numOfSlashes == 4:
-        return True
-    else:
+    # Otherwise it is trimmed into a {birthdate} {age} {gibberish} or just a {date} format
+    # So if there is more than just a date, the birthdate is found otherwise it is not
+    lenOfTrimmedRow = len(_trimmedRowText)
+    if lenOfTrimmedRow == 10:
         return False
+    else:
+        return True
 
 def getTrimmedRowForDateAndBirthdate(_rowText):
     # Trims the row into a {birthdate} {age} {date} format
@@ -221,10 +221,19 @@ def getTrimmedRowForDateAndBirthdate(_rowText):
     trimmedRowAtTime = trimmedRowAtName.partition(':')[0][:remainingTimeCharOffset]
     return trimmedRowAtTime
 
+def isValidDate(_date):
+    # When the time is missing, the date comes out incorrectly
+    numOfSlashes = _date.count('/')
+    if numOfSlashes == 2:
+        return True
+    return False
+
 def getDateFromRow(_rowText):
     trimmedRow = getTrimmedRowForDateAndBirthdate(_rowText)
     if isBirthdateFound(trimmedRow):
         date = trimmedRow.rpartition(' ')[2]
+        if not isValidDate(date):
+            return 'No date found.'
     else:
         date = trimmedRow.partition(' ')[0]
     return date
@@ -255,11 +264,11 @@ def getExpandedRaceGenderInfoFromException(_rowText):
     return expandedRaceGenderInfo.rpartition(' ')
 
 def getSexFromExceptionRow(_rowText):
-    sex = getExpandedRaceGenderInfoFromException[2]
+    sex = getExpandedRaceGenderInfoFromException(_rowText)[2]
     return sex
 
 def getRaceFromExceptionRow(_rowText):
-    race = getExpandedRaceGenderInfoFromException[0]
+    race = getExpandedRaceGenderInfoFromException(_rowText)[0]
     return race
 
 def getRaceFromRow(_rowText):
@@ -297,17 +306,20 @@ def getTrimmedAddressText(_rowText):
     address = address.partition('#')[0]
     address = address.partition('No')[0]
     address = address.partition('Sedgwick')[0]
-    return address.strip()
+    return address.strip()  
+
+def getHighwayAddress(_address, _highways):
+    for highway in _highways:
+        partitionedAddress = _address.partition(highway)
+        _address =  partitionedAddress[0] + partitionedAddress[1]
+    return _address.strip()
 
 def findHighwaysInAddress(_address):
     # The only highways that appear are in the tuple 'highways'
     # If a highway is in the address, the address will get trimmed down to match it
     highways = ('I 135', 'K 96', 'I 235')
     if any(highway in _address for highway in highways):
-        for highway in highways:
-            partitionedAddress = _address.partition(highway)
-            _address =  partitionedAddress[0] + partitionedAddress[1]
-        return _address.strip()
+        return getHighwayAddress(_address, highways)
     return None
 
 def doesContainAlphaAndNum(_str):
@@ -442,6 +454,18 @@ def getWarrantCodes(_rowText):
 def getWarrantsFromRow(_rowText):
     return [code for code in getWarrantCodes(_rowText)]
 
+def validateDates(_dataframe):
+    # In incredibly rare cases, the date is missing
+    # So this counts the number of missing dates and selects the nearest date in the PDF
+    # Usually, the noDatesCount will be 0
+    noDatesCount = (_dataframe['Date'] == 'No date found.').sum()
+    if not noDatesCount:
+        return _dataframe
+    # Nearest date is ideally the one right after the missing date entries, so choose that
+    defaultReplaceDate = _dataframe['Date'][noDatesCount]
+    _dataframe['Date'] = _dataframe['Date'].replace('No date found.', defaultReplaceDate)
+    return _dataframe
+
 def logProblemWithPDF(_pdf, _exception):
     logging.critical('PROBLEM FOUND FOR ' + _pdf)
     logging.exception(_exception)
@@ -475,6 +499,7 @@ if __name__ == "__main__":
                     getWarrantsFromRow(row)
                 ])
 
+            # Because of the algorithm, the list needs to be reversed to be in correct order
             rowsAsList.reverse()
             
             df = pd.DataFrame(rowsAsList, columns=[
@@ -483,6 +508,9 @@ if __name__ == "__main__":
                 'Time', 'Address', 'Arrests', 
                 'Incidents', 'Warrants'
             ])
+
+            df = validateDates(df)
+
             print(df)
         except Exception as e:
             logProblemWithPDF(pdf, e)
