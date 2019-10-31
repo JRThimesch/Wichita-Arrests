@@ -7,6 +7,11 @@ HEADER_OFFSET = len('Incidents with Offenses / Warrants')
 logging.basicConfig(level=logging.INFO, filename='runtime.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 pd.set_option('display.max_rows', 1000)
 
+def loadJSON(_file):
+    with open(_file) as f:
+        _dict = json.load(f)
+    return _dict
+
 def getPDFs(_path):
     files = os.listdir(_path)
     return [_path + file for file in files if file.endswith('.pdf')]
@@ -444,11 +449,19 @@ def removeParenthesesContent(_arrest):
 def getExpandedArrestWords(_arrest):
     return _arrest
 
+def getReplacementWords(_arrest):
+    for key in replacements:
+        if key not in _arrest:
+            continue
+        _arrest = _arrest.replace(key, replacements[key])
+    return _arrest
+
 def getFormattedArrest(_arrest):
     if '(' in _arrest:
         _arrest = removeParenthesesContent(_arrest)
     if ' EFF' in _arrest:
         _arrest = _arrest.rpartition(' EFF')[0]
+    _arrest = getReplacementWords(_arrest)
     _arrest = getExpandedArrestWords(_arrest)
     return _arrest
 
@@ -560,11 +573,12 @@ def getSeparatedArrests(_dataframe):
 
 if __name__ == "__main__":
     arrestsDataframe = pd.Series(data=[])
+    abbreviations = loadJSON('regexAbbreviations.json')
+    replacements = loadJSON('replacements.json')
     for pdf in getPDFs('PDFs/'):
         try:
             logging.info('Parsing... %s', pdf)
             print('Parsing...', pdf)
-            
 
             pdfObject = openPDF(pdf)
             nameArray = getNamesFromPDF(pdfObject)
