@@ -132,6 +132,7 @@ def fixFullTextSpacing(_fullText):
     _fullText = regexSplitandJoin('(\d{2}C\d{6})', _fullText)
     _fullText = regexSplitandJoin('(\d{2}\w{2}\d{6})', _fullText)
     _fullText = _fullText.replace('Sedgwick County Warrant', ' Sedgwick County Warrant ')
+    _fullText = _fullText.replace(' +', '+')
     _fullText = findRaceGender(_fullText)
 
     return ' '.join(_fullText.split())
@@ -396,22 +397,91 @@ def getTrimmedArrestsText(_rowText):
         return ''
     return arrests.strip()
 
-def getRightTrimOfAddressFromRow(_rowText):
-    address = getAddressFromRow(_rowText)
-    rightTrimmedText = _rowText.partition(address)[2]
-    rightTrimmedText = rightTrimmedText.replace(address, '', 1)
-    return rightTrimmedText.strip()
+def getSplitArrests(_trimmedRowText):
+    splitPattern = '\d+\w?\s?.{1,2}?\w?\s-\s'
+    splitArrests = re.split(splitPattern, _trimmedRowText)
+    return splitArrests
+
+def removeTrailingNumbersFromArrest(_arrestLastWord):
+    # The last word of almost every arrest has some kind of arrest codes concatenated to it
+    trimIndex = getNumOfCharUntilNumber(_arrestLastWord)
+    return _arrestLastWord[:trimIndex]
+
+def isValidArrestAbbreviation(_arrestLastWord):
+    # Sometimes the splitting does not work 100%
+    # So far, 'DM' gets left over from codes that use it
+    # This can be expanded in the future if new problems arise
+    invalidLastWords = ['DM']
+    return _arrestLastWord not in invalidLastWords
+
+def isLastWordValid(_arrestLastWord):
+    # If the lastWord is one char long: return False
+    # If the lastWord is not a valid abbreviation: return False
+    # All words are valid otherwise
+    lenOfLastWord = len(_arrestLastWord)
+    return lenOfLastWord != 1 and isValidArrestAbbreviation(_arrestLastWord)
+
+def getLastWordFromArrest(_arrest):
+    partitionedArrest = _arrest.strip().rpartition(' ')
+    lastWord = partitionedArrest[2]
+    if not isLastWordValid(lastWord):
+        # Go to the word before the lastWord in the given recursion and test it's validity
+        restOfArrest = partitionedArrest[0]
+        return getLastWordFromArrest(restOfArrest)
+    return lastWord
+
+def getFixedPlusSignInArrest(_arrest):
+    # Easiest way to fix plus signs concatenated with arrest codes is to just partition
+    partitionedArrest = _arrest.partition('+')
+    beforePlus = partitionedArrest[0] + partitionedArrest[1]
+    return beforePlus
+
+def removeParenthesesContent(_arrest):
+    parenthPattern = '\(.+?\)'
+    _arrest = re.sub(parenthPattern, '', _arrest)
+    return _arrest.strip()
+
+def getExpandedArrestWords(_arrest):
+    return _arrest
+
+def getFormattedArrest(_arrest):
+    if '(' in _arrest:
+        _arrest = removeParenthesesContent(_arrest)
+    if ' EFF' in _arrest:
+        _arrest = _arrest.rpartition(' EFF')[0]
+    _arrest = getExpandedArrestWords(_arrest)
+    return _arrest
+
+def getTrimmedAndFormattedArrestsList(_listOfArrests):
+    for arrest in _listOfArrests:
+        lastWord = getLastWordFromArrest(arrest)
+        if '+' in lastWord:
+            # Plus signs get concatenated incorrectly and need to defer to the function
+            arrest = getFixedPlusSignInArrest(arrest)
+            yield getFormattedArrest(arrest)
+            continue
+        if lastWord.isalpha():
+            # No arrest codes in the arrest; the arrest is perfectly split
+            yield getFormattedArrest(arrest)
+            continue
+        newLastWord = removeTrailingNumbersFromArrest(lastWord)
+        correctPartOfArrest = arrest.rpartition(lastWord)[0]
+        # Cannot use .replace here because of the recursion for finding the lastWord
+        # If the function recurses, then the failed lastWords would remain at the end of the arrest
+        arrest = correctPartOfArrest + newLastWord
+        yield getFormattedArrest(arrest)
 
 def getArrestsFromRow(_rowText):
     incidentIdPattern = '\s?\d{2}C\d{6,}\ss\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
     warrantPattern = '\d{2}[A-Z]{2}\d{6}'
-    trimmedRowText = getTrimmedArrestsText(_rowText)
+    trimmedIncidents = regexTrimLeftOrRight(incidentIdPattern, _rowText, False)
+    trimmedWarrantsAndIncidents = regexTrimLeftOrRight(warrantPattern, trimmedIncidents, False)
+    trimmedRowText = getTrimmedArrestsText(trimmedWarrantsAndIncidents)
     if not trimmedRowText:
         return 'No arrests listed.'
-    trimmedIncidents = regexTrimLeftOrRight(incidentIdPattern, trimmedRowText, False)
-    trimmedWarrantsAndIncidents = regexTrimLeftOrRight(warrantPattern, trimmedIncidents, False)
-    print(trimmedWarrantsAndIncidents)
-    return None
+    listOfArrests = getSplitArrests(trimmedRowText)
+    trimmedAndFormattedListOfArrests = [e.strip() for e in getTrimmedAndFormattedArrestsList(listOfArrests)]
+    return trimmedAndFormattedListOfArrests
     
 def getListOfIncidents(_incidentText):
     incidentIdPattern = '\s?\d{2}C\d{6,}\s\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
@@ -479,11 +549,22 @@ def logProblemWithPDF(_pdf, _exception):
     logging.exception(_exception)
     logging.critical('EXITING FOR ' + _pdf)
 
+def getSeparatedArrests(_dataframe):
+    listOfArrests = _dataframe['Arrests'].tolist()
+    for arrests in listOfArrests:
+        if type(arrests) == str:
+            yield arrests
+            continue
+        for arrest in arrests:
+            yield arrest
+
 if __name__ == "__main__":
+    arrestsDataframe = pd.Series(data=[])
     for pdf in getPDFs('PDFs/'):
         try:
             logging.info('Parsing... %s', pdf)
             print('Parsing...', pdf)
+            
 
             pdfObject = openPDF(pdf)
             nameArray = getNamesFromPDF(pdfObject)
@@ -507,10 +588,10 @@ if __name__ == "__main__":
                     getWarrantsFromRow(row)
                 ])
 
-            # Because of the algorithm, the list needs to be reversed to be in correct order
+            # Because of the algorithm, the list needs to be reversed for the correct order
             rowsAsList.reverse()
             
-            df = pd.DataFrame(rowsAsList, columns=[
+            df = pd.DataFrame(data=rowsAsList, columns=[
                 'Name', 'Birthdate', 'Age', 
                 'Race', 'Sex', 'Date', 
                 'Time', 'Address', 'Arrests', 
@@ -519,7 +600,13 @@ if __name__ == "__main__":
 
             df = validateDates(df)
 
-            print(df)
-        except Exception as e:
+            #print(df)
+
+            separatedArrests = [e for e in getSeparatedArrests(df)]
+            arrestsDataframe = arrestsDataframe.append(pd.Series(separatedArrests))
+        except RuntimeError as e:
             logProblemWithPDF(pdf, e)
             continue
+    counts = arrestsDataframe.value_counts().sort_index()
+    print(counts)
+    counts.to_json('arrests.json', orient='index')
