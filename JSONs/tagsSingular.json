@@ -1,4 +1,6 @@
 {
+    "insur": "Insurance",
+    "uninsur": "Insurance",
     "arson": "Arson",
     "murder": "Murder",
     "terrorist": "Terrorist",
@@ -8,7 +10,8 @@
     "loiter" : "Trespass",
     "embezzl": "Theft",
     "embezz": "Theft",
-    "drive": "Traffic Violation",
+    "escort": "Procurement",
+    "prostitut": "Procurement",
     "sodomi": "Sodomy",
     "elud": "Elusion",
     "obstruct": "Obstruction",
@@ -43,8 +46,6 @@
     "alcohol": "Alcohol",
     "liquor": "Alcohol",
     "robberi": "Robbery",
-    "insur": "Insurance",
-    "uninsur": "Insurance",
     "rape": "Rape",
     "disturb": "Disturbance",
     "litter": "Littering",
@@ -70,8 +71,7 @@
     "rifl": "Firearms",
     "shotgun": "Firearms",
     "subtanc": "Misc Drugs",
-    "escort": "Procurement",
-    "prostitut": "Procurement",
+    "sound" : "Disturbance",
     "roadway": "Traffic Violation",
     "crosswalk": "Traffic Violation",
     "gambl": "Gambling",    
@@ -83,5 +83,6 @@
     "park" : "Traffic Violation",
     "threaten" : "Intimidation",
     "pedestrian" : "Traffic Violation",
+    "drive": "Traffic Violation",
     "vehicl": "Traffic Violation"
 }

@@ -609,12 +609,10 @@ def matchPhrases(_arrestToMatch):
     return matchSingular(_arrestToMatch)
 
 def matchSingular(_arrestToMatch):
-    words = _arrestToMatch.split()
-    for word in words:
-        try:
-            return tagsSingularDict[word]
-        except KeyError:
-            continue
+    for key in tagsSingularDict:
+        if key in _arrestToMatch:
+            return tagsSingularDict[key]
+    print(_arrestToMatch)
     return None
 
 def getTagsFromArrests(_arrestsList):
@@ -672,7 +670,7 @@ if __name__ == "__main__":
 
             df = validateDates(df)
 
-            print(df)
+            #print(df)
 
             separatedArrests = [e for e in getSeparatedArrests(df)]
             arrestsSeries = arrestsSeries.append(pd.Series(separatedArrests))
@@ -685,3 +683,8 @@ if __name__ == "__main__":
     #arrestsSeries.to_string(buf='arrestsToTag.txt', index=False, max_rows=None)
     counts = arrestsSeries.value_counts().sort_index()
     counts.to_string(buf='arrests.txt')
+
+    uniqueArrests = pd.Series(arrestsSeries.unique()).tolist()
+    tags = getTagsFromArrests(uniqueArrests)
+    learningData = pd.Series(data=tags, index=uniqueArrests).sort_index()
+    print(learningData)
