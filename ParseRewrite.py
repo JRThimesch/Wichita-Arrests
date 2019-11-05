@@ -1,11 +1,16 @@
 import PyPDF2
-import os, re, json, logging
+import os, re, json, logging, nltk
 import pandas as pd
+from nltk.stem import PorterStemmer
+from nltk.tokenize import RegexpTokenizer
+from nltk.corpus import stopwords
 
 HEADER_STR = 'Incidents with Offenses / Warrants'
 HEADER_OFFSET = len('Incidents with Offenses / Warrants')
 logging.basicConfig(level=logging.INFO, filename='runtime.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 pd.set_option('display.max_rows', 1000)
+lancaster = PorterStemmer()
+tokenizer = RegexpTokenizer(r'\w+')
 
 def loadJSON(_file):
     with open(_file) as f:
@@ -442,14 +447,24 @@ def getFixedPlusSignInArrest(_arrest):
     return beforePlus
 
 def removeParenthesesContent(_arrest):
+    # Some arrests have content within parentheses that adds no extra info
     parenthPattern = '\(.+?\)'
     _arrest = re.sub(parenthPattern, '', _arrest)
     return _arrest.strip()
 
-def getExpandedArrestWords(_arrest):
+def getRegexReplacements(_arrest):
+    # Uses abbreviations.json to correct abbreviations
+    # Must use the whole word tag (\b), otherwise it is no better than .replace
+    for key in abbreviations:
+        if key not in _arrest:
+            continue
+        keyPattern = '\\b' + key + '\\b'
+        _arrest = re.sub(keyPattern, abbreviations[key], _arrest)
     return _arrest
 
 def getReplacementWords(_arrest):
+    # Uses replacements.json to correct formatting
+    # It is also useful to generalize some arrests
     for key in replacements:
         if key not in _arrest:
             continue
@@ -457,12 +472,15 @@ def getReplacementWords(_arrest):
     return _arrest
 
 def getFormattedArrest(_arrest):
+    logging.info('Original Arrest:\t' + _arrest)
     if '(' in _arrest:
         _arrest = removeParenthesesContent(_arrest)
     if ' EFF' in _arrest:
+        # Superfluous info that can be removed
         _arrest = _arrest.rpartition(' EFF')[0]
     _arrest = getReplacementWords(_arrest)
-    _arrest = getExpandedArrestWords(_arrest)
+    _arrest = getRegexReplacements(_arrest)
+    logging.info('New Arrest:\t' + _arrest)
     return _arrest
 
 def getTrimmedAndFormattedArrestsList(_listOfArrests):
@@ -491,7 +509,7 @@ def getArrestsFromRow(_rowText):
     trimmedWarrantsAndIncidents = regexTrimLeftOrRight(warrantPattern, trimmedIncidents, False)
     trimmedRowText = getTrimmedArrestsText(trimmedWarrantsAndIncidents)
     if not trimmedRowText:
-        return 'No arrests listed.'
+        return ['No arrests listed.']
     listOfArrests = getSplitArrests(trimmedRowText)
     trimmedAndFormattedListOfArrests = [e.strip() for e in getTrimmedAndFormattedArrestsList(listOfArrests)]
     return trimmedAndFormattedListOfArrests
@@ -565,16 +583,53 @@ def logProblemWithPDF(_pdf, _exception):
 def getSeparatedArrests(_dataframe):
     listOfArrests = _dataframe['Arrests'].tolist()
     for arrests in listOfArrests:
-        if type(arrests) == str:
-            yield arrests
-            continue
         for arrest in arrests:
             yield arrest
 
+def getStemmedAndTokenizedArrest(_arrest):
+    _arrest = _arrest.lower()
+    _arrest = _arrest.replace(':', '')
+    _arrest = _arrest.replace('/', ' ')
+    tokens = tokenizer.tokenize(_arrest)
+    filteredWords = filter(lambda token: token not in stopwords.words('english'), tokens)
+    stemmedArrest = [lancaster.stem(word) for word in filteredWords]
+    tokenizedAndStemmedArrest = ' '.join(stemmedArrest)
+    return tokenizedAndStemmedArrest
+
+def matchWholeArrest(_arrestToMatch):
+    try:
+        return tagsWholeArrestsDict[_arrestToMatch]
+    except KeyError:
+        return matchPhrases(_arrestToMatch)
+
+def matchPhrases(_arrestToMatch):
+    for key in tagsPhrasesDict:
+        if key in _arrestToMatch:
+            return tagsPhrasesDict[key]
+    return matchSingular(_arrestToMatch)
+
+def matchSingular(_arrestToMatch):
+    words = _arrestToMatch.split()
+    for word in words:
+        try:
+            return tagsSingularDict[word]
+        except KeyError:
+            continue
+    return None
+
+def getTagsFromArrests(_arrestsList):
+    if _arrestsList == ['No arrests listed.']:
+        return None
+    stemmedAndTokenizedArrests = [getStemmedAndTokenizedArrest(arrest) for arrest in _arrestsList]
+    return [matchWholeArrest(arrest) for arrest in stemmedAndTokenizedArrests]
+
 if __name__ == "__main__":
-    arrestsDataframe = pd.Series(data=[])
-    abbreviations = loadJSON('regexAbbreviations.json')
-    replacements = loadJSON('replacements.json')
+    arrestsSeries = pd.Series(data=[])
+    abbreviations = loadJSON('JSONS/regexAbbreviations.json')
+    replacements = loadJSON('JSONS/replacements.json')
+    tagsSingularDict = loadJSON('JSONS/tagsSingular.json')
+    tagsWholeArrestsDict = loadJSON('JSONS/tagsWholeArrests.json')
+    tagsPhrasesDict = loadJSON('JSONS/tagsPhrases.json')
     for pdf in getPDFs('PDFs/'):
         try:
             logging.info('Parsing... %s', pdf)
@@ -588,6 +643,7 @@ if __name__ == "__main__":
             
             for row in splitRows(fullTextSpaced, nameArray):
                 logging.info(row)
+                arrests = getArrestsFromRow(row)
                 rowsAsList.append([
                     getNamesFromRow(row),
                     getBirthdateFromRow(row),
@@ -597,9 +653,11 @@ if __name__ == "__main__":
                     getDateFromRow(row),
                     getTimeFromRow(row),
                     getAddressFromRow(row),
-                    getArrestsFromRow(row),
+                    arrests,
                     getIncidentsFromRow(row),
-                    getWarrantsFromRow(row)
+                    getWarrantsFromRow(row),
+                    None,
+                    getTagsFromArrests(arrests)
                 ])
 
             # Because of the algorithm, the list needs to be reversed for the correct order
@@ -607,20 +665,23 @@ if __name__ == "__main__":
             
             df = pd.DataFrame(data=rowsAsList, columns=[
                 'Name', 'Birthdate', 'Age', 
-                'Race', 'Sex', 'Date', 
-                'Time', 'Address', 'Arrests', 
-                'Incidents', 'Warrants'
+                'Race', 'Sex', 'Date', 'Time', 
+                'Address', 'Arrests', 'Incidents', 
+                'Warrants', 'Category', 'Tags' 
             ])
 
             df = validateDates(df)
 
-            #print(df)
+            print(df)
 
             separatedArrests = [e for e in getSeparatedArrests(df)]
-            arrestsDataframe = arrestsDataframe.append(pd.Series(separatedArrests))
+            arrestsSeries = arrestsSeries.append(pd.Series(separatedArrests))
         except RuntimeError as e:
             logProblemWithPDF(pdf, e)
             continue
-    counts = arrestsDataframe.value_counts().sort_index()
-    print(counts)
-    counts.to_json('arrests.json', orient='index')
+    with open('arrestsToTag.txt', "w", encoding='utf-8') as f:
+        for arrest in arrestsSeries.tolist():
+            f.write(arrest+'\n')
+    #arrestsSeries.to_string(buf='arrestsToTag.txt', index=False, max_rows=None)
+    counts = arrestsSeries.value_counts().sort_index()
+    counts.to_string(buf='arrests.txt')
