@@ -677,14 +677,16 @@ if __name__ == "__main__":
         except RuntimeError as e:
             logProblemWithPDF(pdf, e)
             continue
-    with open('arrestsToTag.txt', "w", encoding='utf-8') as f:
-        for arrest in arrestsSeries.tolist():
-            f.write(arrest+'\n')
-    #arrestsSeries.to_string(buf='arrestsToTag.txt', index=False, max_rows=None)
     counts = arrestsSeries.value_counts().sort_index()
     counts.to_string(buf='arrests.txt')
 
+    tags = getTagsFromArrests(arrestsSeries.tolist())
     uniqueArrests = pd.Series(arrestsSeries.unique()).tolist()
-    tags = getTagsFromArrests(uniqueArrests)
-    learningData = pd.Series(data=tags, index=uniqueArrests).sort_index()
+    uniqueTags = getTagsFromArrests(uniqueArrests)
+    learningData = pd.Series(data=uniqueTags, index=uniqueArrests).sort_index()
     print(learningData)
+    learningDataCounts = pd.DataFrame(data =learningData.value_counts().sort_index(), columns = ['tag'])
+    learningDataCounts['count'] = 0
+    for index, val in learningDataCounts.iterrows():
+        learningDataCounts.loc[index, 'count'] = tags.count(index)
+    print(learningDataCounts)
