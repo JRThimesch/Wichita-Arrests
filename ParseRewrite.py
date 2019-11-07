@@ -677,16 +677,19 @@ if __name__ == "__main__":
         except RuntimeError as e:
             logProblemWithPDF(pdf, e)
             continue
-    counts = arrestsSeries.value_counts().sort_index()
-    counts.to_string(buf='arrests.txt')
 
-    tags = getTagsFromArrests(arrestsSeries.tolist())
-    uniqueArrests = pd.Series(arrestsSeries.unique()).tolist()
-    uniqueTags = getTagsFromArrests(uniqueArrests)
-    learningData = pd.Series(data=uniqueTags, index=uniqueArrests).sort_index()
+    arrests = [arrest for arrest in arrestsSeries.tolist() if arrest != 'No arrests listed.']
+    tags = getTagsFromArrests(arrests)
+    dataDict = {'arrests' : arrests, 'tags' : tags}
+    #uniqueArrests = pd.Series(arrestsSeries.unique()).tolist()
+    #tags = tags.drop(labels=None)
+    #arrestsSeries.drop('No arrests listed.')
+    #uniqueTags = getTagsFromArrests(uniqueArrests)
+    learningData = pd.DataFrame(data=dataDict)
+    learningData.to_csv('data/tagData.csv', sep = '|')
     print(learningData)
-    learningDataCounts = pd.DataFrame(data =learningData.value_counts().sort_index(), columns = ['tag'])
-    learningDataCounts['count'] = 0
-    for index, val in learningDataCounts.iterrows():
-        learningDataCounts.loc[index, 'count'] = tags.count(index)
-    print(learningDataCounts)
+    #learningDataCounts = pd.DataFrame(data =learningData.value_counts().sort_index(), columns = ['tag'])
+    #learningDataCounts['count'] = 0
+    #for index, val in learningDataCounts.iterrows():
+    #    learningDataCounts.loc[index, 'count'] = tags.count(index)
+    #print(learningDataCounts)

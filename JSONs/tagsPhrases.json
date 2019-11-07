@@ -6,6 +6,8 @@
     "drive licens": "License",
     "hit run": "Hit and Run",
     "sale sexual": "Procurement",
+    "sell sexual" : "Procurement",
+    "purchas sexual" : "Procurement",
     "red light": "Traffic Violation",
     "drive influenc": "DUI",
     "seat belt": "Traffic Violation",
@@ -27,5 +29,6 @@
     "fals imperson": "Identity Theft",
     "improp pass" : "Traffic Violation",
     "financi card" : "Theft",
-    "delinqu minor" : "Child Exploitation"
+    "delinqu minor" : "Child Exploitation",
+    "breach privaci" : "Privacy"
 }
