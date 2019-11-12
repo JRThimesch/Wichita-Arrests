@@ -9,7 +9,7 @@ HEADER_STR = 'Incidents with Offenses / Warrants'
 HEADER_OFFSET = len('Incidents with Offenses / Warrants')
 logging.basicConfig(level=logging.INFO, filename='runtime.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 pd.set_option('display.max_rows', 1000)
-lancaster = PorterStemmer()
+stemmer = PorterStemmer()
 tokenizer = RegexpTokenizer(r'\w+')
 
 def loadJSON(_file):
@@ -592,7 +592,7 @@ def getStemmedAndTokenizedArrest(_arrest):
     _arrest = _arrest.replace('/', ' ')
     tokens = tokenizer.tokenize(_arrest)
     filteredWords = filter(lambda token: token not in stopwords.words('english'), tokens)
-    stemmedArrest = [lancaster.stem(word) for word in filteredWords]
+    stemmedArrest = [stemmer.stem(word) for word in filteredWords]
     tokenizedAndStemmedArrest = ' '.join(stemmedArrest)
     return tokenizedAndStemmedArrest
 
@@ -680,14 +680,15 @@ if __name__ == "__main__":
 
     arrests = [arrest for arrest in arrestsSeries.tolist() if arrest != 'No arrests listed.']
     tags = getTagsFromArrests(arrests)
-    dataDict = {'arrests' : arrests, 'tags' : tags}
+    stemmedArrests = [getStemmedAndTokenizedArrest(arrest) for arrest in arrests]
+    dataDict = {'arrests' : arrests, 'tags' : tags, 'stemmed' : stemmedArrests}
     #uniqueArrests = pd.Series(arrestsSeries.unique()).tolist()
     #tags = tags.drop(labels=None)
     #arrestsSeries.drop('No arrests listed.')
     #uniqueTags = getTagsFromArrests(uniqueArrests)
     learningData = pd.DataFrame(data=dataDict)
     learningData.to_csv('data/tagData.csv', sep = '|')
-    print(learningData)
+    #print(learningData)
     #learningDataCounts = pd.DataFrame(data =learningData.value_counts().sort_index(), columns = ['tag'])
     #learningDataCounts['count'] = 0
     #for index, val in learningDataCounts.iterrows():
