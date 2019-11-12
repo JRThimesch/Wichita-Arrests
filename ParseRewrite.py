@@ -654,7 +654,6 @@ if __name__ == "__main__":
                     arrests,
                     getIncidentsFromRow(row),
                     getWarrantsFromRow(row),
-                    None,
                     getTagsFromArrests(arrests)
                 ])
 
@@ -665,7 +664,7 @@ if __name__ == "__main__":
                 'Name', 'Birthdate', 'Age', 
                 'Race', 'Sex', 'Date', 'Time', 
                 'Address', 'Arrests', 'Incidents', 
-                'Warrants', 'Category', 'Tags' 
+                'Warrants', 'Tags' 
             ])
 
             df = validateDates(df)
@@ -686,8 +685,8 @@ if __name__ == "__main__":
     #tags = tags.drop(labels=None)
     #arrestsSeries.drop('No arrests listed.')
     #uniqueTags = getTagsFromArrests(uniqueArrests)
-    learningData = pd.DataFrame(data=dataDict)
-    learningData.to_csv('data/tagData.csv', sep = '|')
+    #learningData = pd.DataFrame(data=dataDict)
+    #learningData.to_csv('data/tagData.csv', sep = '|')
     #print(learningData)
     #learningDataCounts = pd.DataFrame(data =learningData.value_counts().sort_index(), columns = ['tag'])
     #learningDataCounts['count'] = 0
