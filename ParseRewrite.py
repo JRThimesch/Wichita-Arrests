@@ -669,27 +669,16 @@ if __name__ == "__main__":
 
             df = validateDates(df)
 
-            #print(df)
+            dfDates = df['Date'].unique()
+
+            for date in dfDates:
+                dateSpecificDataframe = df.loc[df['Date'] == date]
+                csvName = 'CSVs/' + date.replace('/', '-') + ".csv"
+                dateSpecificDataframe.to_csv(csvName, sep = '|')
+                print(pdf, 'logged to', csvName)
 
             separatedArrests = [e for e in getSeparatedArrests(df)]
             arrestsSeries = arrestsSeries.append(pd.Series(separatedArrests))
         except RuntimeError as e:
             logProblemWithPDF(pdf, e)
             continue
-
-    arrests = [arrest for arrest in arrestsSeries.tolist() if arrest != 'No arrests listed.']
-    tags = getTagsFromArrests(arrests)
-    stemmedArrests = [getStemmedAndTokenizedArrest(arrest) for arrest in arrests]
-    dataDict = {'arrests' : arrests, 'tags' : tags, 'stemmed' : stemmedArrests}
-    #uniqueArrests = pd.Series(arrestsSeries.unique()).tolist()
-    #tags = tags.drop(labels=None)
-    #arrestsSeries.drop('No arrests listed.')
-    #uniqueTags = getTagsFromArrests(uniqueArrests)
-    #learningData = pd.DataFrame(data=dataDict)
-    #learningData.to_csv('data/tagData.csv', sep = '|')
-    #print(learningData)
-    #learningDataCounts = pd.DataFrame(data =learningData.value_counts().sort_index(), columns = ['tag'])
-    #learningDataCounts['count'] = 0
-    #for index, val in learningDataCounts.iterrows():
-    #    learningDataCounts.loc[index, 'count'] = tags.count(index)
-    #print(learningDataCounts)
