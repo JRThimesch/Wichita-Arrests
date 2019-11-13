@@ -511,7 +511,7 @@ def getArrestsFromRow(_rowText):
     if not trimmedRowText:
         return ['No arrests listed.']
     listOfArrests = getSplitArrests(trimmedRowText)
-    trimmedAndFormattedListOfArrests = getTrimmedAndFormattedArrestsList(listOfArrests)
+    trimmedAndFormattedListOfArrests = [arrest for arrest in getTrimmedAndFormattedArrestsList(listOfArrests)] 
     return trimmedAndFormattedListOfArrests
     
 def getListOfIncidents(_incidentText):
@@ -590,13 +590,14 @@ def matchSingular(_arrestToMatch):
         if key in _arrestToMatch:
             return tagsSingularDict[key]
     print(_arrestToMatch)
+    logging.warning('TAG NOT FOUND FOR\n' + _arrestToMatch)
     return None
 
 def getTagsFromArrests(_arrestsList):
     if _arrestsList == ['No arrests listed.']:
         return None
     stemmedAndTokenizedArrests = map(getStemmedAndTokenizedArrest, _arrestsList)
-    return map(matchWholeArrest, stemmedAndTokenizedArrests)
+    return [matchWholeArrest(arrest) for arrest in stemmedAndTokenizedArrests]
 
 def writeCSV(_dataframe):
     # Outputs to CSV based on dates in the dataframe
@@ -632,6 +633,7 @@ if __name__ == "__main__":
     tagsSingularDict = loadJSON('JSONS/tagsSingular.json')
     tagsWholeArrestsDict = loadJSON('JSONS/tagsWholeArrests.json')
     tagsPhrasesDict = loadJSON('JSONS/tagsPhrases.json')
+    dfFull = pd.DataFrame(data=[])
     for pdf in getPDFs('PDFs/'):
         try:
             logging.info('Parsing... %s', pdf)
@@ -672,7 +674,9 @@ if __name__ == "__main__":
             ])
 
             df = validateDates(df)
+            dfFull = dfFull.append(df, ignore_index=True)
             writeCSV(df)
         except RuntimeError as e:
             logProblemWithPDF(pdf, e)
             continue
+    print(dfFull)
