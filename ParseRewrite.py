@@ -481,7 +481,7 @@ def getFormattedArrest(_arrest):
     _arrest = getReplacementWords(_arrest)
     _arrest = getRegexReplacements(_arrest)
     logging.info('New Arrest:\t' + _arrest)
-    return _arrest
+    return _arrest.strip()
 
 def getTrimmedAndFormattedArrestsList(_listOfArrests):
     for arrest in _listOfArrests:
@@ -511,7 +511,7 @@ def getArrestsFromRow(_rowText):
     if not trimmedRowText:
         return ['No arrests listed.']
     listOfArrests = getSplitArrests(trimmedRowText)
-    trimmedAndFormattedListOfArrests = [e.strip() for e in getTrimmedAndFormattedArrestsList(listOfArrests)]
+    trimmedAndFormattedListOfArrests = getTrimmedAndFormattedArrestsList(listOfArrests)
     return trimmedAndFormattedListOfArrests
     
 def getListOfIncidents(_incidentText):
@@ -563,36 +563,13 @@ def getWarrantCodes(_rowText):
 def getWarrantsFromRow(_rowText):
     return [code for code in getWarrantCodes(_rowText)]
 
-def validateDates(_dataframe):
-    # In incredibly rare cases, the date is missing
-    # So this counts the number of missing dates and selects the nearest date in the PDF
-    # Usually, the noDatesCount will be 0
-    noDatesCount = (_dataframe['Date'] == 'No date found.').sum()
-    if not noDatesCount:
-        return _dataframe
-    # Nearest date is ideally the one right after the missing date entries, so choose that
-    defaultReplaceDate = _dataframe['Date'][noDatesCount]
-    _dataframe['Date'] = _dataframe['Date'].replace('No date found.', defaultReplaceDate)
-    return _dataframe
-
-def logProblemWithPDF(_pdf, _exception):
-    logging.critical('PROBLEM FOUND FOR ' + _pdf)
-    logging.exception(_exception)
-    logging.critical('EXITING FOR ' + _pdf)
-
-def getSeparatedArrests(_dataframe):
-    listOfArrests = _dataframe['Arrests'].tolist()
-    for arrests in listOfArrests:
-        for arrest in arrests:
-            yield arrest
-
 def getStemmedAndTokenizedArrest(_arrest):
     _arrest = _arrest.lower()
     _arrest = _arrest.replace(':', '')
     _arrest = _arrest.replace('/', ' ')
     tokens = tokenizer.tokenize(_arrest)
     filteredWords = filter(lambda token: token not in stopwords.words('english'), tokens)
-    stemmedArrest = [stemmer.stem(word) for word in filteredWords]
+    stemmedArrest = map(stemmer.stem, filteredWords)
     tokenizedAndStemmedArrest = ' '.join(stemmedArrest)
     return tokenizedAndStemmedArrest
 
@@ -618,8 +595,35 @@ def matchSingular(_arrestToMatch):
 def getTagsFromArrests(_arrestsList):
     if _arrestsList == ['No arrests listed.']:
         return None
-    stemmedAndTokenizedArrests = [getStemmedAndTokenizedArrest(arrest) for arrest in _arrestsList]
-    return [matchWholeArrest(arrest) for arrest in stemmedAndTokenizedArrests]
+    stemmedAndTokenizedArrests = map(getStemmedAndTokenizedArrest, _arrestsList)
+    return map(matchWholeArrest, stemmedAndTokenizedArrests)
+
+def writeCSV(_dataframe):
+    # Outputs to CSV based on dates in the dataframe
+    # Multiple dates -- multiple CSVs
+    dfDates = _dataframe['Date'].unique()
+    for date in dfDates:
+        dateSpecificDataframe = _dataframe.loc[_dataframe['Date'] == date]
+        csvName = 'CSVs/' + date.replace('/', '-') + ".csv"
+        dateSpecificDataframe.to_csv(csvName, sep = '|')
+        logging.info('Writing to ' + csvName)
+
+def validateDates(_dataframe):
+    # In incredibly rare cases, the date is missing
+    # So this counts the number of missing dates and selects the nearest date in the PDF
+    # Usually, the noDatesCount will be 0
+    noDatesCount = (_dataframe['Date'] == 'No date found.').sum()
+    if not noDatesCount:
+        return _dataframe
+    # Nearest date is ideally the one right after the missing date entries, so choose that
+    defaultReplaceDate = _dataframe['Date'][noDatesCount]
+    _dataframe['Date'] = _dataframe['Date'].replace('No date found.', defaultReplaceDate)
+    return _dataframe
+
+def logProblemWithPDF(_pdf, _exception):
+    logging.critical('PROBLEM FOUND FOR ' + _pdf)
+    logging.exception(_exception)
+    logging.critical('EXITING FOR ' + _pdf)
 
 if __name__ == "__main__":
     arrestsSeries = pd.Series(data=[])
@@ -668,17 +672,7 @@ if __name__ == "__main__":
             ])
 
             df = validateDates(df)
-
-            dfDates = df['Date'].unique()
-
-            for date in dfDates:
-                dateSpecificDataframe = df.loc[df['Date'] == date]
-                csvName = 'CSVs/' + date.replace('/', '-') + ".csv"
-                dateSpecificDataframe.to_csv(csvName, sep = '|')
-                print(pdf, 'logged to', csvName)
-
-            separatedArrests = [e for e in getSeparatedArrests(df)]
-            arrestsSeries = arrestsSeries.append(pd.Series(separatedArrests))
+            writeCSV(df)
         except RuntimeError as e:
             logProblemWithPDF(pdf, e)
             continue

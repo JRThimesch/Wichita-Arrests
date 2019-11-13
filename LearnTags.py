@@ -52,7 +52,6 @@ y = data['tags']
 vectorizer.fit(x)
 encoder.fit(y)
 
-
 newArrests = [
     'threaten', 'entering wrong way', 'entering after hours', 'possession weapons',
     'school bus sign', 'destruction of personal property: vehicle', 'grand theft auto'

@@ -1,3 +1,9 @@
+    def getSeparatedArrests(_dataframe):
+    listOfArrests = _dataframe['Arrests'].tolist()
+    for arrests in listOfArrests:
+        for arrest in arrests:
+            yield arrest
+    
     arrests = [arrest for arrest in arrestsSeries.tolist() if arrest != 'No arrests listed.']
     tags = getTagsFromArrests(arrests)
     #stemmedArrests = [getStemmedAndTokenizedArrest(arrest) for arrest in arrests]

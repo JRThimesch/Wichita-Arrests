@@ -89,5 +89,6 @@
     "pedestrian" : "Traffic Violation",
     "drive": "Traffic Violation",
     "vehicl": "Traffic Violation",
-    "solicit" : "Solicitation"
+    "solicit" : "Solicitation",
+    "sign" : "Traffic Violation"
 }
