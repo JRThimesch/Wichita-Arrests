@@ -1,10 +1,10 @@
-|arrests|tags|stemmed
+|arrests|tags|stems
 0|POSSESSION OF NARCOTICS|Narcotics|possess narcot
 1|POSSESSION OF PARAPHERNALIA|Drug Paraphernalia|possess paraphernalia
 2|BATTERY BODILY HARM DOMESTIC|Battery|batteri bodili harm domest
 3|FLEE OR ATTEMPT TO ELUDE POLICE OFFICER|Elusion|flee attempt elud polic offic
 4|RUN STOP SIGN|Traffic Violation|run stop sign
-5|SPEED 30 MPH|Speed Limit|speed 30 mph
+5|SPEED 30 MPH|Speed Limit|speed mph
 6|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
 7|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
 8|NO SEAT BELT|Traffic Violation|seat belt
@@ -24,7 +24,7 @@
 22|WILLFUL CRIMINAL DAMAGE TO PROPERTY DOMESTIC VIOLENCE|Property Damage|will crimin damag properti domest violenc
 23|RUNAWAY|Runaway|runaway
 24|MAKING FALSE WRITING|Fraud|make fals write
-25|LARCENY A FROM BUILDING $1500+|Larceny|larceni build 1500
+25|LARCENY A FROM BUILDING $1500+|Larceny|larceni build
 26|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
 27|DOMESTIC BATTERY BODILY HARM|Battery|domest batteri bodili harm
 28|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
@@ -91,11 +91,11 @@
 89|DESTRUCTION OF PROPERTY DOMESTIC VIOLENCE|Property Damage|destruct properti domest violenc
 90|VIOLATION OF PROTECTIVE ORDER|Court Order|violat protect order
 91|EVADE/ELUDE POLICE|Elusion|evad elud polic
-92|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir 18 older
+92|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir older
 93|RUN STOP SIGN|Traffic Violation|run stop sign
 94|NO DRIVER'S LICENSE|License|driver licens
 95|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
-96|DRIVE RIGHT SIDE/4 LANES|Traffic Violation|drive right side 4 lane
+96|DRIVE RIGHT SIDE/4 LANES|Traffic Violation|drive right side lane
 97|RECKLESS DRIVING|Traffic Violation|reckless drive
 98|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
 99|DOMESTIC BATTERY PHYSICAL CONTACT|Battery|domest batteri physic contact
@@ -112,7 +112,7 @@
 110|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
 111|DRIVE UNDER THE INFLUENCE|DUI|drive influenc
 112|RESTRICT ON LICENSE: SUSPENDED/REVOKE|License|restrict licens suspend revok
-113|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road 4 lane
+113|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road lane
 114|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
 115|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
 116|LIGHTS REQUIRED CERTAIN HOURS|Vehicle Violation|light requir certain hour
@@ -122,14 +122,14 @@
 120|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
 121|NO PROOF OF INSURANCE|Insurance|proof insur
 122|RIDE WHERE NOT INTENDED|Traffic Violation|ride intend
-123|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir 18 older
+123|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir older
 124|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
 125|TRAFFIC OF CONTRABAND IN A CORRECTIONAL INSTITUTION|Traffic Violation|traffic contraband correct institut
 126|DOMESTIC BATTERY BODILY HARM|Battery|domest batteri bodili harm
 127|POSSESSION OF NARCOTICS|Narcotics|possess narcot
 128|POSSESSION OF PARAPHERNALIA|Drug Paraphernalia|possess paraphernalia
 129|DRIVE WHILE SUSPENDED|Traffic Violation|drive suspend
-130|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+130|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 131|FAILURE TO FILE LICENSE APPLICATION FOR AFTER HOURS ESTABLISHMENT|License|failur file licens applic hour establish
 132|BATTERY BODILY HARM DOMESTIC|Battery|batteri bodili harm domest
 133|DOMESTIC BATTERY BODILY HARM|Battery|domest batteri bodili harm
@@ -217,7 +217,7 @@
 215|DUI|DUI|dui
 216|UNSAFE LANE CHANGE|Traffic Violation|unsaf lane chang
 217|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
-218|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+218|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 219|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
 220|RUN STOP SIGN|Traffic Violation|run stop sign
 221|VIOLATE DRIVERS LICENSE RESTRICTION|License|violat driver licens restrict
@@ -412,7 +412,7 @@
 410|DUI|DUI|dui
 411|POSSESSION OF PARAPHERNALIA|Drug Paraphernalia|possess paraphernalia
 412|ROBBERY, HIGHWAY, AGGRAVATED|Robbery|robberi highway aggrav
-413|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+413|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 414|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 415|ILLEGAL TAG|Vehicle Violation|illeg tag
 416|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
@@ -463,7 +463,7 @@
 461|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 462|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 463|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
-464|SPEED 30 MPH|Speed Limit|speed 30 mph
+464|SPEED 30 MPH|Speed Limit|speed mph
 465|LICENSE TO BE CARRIED AND EXHIBITED ON DEMAND|License|licens carri exhibit demand
 466|FAILURE TO DRIVE WITHIN MARKED LANE|Traffic Violation|failur drive within mark lane
 467|DRIVE UNDER THE INFLUENCE|DUI|drive influenc
@@ -628,7 +628,7 @@
 626|DESTRUCTION OF PROPERTY DOMESTIC VIOLENCE|Property Damage|destruct properti domest violenc
 627|CRIMINAL DEPRIVATION OF A MOTOR VEHICLE|Vehicle Theft|crimin depriv motor vehicl
 628|DEFECTIVE TAILLIGHT|Vehicle Violation|defect taillight
-629|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+629|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 630|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 631|POSSESSION OF NARCOTICS|Narcotics|possess narcot
 632|AGGRAVATED ASSAULT/DOMESTIC VIOLENCE|Assault|aggrav assault domest violenc
@@ -648,7 +648,7 @@
 646|AGGRAVATED ASSAULT FIREARMS|Firearms|aggrav assault firearm
 647|INTIMIDATION|Intimidation|intimid
 648|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
-649|SALE OR POSSESS WITH INTENT TO SELL NARCOTICS WITHIN 1000 FT OF SCHOOL|Narcotics|sale possess intent sell narcot within 1000 ft school
+649|SALE OR POSSESS WITH INTENT TO SELL NARCOTICS WITHIN 1000 FT OF SCHOOL|Narcotics|sale possess intent sell narcot within ft school
 650|BATTERY|Battery|batteri
 651|INTIMIDATION DOMESTIC VIOLENCE|Intimidation|intimid domest violenc
 652|BATTERY DOMESTIC VIOLENCE|Battery|batteri domest violenc
@@ -745,7 +745,7 @@
 743|DRIVE UNDER THE INFLUENCE|DUI|drive influenc
 744|POSSESSION OF A FIREARM UNDER THE INFLUENCE|Firearms|possess firearm influenc
 745|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
-746|SPEED 30 MPH|Speed Limit|speed 30 mph
+746|SPEED 30 MPH|Speed Limit|speed mph
 747|BATTERY PHYSICAL CONTACT/RUDE MANNER|Battery|batteri physic contact rude manner
 748|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 749|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
@@ -770,7 +770,7 @@
 768|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
 769|FAILURE TO COMPLY WITH A LAWFUL ORDER|Court Order|failur compli law order
 770|LICENSE TO BE CARRIED AND EXHIBITED ON DEMAND|License|licens carri exhibit demand
-771|SPEED 30 MPH|Speed Limit|speed 30 mph
+771|SPEED 30 MPH|Speed Limit|speed mph
 772|RUNAWAY|Runaway|runaway
 773|SALE OF SEXUAL RELATIONS|Procurement|sale sexual relat
 774|PETIT THEFT|Theft|petit theft
@@ -895,7 +895,7 @@
 893|RUN STOP SIGN|Traffic Violation|run stop sign
 894|DRIVE AROUND TIRE DEFLATION DEVICE PLACED BY LAW ENFORCEMENT OFFICER|Vehicle Violation|drive around tire deflat devic place law enforc offic
 895|AUTO THEFT NOT RECOVERED|Theft|auto theft recov
-896|LARCENY A AUTO ACCESSORIES $1500+|Larceny|larceni auto accessori 1500
+896|LARCENY A AUTO ACCESSORIES $1500+|Larceny|larceni auto accessori
 897|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 898|INTIMIDATION DOMESTIC VIOLENCE|Intimidation|intimid domest violenc
 899|DESTRUCTION OF PROPERTY DOMESTIC VIOLENCE|Property Damage|destruct properti domest violenc
@@ -964,7 +964,7 @@
 962|INTERFERE WITH LAW ENFORCEMENT OBSTRUCT, RESIST, ETC|Obstruction|interfer law enforc obstruct resist etc
 963|UNLAWFUL TO LITTER|Littering|unlaw litter
 964|RUNAWAY|Runaway|runaway
-965|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir 18 older
+965|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir older
 966|RUN RED LIGHT|Traffic Violation|run red light
 967|RUN STOP SIGN|Traffic Violation|run stop sign
 968|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
@@ -1037,7 +1037,7 @@
 1035|UNLAWFUL SALE OF MARIJUANA|Marijuana|unlaw sale marijuana
 1036|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 1037|DRIVE AROUND TIRE DEFLATION DEVICE PLACED BY LAW ENFORCEMENT OFFICER|Vehicle Violation|drive around tire deflat devic place law enforc offic
-1038|SPEED 30 MPH|Speed Limit|speed 30 mph
+1038|SPEED 30 MPH|Speed Limit|speed mph
 1039|BATTERY BODILY HARM DOMESTIC|Battery|batteri bodili harm domest
 1040|RESIST POLICE/ARREST|Resistance|resist polic arrest
 1041|WILLFUL CRIMINAL DAMAGE TO PROPERTY DOMESTIC VIOLENCE|Property Damage|will crimin damag properti domest violenc
@@ -1047,7 +1047,7 @@
 1045|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
 1046|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
 1047|ASSAULT, AGGRAVATED, FIREARMS|Firearms|assault aggrav firearm
-1048|SPEED 30 MPH|Speed Limit|speed 30 mph
+1048|SPEED 30 MPH|Speed Limit|speed mph
 1049|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
 1050|CRIMINAL DEPRIVATION OF PROPERTY|Theft|crimin depriv properti
 1051|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
@@ -1280,7 +1280,7 @@
 1278|DUI SECOND|DUI|dui second
 1279|RUN STOP SIGN|Traffic Violation|run stop sign
 1280|NO DRIVER'S LICENSE|License|driver licens
-1281|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir 18 older
+1281|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir older
 1282|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 1283|POSSESSION OF FIREARM BY A FELON|Firearms|possess firearm felon
 1284|POSSESSION OF ILLEGAL WEAPONS|Weapons|possess illeg weapon
@@ -1425,7 +1425,7 @@
 1423|NO DRIVER'S LICENSE|License|driver licens
 1424|AGGRAVATED BATTERY, DOMESTIC VIOLENCE|Battery|aggrav batteri domest violenc
 1425|BATTERY DOMESTIC VIOLENCE|Battery|batteri domest violenc
-1426|SPEED 30 MPH|Speed Limit|speed 30 mph
+1426|SPEED 30 MPH|Speed Limit|speed mph
 1427|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 1428|RECKLESS DRIVING|Traffic Violation|reckless drive
 1429|OTHER DESTRUCTION TO PROPERTY|Property Damage|destruct properti
@@ -1654,7 +1654,7 @@
 1652|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
 1653|RUN STOP SIGN|Traffic Violation|run stop sign
 1654|RECKLESS DRIVING|Traffic Violation|reckless drive
-1655|SPEED 30 MPH|Speed Limit|speed 30 mph
+1655|SPEED 30 MPH|Speed Limit|speed mph
 1656|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
 1657|DRIVE UNDER THE INFLUENCE|DUI|drive influenc
 1658|POSSESSION OF FIREARM BY A FELON|Firearms|possess firearm felon
@@ -1727,7 +1727,7 @@
 1725|WRONG WAY ON ONE WAY STREET|Traffic Violation|wrong way one way street
 1726|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 1727|NO PROOF OF INSURANCE|Insurance|proof insur
-1728|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir 18 older
+1728|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir older
 1729|WILLFUL CRIMINAL DAMAGE TO PROPERTY|Property Damage|will crimin damag properti
 1730|POSSESSION OF PARAPHERNALIA|Drug Paraphernalia|possess paraphernalia
 1731|POSSESSION OF FIREARM BY A FELON|Firearms|possess firearm felon
@@ -1845,7 +1845,7 @@
 1843|RECKLESS DRIVING|Traffic Violation|reckless drive
 1844|TRAFFIC CONTROL SIGNALS|Traffic Violation|traffic control signal
 1845|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
-1846|FAILURE TO DRIVE RIGHT SIDE OF ROAD 2 LANES|Traffic Violation|failur drive right side road 2 lane
+1846|FAILURE TO DRIVE RIGHT SIDE OF ROAD 2 LANES|Traffic Violation|failur drive right side road lane
 1847|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
 1848|TAG REQUIRED|Vehicle Violation|tag requir
 1849|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
@@ -1968,7 +1968,7 @@
 1966|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
 1967|NO PROOF OF INSURANCE|Insurance|proof insur
 1968|ILLEGAL TAG|Vehicle Violation|illeg tag
-1969|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir 18 older
+1969|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir older
 1970|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 1971|VEHICLE ON STREET LOUD SOUND|Disturbance|vehicl street loud sound
 1972|CRIMINAL DISCHARGE OF FIREARM|Firearms|crimin discharg firearm
@@ -1983,7 +1983,7 @@
 1981|NO PROOF OF INSURANCE|Insurance|proof insur
 1982|ILLEGAL TAG|Vehicle Violation|illeg tag
 1983|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
-1984|SPEED 30 MPH|Speed Limit|speed 30 mph
+1984|SPEED 30 MPH|Speed Limit|speed mph
 1985|POSSESSION OF NARCOTICS|Narcotics|possess narcot
 1986|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
 1987|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
@@ -1996,7 +1996,7 @@
 1994|ILLEGAL USE OF SIGNAL DEVICE|Traffic Violation|illeg use signal devic
 1995|NO PROOF OF INSURANCE|Insurance|proof insur
 1996|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
-1997|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+1997|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 1998|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 1999|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
 2000|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
@@ -2057,7 +2057,7 @@
 2055|BATTERY BODILY HARM|Battery|batteri bodili harm
 2056|CRIMINAL DAMAGE TO PROPERTY|Property Damage|crimin damag properti
 2057|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
-2058|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+2058|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 2059|PUBLIC NUDITY PROHIBITED ENGAGING IN ANY SEX ACT|Public Nudity|public nuditi prohibit engag sex act
 2060|INTERFERE WITH LAW ENFORCEMENT OBSTRUCT, RESIST, ETC|Obstruction|interfer law enforc obstruct resist etc
 2061|BATTERY BODILY HARM|Battery|batteri bodili harm
@@ -2098,7 +2098,7 @@
 2096|VIOLATION OF PROTECTIVE ORDER|Court Order|violat protect order
 2097|FLEE OR ATTEMPT TO ELUDE POLICE OFFICER|Elusion|flee attempt elud polic offic
 2098|RECKLESS DRIVING|Traffic Violation|reckless drive
-2099|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road 4 lane
+2099|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road lane
 2100|FAILURE TO DRIVE WITHIN MARKED LANE|Traffic Violation|failur drive within mark lane
 2101|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
 2102|RUN STOP SIGN|Traffic Violation|run stop sign
@@ -2431,7 +2431,7 @@
 2429|STOLEN PROPERTY BUYING|Theft|stolen properti buy
 2430|TERRORISTIC THREATS|Terrorism|terrorist threat
 2431|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
-2432|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir 18 older
+2432|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir older
 2433|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
 2434|INATTENTIVE DRIVING|Traffic Violation|inattent drive
 2435|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
@@ -2500,7 +2500,7 @@
 2498|UNSAFE LANE CHANGE|Traffic Violation|unsaf lane chang
 2499|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 2500|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
-2501|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+2501|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 2502|ILLEGAL TAG|Vehicle Violation|illeg tag
 2503|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 2504|INTERFERE WITH LAW ENFORCEMENT OBSTRUCT, RESIST, ETC|Obstruction|interfer law enforc obstruct resist etc
@@ -2512,7 +2512,7 @@
 2510|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
 2511|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 2512|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
-2513|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+2513|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 2514|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 2515|ILLEGAL TAG|Vehicle Violation|illeg tag
 2516|NO PROOF OF INSURANCE|Insurance|proof insur
@@ -2525,8 +2525,8 @@
 2523|DUI DRUG|DUI|dui drug
 2524|DUI SECOND|DUI|dui second
 2525|NO SEAT BELT|Traffic Violation|seat belt
-2526|SALE OR POSSESS WITH INTENT TO SELL NARCOTICS WITHIN 1000 FT OF SCHOOL|Narcotics|sale possess intent sell narcot within 1000 ft school
-2527|SALE OR POSSESS WITH INTENT TO SELL MARIJUANA WITHIN 1000 FT OF SCHOOL|Marijuana|sale possess intent sell marijuana within 1000 ft school
+2526|SALE OR POSSESS WITH INTENT TO SELL NARCOTICS WITHIN 1000 FT OF SCHOOL|Narcotics|sale possess intent sell narcot within ft school
+2527|SALE OR POSSESS WITH INTENT TO SELL MARIJUANA WITHIN 1000 FT OF SCHOOL|Marijuana|sale possess intent sell marijuana within ft school
 2528|UNLAWFUL SALE OF NON NARCOTICS|Narcotics|unlaw sale non narcot
 2529|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 2530|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
@@ -2605,7 +2605,7 @@
 2603|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
 2604|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
 2605|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
-2606|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir 18 older
+2606|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir older
 2607|DOMESTIC BATTERY BODILY HARM|Battery|domest batteri bodili harm
 2608|SEXUAL BATTERY DOMESTIC VIOLENCE|Sexual Battery|sexual batteri domest violenc
 2609|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
@@ -2619,9 +2619,9 @@
 2617|PETIT THEFT|Theft|petit theft
 2618|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 2619|AGGRAVATED ASSAULT/DOMESTIC VIOLENCE|Assault|aggrav assault domest violenc
-2620|SALE OR POSSESS WITH INTENT TO SELL NARCOTICS WITHIN 1000 FT OF SCHOOL|Narcotics|sale possess intent sell narcot within 1000 ft school
+2620|SALE OR POSSESS WITH INTENT TO SELL NARCOTICS WITHIN 1000 FT OF SCHOOL|Narcotics|sale possess intent sell narcot within ft school
 2621|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
-2622|SALE OR POSSESS WITH INTENT TO SELL MARIJUANA WITHIN 1000 FT OF SCHOOL|Marijuana|sale possess intent sell marijuana within 1000 ft school
+2622|SALE OR POSSESS WITH INTENT TO SELL MARIJUANA WITHIN 1000 FT OF SCHOOL|Marijuana|sale possess intent sell marijuana within ft school
 2623|STOLEN PROPERTY BUYING|Theft|stolen properti buy
 2624|PEDESTRIAN MUST USE TRAFFIC CONTROL DEVICE|Traffic Violation|pedestrian must use traffic control devic
 2625|OTHER WEAPONS VIOLATIONS|Weapons|weapon violat
@@ -2843,7 +2843,7 @@
 2841|NO PROOF OF INSURANCE|Insurance|proof insur
 2842|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 2843|DISPLAY ALTERED TAG|Vehicle Violation|display alter tag
-2844|SPEED 30 MPH|Speed Limit|speed 30 mph
+2844|SPEED 30 MPH|Speed Limit|speed mph
 2845|RECKLESS DRIVING|Traffic Violation|reckless drive
 2846|DRIVE UNDER THE INFLUENCE|DUI|drive influenc
 2847|CHILD ENDANGERMENT|Child Abuse|child endanger
@@ -2860,7 +2860,7 @@
 2858|WILLFUL CRIMINAL DAMAGE TO PROPERTY DOMESTIC VIOLENCE|Property Damage|will crimin damag properti domest violenc
 2859|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
 2860|RUN STOP SIGN|Traffic Violation|run stop sign
-2861|DRIVE RIGHT SIDE/2 LANE|Traffic Violation|drive right side 2 lane
+2861|DRIVE RIGHT SIDE/2 LANE|Traffic Violation|drive right side lane
 2862|NO PROOF OF INSURANCE|Insurance|proof insur
 2863|RENDER AID OR GIVE INFORMATION|Obstruction|render aid give inform
 2864|DRIVE UNDER THE INFLUENCE|DUI|drive influenc
@@ -2903,7 +2903,7 @@
 2901|VIOLATION OF COURT ORDER/CASE PENDING|Court Order|violat court order case pend
 2902|LARCENY B SHOPLIFT|Larceny|larceni b shoplift
 2903|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
-2904|RAPE CHILD 13 AND UNDER|Rape|rape child 13
+2904|RAPE CHILD 13 AND UNDER|Rape|rape child
 2905|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
 2906|DRIVE ON SIDEWALK|Traffic Violation|drive sidewalk
 2907|DUI|DUI|dui
@@ -2926,7 +2926,7 @@
 2924|POSSESSION OF ILLEGAL WEAPONS|Weapons|possess illeg weapon
 2925|LAMPS, BRAKES, AND OTHER EQUIPMENT|Vehicle Violation|lamp brake equip
 2926|UNLAWFUL USE FINANCIAL CARD|Theft|unlaw use financi card
-2927|LARCENY A ALL OTHER $1500+|Larceny|larceni 1500
+2927|LARCENY A ALL OTHER $1500+|Larceny|larceni
 2928|CRIMINAL TRESPASS|Trespass|crimin trespass
 2929|CRIMINAL TRESPASS|Trespass|crimin trespass
 2930|AGGRAVATED ASSAULT|Assault|aggrav assault
@@ -3011,7 +3011,7 @@
 3009|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
 3010|RUN RED LIGHT RIGHT TURN|Traffic Violation|run red light right turn
 3011|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
-3012|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+3012|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 3013|CRIMINAL POSSESSION OF FIREARM BY JUVENILE|Firearms|crimin possess firearm juvenil
 3014|AGGRAVATED ASSAULT FIREARMS|Firearms|aggrav assault firearm
 3015|TAMPER WITH AUTO WITHOUT OWNER PERMISSION|Theft|tamper auto without owner permiss
@@ -3026,7 +3026,7 @@
 3024|WILLFUL CRIMINAL DAMAGE TO PROPERTY DOMESTIC VIOLENCE|Property Damage|will crimin damag properti domest violenc
 3025|EVADE/ELUDE POLICE|Elusion|evad elud polic
 3026|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
-3027|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+3027|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 3028|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 3029|NO PROOF OF INSURANCE|Insurance|proof insur
 3030|DISPLAY ALTERED TAG|Vehicle Violation|display alter tag
@@ -3230,7 +3230,7 @@
 3228|POSSESSION OF FIREARM BY A FELON|Firearms|possess firearm felon
 3229|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
 3230|UNLAWFUL INHALATION|Other Drugs|unlaw inhal
-3231|SALE OR POSSESS WITH INTENT TO SELL MARIJUANA WITHIN 1000 FT OF SCHOOL|Marijuana|sale possess intent sell marijuana within 1000 ft school
+3231|SALE OR POSSESS WITH INTENT TO SELL MARIJUANA WITHIN 1000 FT OF SCHOOL|Marijuana|sale possess intent sell marijuana within ft school
 3232|ONE WAY GLASS PROHIBITED|Vehicle Violation|one way glass prohibit
 3233|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 3234|ILLEGAL TAG|Vehicle Violation|illeg tag
@@ -3280,7 +3280,7 @@
 3278|OBSTRUCT LEGAL PROCESS|Obstruction|obstruct legal process
 3279|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
 3280|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
-3281|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+3281|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 3282|SALE OF SEXUAL RELATIONS|Procurement|sale sexual relat
 3283|WORK AS AN ESCORT WITHOUT LICENSE|Procurement|work escort without licens
 3284|DUI|DUI|dui
@@ -3321,9 +3321,9 @@
 3319|AUTO THEFT NOT RECOVERED|Theft|auto theft recov
 3320|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
 3321|FLEE OR ATTEMPT TO ELUDE POLICE OFFICER|Elusion|flee attempt elud polic offic
-3322|LARCENY A FROM AUTO $1500+|Larceny|larceni auto 1500
+3322|LARCENY A FROM AUTO $1500+|Larceny|larceni auto
 3323|WHEN LIGHTED LAMPS REQUIRED|Vehicle Violation|light lamp requir
-3324|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road 4 lane
+3324|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road lane
 3325|CRIMINAL TRESPASS|Trespass|crimin trespass
 3326|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 3327|CRIMINAL TRESPASS|Trespass|crimin trespass
@@ -3387,7 +3387,7 @@
 3385|SPEED OVER LIMIT|Speed Limit|speed limit
 3386|LIGHTS REQUIRED SUNSET TO SUNRISE|Vehicle Violation|light requir sunset sunris
 3387|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
-3388|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+3388|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 3389|CRIMINAL DEPRIVATION OF A MOTOR VEHICLE|Vehicle Theft|crimin depriv motor vehicl
 3390|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
 3391|AGGRAVATED BATTERY, DOMESTIC VIOLENCE|Battery|aggrav batteri domest violenc
@@ -3409,9 +3409,9 @@
 3407|RECKLESS DRIVING|Traffic Violation|reckless drive
 3408|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
 3409|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
-3410|LARCENY A ALL OTHER $1500+|Larceny|larceni 1500
+3410|LARCENY A ALL OTHER $1500+|Larceny|larceni
 3411|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
-3412|SPEED 30 MPH|Speed Limit|speed 30 mph
+3412|SPEED 30 MPH|Speed Limit|speed mph
 3413|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 3414|POSSESSION OF NARCOTICS|Narcotics|possess narcot
 3415|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
@@ -3464,7 +3464,7 @@
 3462|DUI|DUI|dui
 3463|DUI|DUI|dui
 3464|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
-3465|DRIVE RIGHT SIDE/2 LANE|Traffic Violation|drive right side 2 lane
+3465|DRIVE RIGHT SIDE/2 LANE|Traffic Violation|drive right side lane
 3466|KNOWINGLY DRIVE UNINSURED VEHICLE|Insurance|knowingli drive uninsur vehicl
 3467|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 3468|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
@@ -3472,7 +3472,7 @@
 3470|DUI|DUI|dui
 3471|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
 3472|DUI SECOND|DUI|dui second
-3473|SPEED 30 MPH|Speed Limit|speed 30 mph
+3473|SPEED 30 MPH|Speed Limit|speed mph
 3474|BATTERY OF LAW ENFORCEMENT OFFICER|Battery|batteri law enforc offic
 3475|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
 3476|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
@@ -3627,7 +3627,7 @@
 3625|KNOWINGLY DRIVE UNINSURED VEHICLE|Insurance|knowingli drive uninsur vehicl
 3626|BATTERY DOMESTIC VIOLENCE|Battery|batteri domest violenc
 3627|DRIVE UNDER THE INFLUENCE|DUI|drive influenc
-3628|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road 4 lane
+3628|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road lane
 3629|POSSESSION OF NARCOTICS|Narcotics|possess narcot
 3630|TRAFFIC OF CONTRABAND IN A CORRECTIONAL INSTITUTION|Traffic Violation|traffic contraband correct institut
 3631|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
@@ -3771,7 +3771,7 @@
 3769|STORE SALVAGE MATERIAL, JUNK, OR OTHER MATERIAL ON RESIDENTIAL PREMISES|Property Violation|store salvag materi junk materi residenti premis
 3770|KEEP PREMISES FREE OF LITTER, REFUSE, DEBRIS, ETC|Littering|keep premis free litter refus debri etc
 3771|INOPERABLE VEHICLES|Traffic Violation|inoper vehicl
-3772|ALLOW WEEDS/VEGETATION TO GROW OVER 12 INCHES HIGH|Property Violation|allow weed veget grow 12 inch high
+3772|ALLOW WEEDS/VEGETATION TO GROW OVER 12 INCHES HIGH|Property Violation|allow weed veget grow inch high
 3773|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
 3774|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
 3775|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
@@ -3851,7 +3851,7 @@
 3849|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
 3850|LIGHTS REQUIRED SUNSET TO SUNRISE|Vehicle Violation|light requir sunset sunris
 3851|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
-3852|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir 18 older
+3852|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir older
 3853|INATTENTIVE DRIVING|Traffic Violation|inattent drive
 3854|BATTERY DOMESTIC VIOLENCE|Battery|batteri domest violenc
 3855|DESTRUCTION OF PROPERTY DOMESTIC VIOLENCE|Property Damage|destruct properti domest violenc
@@ -3868,7 +3868,7 @@
 3866|OPERATOR STOPPING, PARKING, DEVIATING FROM TRAFFIC TO RESPOND TO PERSON|Traffic Violation|oper stop park deviat traffic respond person
 3867|DESTRUCTION OF PROPERTY DOMESTIC VIOLENCE|Property Damage|destruct properti domest violenc
 3868|RUN STOP SIGN|Traffic Violation|run stop sign
-3869|SPEED 30 MPH|Speed Limit|speed 30 mph
+3869|SPEED 30 MPH|Speed Limit|speed mph
 3870|RECKLESS DRIVING|Traffic Violation|reckless drive
 3871|FLEE OR ATTEMPT TO ELUDE POLICE OFFICER|Elusion|flee attempt elud polic offic
 3872|UNLAWFUL ACTS/ILLEGAL TAGS|Vehicle Violation|unlaw act illeg tag
@@ -3916,9 +3916,9 @@
 3914|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
 3915|HEAD LAMPS REQUIRED|Vehicle Violation|head lamp requir
 3916|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
-3917|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir 18 older
+3917|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir older
 3918|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
-3919|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir 18 older
+3919|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir older
 3920|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
 3921|POSSESSION OF NARCOTICS|Narcotics|possess narcot
 3922|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
@@ -3948,7 +3948,7 @@
 3946|BATTERY|Battery|batteri
 3947|WILLFUL CRIMINAL DAMAGE TO PROPERTY|Property Damage|will crimin damag properti
 3948|AGGRAVATED BATTERY, DOMESTIC VIOLENCE|Battery|aggrav batteri domest violenc
-3949|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir 18 older
+3949|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir older
 3950|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 3951|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 3952|BATTERY PHYSICAL CONTACT/RUDE MANNER|Battery|batteri physic contact rude manner
@@ -4070,7 +4070,7 @@
 4068|FLEE OR ATTEMPT TO ELUDE POLICE OFFICER|Elusion|flee attempt elud polic offic
 4069|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 4070|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
-4071|SPEED 30 MPH|Speed Limit|speed 30 mph
+4071|SPEED 30 MPH|Speed Limit|speed mph
 4072|TRAFFIC CONTROL SIGNALS|Traffic Violation|traffic control signal
 4073|AUTO THEFT NOT RECOVERED|Theft|auto theft recov
 4074|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
@@ -4256,7 +4256,7 @@
 4254|TRAFFIC CONTROL SIGNALS|Traffic Violation|traffic control signal
 4255|RUN STOP SIGN|Traffic Violation|run stop sign
 4256|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
-4257|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road 4 lane
+4257|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road lane
 4258|LICENSE TO BE CARRIED AND EXHIBITED ON DEMAND|License|licens carri exhibit demand
 4259|PETIT THEFT|Theft|petit theft
 4260|BATTERY DOMESTIC VIOLENCE|Battery|batteri domest violenc
@@ -4282,7 +4282,7 @@
 4280|SIMPLE ASSAULT|Assault|simpl assault
 4281|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 4282|LARCENY B SHOPLIFT|Larceny|larceni b shoplift
-4283|RAPE CHILD 13 AND UNDER|Rape|rape child 13
+4283|RAPE CHILD 13 AND UNDER|Rape|rape child
 4284|VIOLATION OF PROTECTIVE ORDER|Court Order|violat protect order
 4285|LARCENY B SHOPLIFT|Larceny|larceni b shoplift
 4286|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
@@ -4443,7 +4443,7 @@
 4441|BURGLARY RESIDENCE|Burglary|burglari resid
 4442|BATTERY PHYSICAL CONTACT/RUDE MANNER|Battery|batteri physic contact rude manner
 4443|UNSAFE LANE CHANGE|Traffic Violation|unsaf lane chang
-4444|STATIONARY EMERGENCY VEHICLE 2 LANE TRAVELING IN SAME DIRECTION CHANGE LANES|Traffic Violation|stationari emerg vehicl 2 lane travel direct chang lane
+4444|STATIONARY EMERGENCY VEHICLE 2 LANE TRAVELING IN SAME DIRECTION CHANGE LANES|Traffic Violation|stationari emerg vehicl lane travel direct chang lane
 4445|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 4446|NO PROOF OF INSURANCE|Insurance|proof insur
 4447|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
@@ -4621,7 +4621,7 @@
 4619|RECKLESS DRIVING|Traffic Violation|reckless drive
 4620|RESTRICT ON LICENSE: SUSPENDED/REVOKE|License|restrict licens suspend revok
 4621|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
-4622|SPEED 30 MPH|Speed Limit|speed 30 mph
+4622|SPEED 30 MPH|Speed Limit|speed mph
 4623|FAILURE TO DRIVE WITHIN MARKED LANE|Traffic Violation|failur drive within mark lane
 4624|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
 4625|NO SEAT BELT|Traffic Violation|seat belt
@@ -4673,7 +4673,7 @@
 4671|DRIVING WHILE REVOKED|License|drive revok
 4672|INTERFERE WITH LAW ENFORCEMENT OBSTRUCT, RESIST, ETC|Obstruction|interfer law enforc obstruct resist etc
 4673|DUI DRUG|DUI|dui drug
-4674|DRIVE RIGHT SIDE/4 LANES|Traffic Violation|drive right side 4 lane
+4674|DRIVE RIGHT SIDE/4 LANES|Traffic Violation|drive right side lane
 4675|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
 4676|NO TAX STAMP|Weapons|tax stamp
 4677|FAILURE TO DRIVE WITHIN MARKED LANE|Traffic Violation|failur drive within mark lane
@@ -4750,11 +4750,11 @@
 4748|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 4749|VIOLATION OF PROTECTION FROM ABUSE|Court Order|violat protect abus
 4750|BURGLARY NON RESIDENCE|Burglary|burglari non resid
-4751|LARCENY A FROM BUILDING $1500+|Larceny|larceni build 1500
+4751|LARCENY A FROM BUILDING $1500+|Larceny|larceni build
 4752|CONSUMPTION/POSSESSION OF LIQUOR OR CEREAL MALT BEVERAGE BY MINOR|Alcohol|consumpt possess liquor cereal malt beverag minor
 4753|CRIMINAL TRESPASS|Trespass|crimin trespass
 4754|BURGLARY NON RESIDENCE|Burglary|burglari non resid
-4755|LARCENY A FROM BUILDING $1500+|Larceny|larceni build 1500
+4755|LARCENY A FROM BUILDING $1500+|Larceny|larceni build
 4756|RUNAWAY|Runaway|runaway
 4757|AGGRAVATED BATTERY, DOMESTIC VIOLENCE|Battery|aggrav batteri domest violenc
 4758|AUTO THEFT NOT RECOVERED|Theft|auto theft recov
@@ -4819,7 +4819,7 @@
 4817|AGGRAVATED ASSAULT FIREARMS|Firearms|aggrav assault firearm
 4818|INTIMIDATION DOMESTIC VIOLENCE|Intimidation|intimid domest violenc
 4819|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
-4820|AGGRAVATED HUMAN TRAFFICKING UNDER 18 YEARS OF AGE|Human Trafficking|aggrav human traffick 18 year age
+4820|AGGRAVATED HUMAN TRAFFICKING UNDER 18 YEARS OF AGE|Human Trafficking|aggrav human traffick year age
 4821|DOMESTIC BATTERY BODILY HARM|Battery|domest batteri bodili harm
 4822|AGGRAVATED BATTERY|Battery|aggrav batteri
 4823|LARCENY B ALL OTHER|Larceny|larceni b
@@ -4918,11 +4918,11 @@
 4916|LARCENY B FROM AUTO|Larceny|larceni b auto
 4917|POSSESSION OF NARCOTICS|Narcotics|possess narcot
 4918|AUTO THEFT NOT RECOVERED|Theft|auto theft recov
-4919|LARCENY A ALL OTHER $1500+|Larceny|larceni 1500
+4919|LARCENY A ALL OTHER $1500+|Larceny|larceni
 4920|POSSESSION OF FIREARM BY A FELON|Firearms|possess firearm felon
 4921|AGGRAVATED WEAPONS VIOLATION|Weapons|aggrav weapon violat
 4922|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
-4923|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+4923|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 4924|CRIMINAL DISCHARGE OF FIREARM|Firearms|crimin discharg firearm
 4925|CRIMINAL POSSESSION OF FIREARM BY JUVENILE|Firearms|crimin possess firearm juvenil
 4926|LARCENY B SHOPLIFT|Larceny|larceni b shoplift
@@ -4955,7 +4955,7 @@
 4953|UNLAWFUL RESTRAINT|Obstruction|unlaw restraint
 4954|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 4955|OTHER WEAPONS VIOLATIONS|Weapons|weapon violat
-4956|SPEED 30 MPH|Speed Limit|speed 30 mph
+4956|SPEED 30 MPH|Speed Limit|speed mph
 4957|KNOWINGLY DRIVE UNINSURED VEHICLE|Insurance|knowingli drive uninsur vehicl
 4958|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
 4959|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
@@ -5003,7 +5003,7 @@
 5001|POSSESSION OF FIREARM BY A FELON|Firearms|possess firearm felon
 5002|BATTERY DOMESTIC VIOLENCE|Battery|batteri domest violenc
 5003|CRIMINAL DISCHARGE OF FIREARM|Firearms|crimin discharg firearm
-5004|SPEED 30 MPH|Speed Limit|speed 30 mph
+5004|SPEED 30 MPH|Speed Limit|speed mph
 5005|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
 5006|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 5007|TRANSPORT OPEN CONTAINER LIQUOR|Alcohol|transport open contain liquor
@@ -5261,7 +5261,7 @@
 5259|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 5260|WILLFUL CRIMINAL DAMAGE TO PROPERTY|Property Damage|will crimin damag properti
 5261|BATTERY PHYSICAL CONTACT/RUDE DOMESTIC|Battery|batteri physic contact rude domest
-5262|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+5262|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 5263|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
 5264|ROBBERY, COMMERCIAL HOUSE, AGGRAVATED|Robbery|robberi commerci hous aggrav
 5265|WILLFUL CRIMINAL DAMAGE TO PROPERTY DOMESTIC VIOLENCE|Property Damage|will crimin damag properti domest violenc
@@ -5496,7 +5496,7 @@
 5494|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
 5495|WALK ON ROADWAY WHEN SIDEWALK PROVIDED|Traffic Violation|walk roadway sidewalk provid
 5496|AGGRAVATED ASSAULT|Assault|aggrav assault
-5497|LARCENY A SHOPLIFT $1500+|Larceny|larceni shoplift 1500
+5497|LARCENY A SHOPLIFT $1500+|Larceny|larceni shoplift
 5498|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
 5499|NO DRIVER'S LICENSE|License|driver licens
 5500|NO PROOF OF INSURANCE|Insurance|proof insur
@@ -5506,7 +5506,7 @@
 5504|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 5505|DEFECTIVE TAILLIGHT|Vehicle Violation|defect taillight
 5506|NO DRIVER'S LICENSE|License|driver licens
-5507|LARCENY A SHOPLIFT $1500+|Larceny|larceni shoplift 1500
+5507|LARCENY A SHOPLIFT $1500+|Larceny|larceni shoplift
 5508|AGGRAVATED ASSAULT|Assault|aggrav assault
 5509|ASSAULT, DOMESTIC VIOLENCE|Assault|assault domest violenc
 5510|BATTERY DOMESTIC VIOLENCE|Battery|batteri domest violenc
@@ -5650,7 +5650,7 @@
 5648|DRIVE UNDER THE INFLUENCE|DUI|drive influenc
 5649|FLEE OR ATTEMPT TO ELUDE POLICE OFFICER|Elusion|flee attempt elud polic offic
 5650|POSSESSION OF A FIREARM UNDER THE INFLUENCE|Firearms|possess firearm influenc
-5651|SPEED 30 MPH|Speed Limit|speed 30 mph
+5651|SPEED 30 MPH|Speed Limit|speed mph
 5652|FAILURE TO DRIVE WITHIN MARKED LANE|Traffic Violation|failur drive within mark lane
 5653|DRIVE ACROSS DIVIDING SPACE ON HIGHWAY|Traffic Violation|drive across divid space highway
 5654|ILLEGAL RIGHT TURN|Traffic Violation|illeg right turn
@@ -5674,7 +5674,7 @@
 5672|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
 5673|CRIMINAL TRESPASS|Trespass|crimin trespass
 5674|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
-5675|SALE OR POSSESS WITH INTENT TO SELL MARIJUANA WITHIN 1000 FT OF SCHOOL|Marijuana|sale possess intent sell marijuana within 1000 ft school
+5675|SALE OR POSSESS WITH INTENT TO SELL MARIJUANA WITHIN 1000 FT OF SCHOOL|Marijuana|sale possess intent sell marijuana within ft school
 5676|CRIMINAL POSSESSION OF FIREARM BY JUVENILE|Firearms|crimin possess firearm juvenil
 5677|DEFECATING UPON PUBLIC/PRIVATE|Public Nudity|defec upon public privat
 5678|LARCENY B SHOPLIFT|Larceny|larceni b shoplift
@@ -5721,7 +5721,7 @@
 5719|INTERFERE WITH LAW ENFORCEMENT OBSTRUCT, RESIST, ETC|Obstruction|interfer law enforc obstruct resist etc
 5720|FLEE OR ATTEMPT TO ELUDE POLICE OFFICER|Elusion|flee attempt elud polic offic
 5721|RUN STOP SIGN|Traffic Violation|run stop sign
-5722|SPEED 30 MPH|Speed Limit|speed 30 mph
+5722|SPEED 30 MPH|Speed Limit|speed mph
 5723|RECKLESS DRIVING|Traffic Violation|reckless drive
 5724|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
 5725|HIT AND RUN UNATTENDED VEHICLE|Hit and Run|hit run unattend vehicl
@@ -5749,7 +5749,7 @@
 5747|MURDER/NEGLIGENT MANSLAUGHTER|Manslaughter|murder neglig manslaught
 5748|VIOLATE DRIVERS LICENSE RESTRICTION|License|violat driver licens restrict
 5749|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
-5750|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir 18 older
+5750|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir older
 5751|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 5752|INTERFERE WITH LAW ENFORCEMENT OBSTRUCT, RESIST, ETC|Obstruction|interfer law enforc obstruct resist etc
 5753|CARELESS DRIVING DRIVER ACTION|Traffic Violation|careless drive driver action
@@ -5780,13 +5780,13 @@
 5778|INTIMIDATION|Intimidation|intimid
 5779|OTHER DESTRUCTION TO PROPERTY|Property Damage|destruct properti
 5780|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
-5781|SPEED 30 MPH|Speed Limit|speed 30 mph
+5781|SPEED 30 MPH|Speed Limit|speed mph
 5782|VIOLATE DRIVERS LICENSE RESTRICTION|License|violat driver licens restrict
 5783|DEFECTIVE BRAKES|Vehicle Violation|defect brake
 5784|DUI|DUI|dui
 5785|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
 5786|DUI SECOND|DUI|dui second
-5787|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+5787|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 5788|OBSTRUCT LEGAL PROCESS|Obstruction|obstruct legal process
 5789|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 5790|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
@@ -5817,7 +5817,7 @@
 5815|SIMPLE ASSAULT LAW ENFORCEMENT OFFICER|Assault|simpl assault law enforc offic
 5816|OBSTRUCT LEGAL PROCESS|Obstruction|obstruct legal process
 5817|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
-5818|SPEED 30 MPH|Speed Limit|speed 30 mph
+5818|SPEED 30 MPH|Speed Limit|speed mph
 5819|LIGHTS REQUIRED CERTAIN HOURS|Vehicle Violation|light requir certain hour
 5820|DUI SECOND|DUI|dui second
 5821|STOLEN PROPERTY BUYING|Theft|stolen properti buy
@@ -5871,7 +5871,7 @@
 5869|RUN STOP SIGN|Traffic Violation|run stop sign
 5870|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
 5871|CARELESS DRIVING DRIVER ACTION|Traffic Violation|careless drive driver action
-5872|DRIVE RIGHT SIDE/2 LANE|Traffic Violation|drive right side 2 lane
+5872|DRIVE RIGHT SIDE/2 LANE|Traffic Violation|drive right side lane
 5873|FAILURE TO DRIVE WITHIN MARKED LANE|Traffic Violation|failur drive within mark lane
 5874|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
 5875|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
@@ -5988,7 +5988,7 @@
 5986|OTHER DESTRUCTION TO PROPERTY|Property Damage|destruct properti
 5987|OTHER WEAPONS VIOLATIONS|Weapons|weapon violat
 5988|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
-5989|LARCENY A ALL OTHER $1500+|Larceny|larceni 1500
+5989|LARCENY A ALL OTHER $1500+|Larceny|larceni
 5990|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
 5991|AGGRAVATED ASSAULT|Assault|aggrav assault
 5992|INTIMIDATION|Intimidation|intimid
@@ -6132,7 +6132,7 @@
 6130|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 6131|NO DRIVER'S LICENSE|License|driver licens
 6132|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
-6133|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+6133|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 6134|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 6135|CRIMINAL TRESPASS|Trespass|crimin trespass
 6136|BATTERY|Battery|batteri
@@ -6239,7 +6239,7 @@
 6237|UNLAWFUL USE OF A WEAPON|Weapons|unlaw use weapon
 6238|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
 6239|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
-6240|LARCENY A SHOPLIFT $1500+|Larceny|larceni shoplift 1500
+6240|LARCENY A SHOPLIFT $1500+|Larceny|larceni shoplift
 6241|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
 6242|POSSESSION OF PARAPHERNALIA|Drug Paraphernalia|possess paraphernalia
 6243|PUBLIC NUDITY PROHIBITED ENGAGING IN ANY SEX ACT|Public Nudity|public nuditi prohibit engag sex act
@@ -6379,7 +6379,7 @@
 6377|DRIVE UNDER THE INFLUENCE|DUI|drive influenc
 6378|FAILURE TO COMPLY WITH A LAWFUL ORDER|Court Order|failur compli law order
 6379|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
-6380|FAILURE TO DRIVE RIGHT SIDE OF ROAD 2 LANES|Traffic Violation|failur drive right side road 2 lane
+6380|FAILURE TO DRIVE RIGHT SIDE OF ROAD 2 LANES|Traffic Violation|failur drive right side road lane
 6381|FAILURE TO DRIVE WITHIN MARKED LANE|Traffic Violation|failur drive within mark lane
 6382|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
 6383|ASSAULT, AGGRAVATED, FIREARMS|Firearms|assault aggrav firearm
@@ -6435,7 +6435,7 @@
 6433|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 6434|DRIVE UNDER THE INFLUENCE|DUI|drive influenc
 6435|TRANSPORT OPEN CONTAINER LIQUOR|Alcohol|transport open contain liquor
-6436|FAILURE TO DRIVE RIGHT SIDE OF ROAD 2 LANES|Traffic Violation|failur drive right side road 2 lane
+6436|FAILURE TO DRIVE RIGHT SIDE OF ROAD 2 LANES|Traffic Violation|failur drive right side road lane
 6437|ILLEGAL LEFT TURN|Traffic Violation|illeg left turn
 6438|POSSESSION OF NARCOTICS|Narcotics|possess narcot
 6439|CRIMINAL TRESPASS|Trespass|crimin trespass
@@ -6614,7 +6614,7 @@
 6612|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 6613|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
 6614|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
-6615|SPEED 30 MPH|Speed Limit|speed 30 mph
+6615|SPEED 30 MPH|Speed Limit|speed mph
 6616|FLEE OR ATTEMPT TO ELUDE POLICE OFFICER|Elusion|flee attempt elud polic offic
 6617|BATTERY PHYSICAL CONTACT/RUDE DOMESTIC|Battery|batteri physic contact rude domest
 6618|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
@@ -6635,12 +6635,12 @@
 6633|RUN STOP SIGN|Traffic Violation|run stop sign
 6634|RECKLESS DRIVING|Traffic Violation|reckless drive
 6635|NO PROOF OF INSURANCE|Insurance|proof insur
-6636|LARCENY A FROM BUILDING $1500+|Larceny|larceni build 1500
+6636|LARCENY A FROM BUILDING $1500+|Larceny|larceni build
 6637|BURGLARY AGGRAVATED RESIDENCE|Burglary|burglari aggrav resid
 6638|BURGLARY AGGRAVATED RESIDENCE|Burglary|burglari aggrav resid
 6639|LARCENY B FROM BUILDING|Larceny|larceni b build
 6640|BURGLARY AGGRAVATED RESIDENCE|Burglary|burglari aggrav resid
-6641|LARCENY A FROM BUILDING $1500+|Larceny|larceni build 1500
+6641|LARCENY A FROM BUILDING $1500+|Larceny|larceni build
 6642|RESIST POLICE/ARREST|Resistance|resist polic arrest
 6643|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 6644|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
@@ -6716,7 +6716,7 @@
 6714|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
 6715|INTERFERE WITH LAW ENFORCEMENT FALSE REPORTING|Obstruction|interfer law enforc fals report
 6716|BURGLARY NON RESIDENCE|Burglary|burglari non resid
-6717|LARCENY A FROM AUTO $1500+|Larceny|larceni auto 1500
+6717|LARCENY A FROM AUTO $1500+|Larceny|larceni auto
 6718|STOLEN PROPERTY BUYING|Theft|stolen properti buy
 6719|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
 6720|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
@@ -6786,7 +6786,7 @@
 6784|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 6785|FAILURE TO EXIT, DISPERSE OR VACATE PREMISES IN A TIMELY MANNER|Trespass|failur exit dispers vacat premis time manner
 6786|POSSESSION OF ILLEGAL WEAPONS|Weapons|possess illeg weapon
-6787|DRIVE RIGHT SIDE/4 LANES|Traffic Violation|drive right side 4 lane
+6787|DRIVE RIGHT SIDE/4 LANES|Traffic Violation|drive right side lane
 6788|UNSAFE LANE CHANGE|Traffic Violation|unsaf lane chang
 6789|DUI|DUI|dui
 6790|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
@@ -6891,10 +6891,10 @@
 6889|DISTURBING THE PEACE|Disturbance|disturb peac
 6890|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
 6891|DISTURBING THE PEACE|Disturbance|disturb peac
-6892|8 FT FROM PRIVATE DRIVE|Traffic Violation|8 ft privat drive
+6892|8 FT FROM PRIVATE DRIVE|Traffic Violation|ft privat drive
 6893|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 6894|TRANSPORT OPEN ALCOHOL/LIQUOR BEVERAGE ACCESSIBLE TO DRIVER|Alcohol|transport open alcohol liquor beverag access driver
-6895|PARK LEFT WHEEL TO CURB/PARK 12 IN FROM CURB ON 1 WAY STREET|Vehicle Violation|park left wheel curb park 12 curb 1 way street
+6895|PARK LEFT WHEEL TO CURB/PARK 12 IN FROM CURB ON 1 WAY STREET|Vehicle Violation|park left wheel curb park curb way street
 6896|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 6897|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
 6898|BURGLARY NON RESIDENCE|Burglary|burglari non resid
@@ -6946,7 +6946,7 @@
 6944|NO VALID DRIVER'S LICENSE IN POSSESSION|License|valid driver licens possess
 6945|SPEED OVER LIMIT|Speed Limit|speed limit
 6946|OBSTRUCT LEGAL PROCESS|Obstruction|obstruct legal process
-6947|LARCENY A SHOPLIFT $1500+|Larceny|larceni shoplift 1500
+6947|LARCENY A SHOPLIFT $1500+|Larceny|larceni shoplift
 6948|LARCENY B SHOPLIFT|Larceny|larceni b shoplift
 6949|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 6950|IMPROPER LEFT TURN|Traffic Violation|improp left turn
@@ -6963,7 +6963,7 @@
 6961|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
 6962|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
 6963|FORCIBLE RAPE|Rape|forcibl rape
-6964|AGGRAVATED HUMAN TRAFFICKING UNDER 18 YEARS OF AGE|Human Trafficking|aggrav human traffick 18 year age
+6964|AGGRAVATED HUMAN TRAFFICKING UNDER 18 YEARS OF AGE|Human Trafficking|aggrav human traffick year age
 6965|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 6966|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
 6967|CRIMINAL TRESPASS|Trespass|crimin trespass
@@ -7036,7 +7036,7 @@
 7034|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
 7035|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 7036|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
-7037|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+7037|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 7038|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
 7039|NO DRIVER'S LICENSE|License|driver licens
 7040|ILLEGAL TAG|Vehicle Violation|illeg tag
@@ -7263,7 +7263,7 @@
 7261|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 7262|UNLAWFUL POSSESSION OF MARIJUANA DEPRESSANT|Marijuana|unlaw possess marijuana depress
 7263|CRIMINAL TRESPASS|Trespass|crimin trespass
-7264|POSSESSION OR CONSUMPTION OF ALCOHOL WHILE UNDER 21 YRS OF AGE|Alcohol|possess consumpt alcohol 21 yr age
+7264|POSSESSION OR CONSUMPTION OF ALCOHOL WHILE UNDER 21 YRS OF AGE|Alcohol|possess consumpt alcohol yr age
 7265|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
 7266|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 7267|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
@@ -7274,7 +7274,7 @@
 7272|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
 7273|SPEED OVER LIMIT|Speed Limit|speed limit
 7274|WINDSHIELD CRACKED|Vehicle Violation|windshield crack
-7275|SPEED 30 MPH|Speed Limit|speed 30 mph
+7275|SPEED 30 MPH|Speed Limit|speed mph
 7276|NO DRIVER'S LICENSE|License|driver licens
 7277|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 7278|INATTENTIVE DRIVING|Traffic Violation|inattent drive
@@ -7332,7 +7332,7 @@
 7330|ROBBERY, RESIDENTIAL, AGGRAVATED|Robbery|robberi residenti aggrav
 7331|CONSUME ALCOHOL/LIQUOR IN PUBLIC|Alcohol|consum alcohol liquor public
 7332|CONSUME ALCOHOL/LIQUOR IN PUBLIC|Alcohol|consum alcohol liquor public
-7333|DRIVE RIGHT SIDE/4 LANES|Traffic Violation|drive right side 4 lane
+7333|DRIVE RIGHT SIDE/4 LANES|Traffic Violation|drive right side lane
 7334|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 7335|ROBBERY FROM PERSON|Robbery|robberi person
 7336|CRIMINAL TRESPASS|Trespass|crimin trespass
@@ -7354,7 +7354,7 @@
 7352|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 7353|NO PROOF OF INSURANCE|Insurance|proof insur
 7354|DISPLAY ALTERED TAG|Vehicle Violation|display alter tag
-7355|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+7355|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 7356|ILLEGAL TAG|Vehicle Violation|illeg tag
 7357|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
 7358|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
@@ -7373,7 +7373,7 @@
 7371|AGGRAVATED ASSAULT LAW ENFORCEMENT OFFICER|Assault|aggrav assault law enforc offic
 7372|FLEE OR ATTEMPT TO ELUDE POLICE OFFICER|Elusion|flee attempt elud polic offic
 7373|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
-7374|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road 4 lane
+7374|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road lane
 7375|RECKLESS DRIVING|Traffic Violation|reckless drive
 7376|FAILURE TO COMPLY WITH A LAWFUL ORDER|Court Order|failur compli law order
 7377|POSSESSION OF FIREARM BY A FELON|Firearms|possess firearm felon
@@ -7425,7 +7425,7 @@
 7423|WILLFUL CRIMINAL DAMAGE TO PROPERTY DOMESTIC VIOLENCE|Property Damage|will crimin damag properti domest violenc
 7424|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 7425|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
-7426|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+7426|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 7427|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 7428|INTIMIDATION|Intimidation|intimid
 7429|SIMPLE ASSAULT LAW ENFORCEMENT OFFICER|Assault|simpl assault law enforc offic
@@ -7456,7 +7456,7 @@
 7454|CRIMINAL TRESPASS|Trespass|crimin trespass
 7455|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 7456|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
-7457|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+7457|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 7458|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 7459|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
 7460|POSSESSION OF NARCOTICS|Narcotics|possess narcot
@@ -7467,7 +7467,7 @@
 7465|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 7466|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
 7467|FLEE OR ATTEMPT TO ELUDE POLICE OFFICER|Elusion|flee attempt elud polic offic
-7468|SPEED 30 MPH|Speed Limit|speed 30 mph
+7468|SPEED 30 MPH|Speed Limit|speed mph
 7469|TRAFFIC CONTROL SIGNALS|Traffic Violation|traffic control signal
 7470|RECKLESS DRIVING|Traffic Violation|reckless drive
 7471|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
@@ -7557,10 +7557,10 @@
 7555|FIGHTING/DOMESTIC VIOLENCE|Domestic Violence|fight domest violenc
 7556|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
 7557|DOMESTIC BATTERY BODILY HARM|Battery|domest batteri bodili harm
-7558|SPEED 30 MPH|Speed Limit|speed 30 mph
+7558|SPEED 30 MPH|Speed Limit|speed mph
 7559|NO PROOF OF INSURANCE|Insurance|proof insur
 7560|DRIVING ACROSS BARRIER|Traffic Violation|drive across barrier
-7561|FAILURE TO DRIVING RIGHT SIDE 3 LANES|Traffic Violation|failur drive right side 3 lane
+7561|FAILURE TO DRIVING RIGHT SIDE 3 LANES|Traffic Violation|failur drive right side lane
 7562|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
 7563|DUI|DUI|dui
 7564|NO DRIVER'S LICENSE|License|driver licens
@@ -7713,7 +7713,7 @@
 7711|NO PROOF OF INSURANCE|Insurance|proof insur
 7712|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 7713|PASS IN NO PASSING ZONE|Traffic Violation|pass pass zone
-7714|DRIVE ON LEFT W/IN 100' INTERSECTION/RAILROAD|Traffic Violation|drive left w 100 intersect railroad
+7714|DRIVE ON LEFT W/IN 100' INTERSECTION/RAILROAD|Traffic Violation|drive left w intersect railroad
 7715|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 7716|NO PROOF OF INSURANCE|Insurance|proof insur
 7717|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
@@ -7734,13 +7734,13 @@
 7732|CRIMINAL TRESPASS|Trespass|crimin trespass
 7733|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 7734|CARELESS DRIVING ENGINEER|Traffic Violation|careless drive engin
-7735|FAILURE TO DRIVE RIGHT SIDE OF ROAD 2 LANES|Traffic Violation|failur drive right side road 2 lane
+7735|FAILURE TO DRIVE RIGHT SIDE OF ROAD 2 LANES|Traffic Violation|failur drive right side road lane
 7736|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
 7737|RUN STOP SIGN|Traffic Violation|run stop sign
 7738|FAILURE TO STOP FROM ALLEY, BUILDING, PRIVATE ROAD OR DRIVEWAY|Traffic Violation|failur stop alley build privat road driveway
 7739|ILLEGAL LEFT TURN|Traffic Violation|illeg left turn
 7740|VEHICLE: NO PASSING ZONES|Traffic Violation|vehicl pass zone
-7741|SPEED 30 MPH|Speed Limit|speed 30 mph
+7741|SPEED 30 MPH|Speed Limit|speed mph
 7742|DRIVING OFF ROADWAY TO PASS A VEHICLE ON RIGHT|Traffic Violation|drive roadway pass vehicl right
 7743|FLEE OR ATTEMPT TO ELUDE POLICE OFFICER|Elusion|flee attempt elud polic offic
 7744|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
@@ -7854,7 +7854,7 @@
 7852|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 7853|KNOWINGLY DRIVE UNINSURED VEHICLE|Insurance|knowingli drive uninsur vehicl
 7854|RUN RED LIGHT|Traffic Violation|run red light
-7855|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir 18 older
+7855|SEAT BELT REQUIRED 18 OR OLDER|Traffic Violation|seat belt requir older
 7856|AGGRAVATED ASSAULT|Assault|aggrav assault
 7857|LARCENY B SHOPLIFT|Larceny|larceni b shoplift
 7858|CARRYING CONCEALED FIREARM|Firearms|carri conceal firearm
@@ -7876,7 +7876,7 @@
 7874|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
 7875|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 7876|OTHER WEAPONS VIOLATIONS|Weapons|weapon violat
-7877|RAPE CHILD 13 AND UNDER|Rape|rape child 13
+7877|RAPE CHILD 13 AND UNDER|Rape|rape child
 7878|INTERFERE WITH LAW ENFORCEMENT OBSTRUCT, RESIST, ETC|Obstruction|interfer law enforc obstruct resist etc
 7879|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
 7880|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
@@ -7934,7 +7934,7 @@
 7932|BATTERY DOMESTIC VIOLENCE|Battery|batteri domest violenc
 7933|DESTRUCTION OF PROPERTY DOMESTIC VIOLENCE|Property Damage|destruct properti domest violenc
 7934|BURGLARY NON DWELLING|Burglary|burglari non dwell
-7935|LARCENY A FROM BUILDING $1500+|Larceny|larceni build 1500
+7935|LARCENY A FROM BUILDING $1500+|Larceny|larceni build
 7936|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 7937|BATTERY SCHOOL EMPLOYEE|Battery|batteri school employe
 7938|LARCENY B SHOPLIFT|Larceny|larceni b shoplift
@@ -7960,7 +7960,7 @@
 7958|AGGRAVATED BATTERY|Battery|aggrav batteri
 7959|ROBBERY FROM PERSON|Robbery|robberi person
 7960|BATTERY OF LAW ENFORCEMENT OFFICER|Battery|batteri law enforc offic
-7961|SALE OR POSSESS WITH INTENT TO SELL NARCOTICS WITHIN 1000 FT OF SCHOOL|Narcotics|sale possess intent sell narcot within 1000 ft school
+7961|SALE OR POSSESS WITH INTENT TO SELL NARCOTICS WITHIN 1000 FT OF SCHOOL|Narcotics|sale possess intent sell narcot within ft school
 7962|POSSESSION OF PARAPHERNALIA|Drug Paraphernalia|possess paraphernalia
 7963|UNLAWFUL RESTRAINT DOMESTIC VIOLENCE|Domestic Violence|unlaw restraint domest violenc
 7964|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
@@ -8055,7 +8055,7 @@
 8053|MOTORCYCLES: ROADWAYS LANED FOR TRAFFIC|Traffic Violation|motorcycl roadway lane traffic
 8054|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
 8055|LANE DIRECTION CONTROL SIGNALS|Traffic Violation|lane direct control signal
-8056|SPEED 30 MPH|Speed Limit|speed 30 mph
+8056|SPEED 30 MPH|Speed Limit|speed mph
 8057|UNLAWFUL ACTS/ILLEGAL TAGS|Vehicle Violation|unlaw act illeg tag
 8058|KNOWINGLY DRIVE UNINSURED VEHICLE|Insurance|knowingli drive uninsur vehicl
 8059|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
@@ -8066,7 +8066,7 @@
 8064|AGGRAVATED KIDNAPPING|Kidnapping|aggrav kidnap
 8065|DUI|DUI|dui
 8066|UNSAFE LANE CHANGE|Traffic Violation|unsaf lane chang
-8067|DRIVE RIGHT SIDE/4 LANES|Traffic Violation|drive right side 4 lane
+8067|DRIVE RIGHT SIDE/4 LANES|Traffic Violation|drive right side lane
 8068|CRIMINAL TRESPASS|Trespass|crimin trespass
 8069|OBSTRUCT LEGAL PROCESS|Obstruction|obstruct legal process
 8070|AGGRAVATED BATTERY, DOMESTIC VIOLENCE|Battery|aggrav batteri domest violenc
@@ -8262,7 +8262,7 @@
 8260|IMPROPER RIGHT TURN|Traffic Violation|improp right turn
 8261|WILLFUL CRIMINAL DAMAGE TO PROPERTY DOMESTIC VIOLENCE|Property Damage|will crimin damag properti domest violenc
 8262|INTERFERE WITH LAW ENFORCEMENT OBSTRUCT, RESIST, ETC|Obstruction|interfer law enforc obstruct resist etc
-8263|AGGRAVATED HUMAN TRAFFICKING UNDER 18 YEARS OF AGE|Human Trafficking|aggrav human traffick 18 year age
+8263|AGGRAVATED HUMAN TRAFFICKING UNDER 18 YEARS OF AGE|Human Trafficking|aggrav human traffick year age
 8264|CRIMINAL TRESPASS|Trespass|crimin trespass
 8265|NO DRIVER'S LICENSE|License|driver licens
 8266|DISPLAY TAG IN PROPER PLACE|Vehicle Violation|display tag proper place
@@ -8296,7 +8296,7 @@
 8294|DESTRUCTION OF PROPERTY DOMESTIC VIOLENCE|Property Damage|destruct properti domest violenc
 8295|DOMESTIC BATTERY BODILY HARM|Battery|domest batteri bodili harm
 8296|CRIMINAL TRESPASS|Trespass|crimin trespass
-8297|LARCENY A ALL OTHER $1500+|Larceny|larceni 1500
+8297|LARCENY A ALL OTHER $1500+|Larceny|larceni
 8298|HIT AND RUN INJURY ACCIDENT|Hit and Run|hit run injuri accid
 8299|VIOLATION OF COURT ORDER/CASE PENDING|Court Order|violat court order case pend
 8300|PETIT THEFT|Theft|petit theft
@@ -8390,7 +8390,7 @@
 8388|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
 8389|UNSAFE LANE CHANGE|Traffic Violation|unsaf lane chang
 8390|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
-8391|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+8391|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 8392|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
 8393|WILLFUL CRIMINAL DAMAGE TO PROPERTY DOMESTIC VIOLENCE|Property Damage|will crimin damag properti domest violenc
 8394|POSSESSION OF NARCOTICS|Narcotics|possess narcot
@@ -8412,7 +8412,7 @@
 8410|RUN STOP SIGN|Traffic Violation|run stop sign
 8411|MAXIMUM SPEED LIMIT|Speed Limit|maximum speed limit
 8412|BURGLARY NON RESIDENCE|Burglary|burglari non resid
-8413|LARCENY A ALL OTHER $1500+|Larceny|larceni 1500
+8413|LARCENY A ALL OTHER $1500+|Larceny|larceni
 8414|BATTERY BODILY HARM DOMESTIC|Battery|batteri bodili harm domest
 8415|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 8416|AUTO THEFT NOT RECOVERED|Theft|auto theft recov
@@ -8430,7 +8430,7 @@
 8428|PETIT THEFT|Theft|petit theft
 8429|LARCENY B SHOPLIFT|Larceny|larceni b shoplift
 8430|BURGLARY RESIDENCE|Burglary|burglari resid
-8431|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+8431|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 8432|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 8433|CRIMINAL POSSESSION OF FIREARM BY JUVENILE|Firearms|crimin possess firearm juvenil
 8434|POSSESSION OF FIREARM BY A FELON|Firearms|possess firearm felon
@@ -8514,7 +8514,7 @@
 8512|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 8513|ILLEGAL TAG|Vehicle Violation|illeg tag
 8514|RUN STOP SIGN|Traffic Violation|run stop sign
-8515|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+8515|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 8516|AGGRAVATED WEAPONS VIOLATION|Weapons|aggrav weapon violat
 8517|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 8518|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
@@ -8690,13 +8690,13 @@
 8688|CRIMINAL DAMAGE TO PROPERTY|Property Damage|crimin damag properti
 8689|LARCENY B SHOPLIFT|Larceny|larceni b shoplift
 8690|TAG ILLUMINATED|Vehicle Violation|tag illumin
-8691|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+8691|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 8692|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 8693|DISOBEYING POLICE|Resistance|disobey polic
 8694|MURDER|Murder|murder
 8695|POSSESSION OF FIREARM BY A FELON|Firearms|possess firearm felon
 8696|POSSESSION OF NARCOTICS|Narcotics|possess narcot
-8697|UNLAWFUL POSSESSION OF HALLUCINOGENICS|Hallucinogenics|unlaw possess hallucinogen
+8697|UNLAWFUL POSSESSION OF HALLUCINOGENICS|Other Drugs|unlaw possess hallucinogen
 8698|AGGRAVATED ASSAULT|Assault|aggrav assault
 8699|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
 8700|UNLAWFUL ACTS/ILLEGAL TAGS|Vehicle Violation|unlaw act illeg tag
@@ -8710,7 +8710,7 @@
 8708|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 8709|LIABILITY INSURANCE REQUIRED|Insurance|liabil insur requir
 8710|DEFECTIVE TAILLIGHT|Vehicle Violation|defect taillight
-8711|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+8711|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 8712|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 8713|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
 8714|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
@@ -8807,7 +8807,7 @@
 8805|NO PROOF OF INSURANCE|Insurance|proof insur
 8806|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 8807|DUI|DUI|dui
-8808|DRIVE RIGHT SIDE/4 LANES|Traffic Violation|drive right side 4 lane
+8808|DRIVE RIGHT SIDE/4 LANES|Traffic Violation|drive right side lane
 8809|POSSESSION OF ILLEGAL WEAPONS|Weapons|possess illeg weapon
 8810|DUI SECOND|DUI|dui second
 8811|BATTERY BODILY HARM DOMESTIC|Battery|batteri bodili harm domest
@@ -8869,7 +8869,7 @@
 8867|RUNAWAY|Runaway|runaway
 8868|ABDUCTION/KIDNAPPING|Kidnapping|abduct kidnap
 8869|BURGLARY RESIDENCE|Burglary|burglari resid
-8870|LARCENY A FROM AUTO $1500+|Larceny|larceni auto 1500
+8870|LARCENY A FROM AUTO $1500+|Larceny|larceni auto
 8871|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
 8872|CARRY CONCEALED WEAPON|Weapons|carri conceal weapon
 8873|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
@@ -9158,7 +9158,7 @@
 9156|DOMESTIC BATTERY BODILY HARM|Battery|domest batteri bodili harm
 9157|AGGRAVATED ASSAULT|Assault|aggrav assault
 9158|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
-9159|SPEED 30 MPH|Speed Limit|speed 30 mph
+9159|SPEED 30 MPH|Speed Limit|speed mph
 9160|TRAFFIC CONTROL SIGNALS|Traffic Violation|traffic control signal
 9161|CUTTING IN TRAFFIC|Traffic Violation|cut traffic
 9162|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
@@ -9356,12 +9356,12 @@
 9354|SIMPLE ASSAULT LAW ENFORCEMENT OFFICER|Assault|simpl assault law enforc offic
 9355|BURGLARY RESIDENCE|Burglary|burglari resid
 9356|MAKING FALSE WRITING|Fraud|make fals write
-9357|LARCENY A FROM BUILDING $1500+|Larceny|larceni build 1500
+9357|LARCENY A FROM BUILDING $1500+|Larceny|larceni build
 9358|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
 9359|UNLAWFUL POSSESSION OF MARIJUANA DEPRESSANT|Marijuana|unlaw possess marijuana depress
 9360|OBTAIN PRESCRIPTION ONLY BY FRAUDULENT|Fraud|obtain prescript fraudul
 9361|PETIT THEFT CONTAINING STOLEN PROPERTY|Theft|petit theft contain stolen properti
-9362|USE FINANCIAL CARD WITHOUT CONSENT|Theft|use financi card without consent
+9362|USE FINANCIAL CARD WITHOUT CONSENT|Fraud|use financi card without consent
 9363|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 9364|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 9365|DISPLAY ALTERED TAG|Vehicle Violation|display alter tag
@@ -9381,7 +9381,7 @@
 9379|POSSESSION OF NARCOTICS|Narcotics|possess narcot
 9380|AGGRAVATED BATTERY, DOMESTIC VIOLENCE|Battery|aggrav batteri domest violenc
 9381|AGGRAVATED ASSAULT/DOMESTIC VIOLENCE|Assault|aggrav assault domest violenc
-9382|RAPE CHILD 13 AND UNDER|Rape|rape child 13
+9382|RAPE CHILD 13 AND UNDER|Rape|rape child
 9383|OTHER DESTRUCTION TO PROPERTY|Property Damage|destruct properti
 9384|ILLEGAL TAG|Vehicle Violation|illeg tag
 9385|POSSESSION OF DANGEROUS/DEADLY WEAPON WITH INTENT TO USE UNLAWFULLY|Weapons|possess danger deadli weapon intent use unlaw
@@ -9493,7 +9493,7 @@
 9491|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 9492|AGGRAVATED BATTERY|Battery|aggrav batteri
 9493|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
-9494|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+9494|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 9495|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
 9496|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
 9497|BATTERY PHYSICAL CONTACT/RUDE MANNER|Battery|batteri physic contact rude manner
@@ -9611,7 +9611,7 @@
 9609|OTHER WEAPONS VIOLATIONS|Weapons|weapon violat
 9610|STOLEN PROPERTY BUYING|Theft|stolen properti buy
 9611|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
-9612|SALE OR POSSESS WITH INTENT TO SELL MARIJUANA WITHIN 1000 FT OF SCHOOL|Marijuana|sale possess intent sell marijuana within 1000 ft school
+9612|SALE OR POSSESS WITH INTENT TO SELL MARIJUANA WITHIN 1000 FT OF SCHOOL|Marijuana|sale possess intent sell marijuana within ft school
 9613|PETIT THEFT|Theft|petit theft
 9614|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
 9615|STOLEN PROPERTY BUYING|Theft|stolen properti buy
@@ -9696,7 +9696,7 @@
 9694|AGGRAVATED WEAPONS VIOLATION|Weapons|aggrav weapon violat
 9695|BATTERY DOMESTIC VIOLENCE|Battery|batteri domest violenc
 9696|SALE OF SEXUAL RELATIONS|Procurement|sale sexual relat
-9697|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+9697|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 9698|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 9699|BATTERY BODILY HARM DOMESTIC|Battery|batteri bodili harm domest
 9700|WILLFUL CRIMINAL DAMAGE TO PROPERTY DOMESTIC VIOLENCE|Property Damage|will crimin damag properti domest violenc
@@ -9770,7 +9770,7 @@
 9768|RUN STOP SIGN|Traffic Violation|run stop sign
 9769|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
 9770|RECKLESS DRIVING|Traffic Violation|reckless drive
-9771|SPEED 30 MPH|Speed Limit|speed 30 mph
+9771|SPEED 30 MPH|Speed Limit|speed mph
 9772|POSSESSION OF FIREARM BY A FELON|Firearms|possess firearm felon
 9773|TRANSPORT OPEN CONTAINER LIQUOR|Alcohol|transport open contain liquor
 9774|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
@@ -9801,8 +9801,8 @@
 9799|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
 9800|WILLFUL CRIMINAL DAMAGE TO PROPERTY DOMESTIC VIOLENCE|Property Damage|will crimin damag properti domest violenc
 9801|CRIMINAL TRESPASS|Trespass|crimin trespass
-9802|LARCENY A ALL OTHER $1500+|Larceny|larceni 1500
-9803|LARCENY A ALL OTHER $1500+|Larceny|larceni 1500
+9802|LARCENY A ALL OTHER $1500+|Larceny|larceni
+9803|LARCENY A ALL OTHER $1500+|Larceny|larceni
 9804|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 9805|WINDSHIELD CRACKED|Vehicle Violation|windshield crack
 9806|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
@@ -9932,7 +9932,7 @@
 9930|ROBBERY, BANK, AGGRAVATED|Robbery|robberi bank aggrav
 9931|INTERFERE WITH LAW ENFORCEMENT OBSTRUCT, RESIST, ETC|Obstruction|interfer law enforc obstruct resist etc
 9932|HIT AND RUN ATTENDED VEHICLE|Hit and Run|hit run attend vehicl
-9933|DRIVE RIGHT SIDE/2 LANE|Traffic Violation|drive right side 2 lane
+9933|DRIVE RIGHT SIDE/2 LANE|Traffic Violation|drive right side lane
 9934|ROBBERY, BANK, AGGRAVATED|Robbery|robberi bank aggrav
 9935|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 9936|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
@@ -10132,24 +10132,24 @@
 10130|ANTI SEX TRAFFICKING EMPHASIS AREA|Speed Limit|anti sex traffick emphasi area
 10131|LOITERING FOR PURPOSE OF SOLICITING|Trespass|loiter purpos solicit
 10132|ANTI SEX TRAFFICKING EMPHASIS AREA|Speed Limit|anti sex traffick emphasi area
-10133|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat 18 older
+10133|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat older
 10134|ANTI SEX TRAFFICKING EMPHASIS AREA|Speed Limit|anti sex traffick emphasi area
 10135|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 10136|BIKE OBSERVE TRAFFIC REGULATIONS|Traffic Violation|bike observ traffic regul
 10137|TRAFFIC OF CONTRABAND IN A CORRECTIONAL INSTITUTION|Traffic Violation|traffic contraband correct institut
 10138|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
 10139|CRIMINAL TRESPASS|Trespass|crimin trespass
-10140|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat 18 older
+10140|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat older
 10141|ANTI SEX TRAFFICKING EMPHASIS AREA|Speed Limit|anti sex traffick emphasi area
-10142|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat 18 older
+10142|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat older
 10143|ANTI SEX TRAFFICKING EMPHASIS AREA|Speed Limit|anti sex traffick emphasi area
 10144|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
-10145|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat 18 older
+10145|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat older
 10146|ANTI SEX TRAFFICKING EMPHASIS AREA|Speed Limit|anti sex traffick emphasi area
-10147|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat 18 older
+10147|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat older
 10148|ANTI SEX TRAFFICKING EMPHASIS AREA|Speed Limit|anti sex traffick emphasi area
 10149|PETIT THEFT|Theft|petit theft
-10150|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat 18 older
+10150|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat older
 10151|ANTI SEX TRAFFICKING EMPHASIS AREA|Speed Limit|anti sex traffick emphasi area
 10152|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
 10153|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
@@ -10163,17 +10163,17 @@
 10161|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 10162|ILLEGAL TAG|Vehicle Violation|illeg tag
 10163|ILLEGAL TAG|Vehicle Violation|illeg tag
-10164|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat 18 older
+10164|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat older
 10165|ANTI SEX TRAFFICKING EMPHASIS AREA|Speed Limit|anti sex traffick emphasi area
 10166|ANTI SEX TRAFFICKING EMPHASIS AREA|Speed Limit|anti sex traffick emphasi area
-10167|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat 18 older
-10168|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat 18 older
+10167|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat older
+10168|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat older
 10169|ANTI SEX TRAFFICKING EMPHASIS AREA|Speed Limit|anti sex traffick emphasi area
-10170|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat 18 older
+10170|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat older
 10171|ANTI SEX TRAFFICKING EMPHASIS AREA|Speed Limit|anti sex traffick emphasi area
 10172|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
 10173|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
-10174|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat 18 older
+10174|HIRING A PERSON SELLING SEXUAL RELATIONS WHO IS 18 OR OLDER|Procurement|hire person sell sexual relat older
 10175|ANTI SEX TRAFFICKING EMPHASIS AREA|Speed Limit|anti sex traffick emphasi area
 10176|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 10177|ILLEGAL TAG|Vehicle Violation|illeg tag
@@ -10204,7 +10204,7 @@
 10202|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
 10203|DUI|DUI|dui
 10204|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
-10205|SPEED 30 MPH|Speed Limit|speed 30 mph
+10205|SPEED 30 MPH|Speed Limit|speed mph
 10206|CRIMINAL DISCHARGE OF FIREARM|Firearms|crimin discharg firearm
 10207|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
 10208|CRIMINAL POSSESSION OF FIREARM BY JUVENILE|Firearms|crimin possess firearm juvenil
@@ -10222,7 +10222,7 @@
 10220|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
 10221|WILLFUL CRIMINAL DAMAGE TO PROPERTY DOMESTIC VIOLENCE|Property Damage|will crimin damag properti domest violenc
 10222|BURGLARY NON RESIDENCE|Burglary|burglari non resid
-10223|LARCENY A ALL OTHER $1500+|Larceny|larceni 1500
+10223|LARCENY A ALL OTHER $1500+|Larceny|larceni
 10224|CRIMINAL TRESPASS|Trespass|crimin trespass
 10225|LARCENY B SHOPLIFT|Larceny|larceni b shoplift
 10226|RUNAWAY|Runaway|runaway
@@ -10408,7 +10408,7 @@
 10406|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 10407|DISPLAY ALTERED TAG|Vehicle Violation|display alter tag
 10408|OTHER NARCOTIC VIOLATIONS|Narcotics|narcot violat
-10409|SPEED 30 MPH|Speed Limit|speed 30 mph
+10409|SPEED 30 MPH|Speed Limit|speed mph
 10410|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
 10411|AGGRAVATED BATTERY, DOMESTIC VIOLENCE|Battery|aggrav batteri domest violenc
 10412|LARCENY B FROM BUILDING|Larceny|larceni b build
@@ -10420,7 +10420,7 @@
 10418|BATTERY OF LAW ENFORCEMENT OFFICER|Battery|batteri law enforc offic
 10419|INTERFERE WITH LAW ENFORCEMENT OBSTRUCT, RESIST, ETC|Obstruction|interfer law enforc obstruct resist etc
 10420|SIMPLE ASSAULT LAW ENFORCEMENT OFFICER|Assault|simpl assault law enforc offic
-10421|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road 4 lane
+10421|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road lane
 10422|UNLAWFUL ACTS/ILLEGAL TAGS|Vehicle Violation|unlaw act illeg tag
 10423|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
 10424|DRIVE UNDER THE INFLUENCE|DUI|drive influenc
@@ -10612,7 +10612,7 @@
 10610|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
 10611|AGGRAVATED WEAPONS VIOLATION|Weapons|aggrav weapon violat
 10612|TRANSPORT OPEN ALCOHOLIC BEVERAGES|Alcohol|transport open alcohol beverag
-10613|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+10613|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 10614|CRIMINAL TRESPASS|Trespass|crimin trespass
 10615|BATTERY OF LAW ENFORCEMENT OFFICER|Battery|batteri law enforc offic
 10616|NO DRIVER'S LICENSE|License|driver licens
@@ -10675,7 +10675,7 @@
 10673|PETIT THEFT|Theft|petit theft
 10674|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 10675|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
-10676|SIGNAL TURN 100 FEET|Traffic Violation|signal turn 100 feet
+10676|SIGNAL TURN 100 FEET|Traffic Violation|signal turn feet
 10677|DOMESTIC BATTERY|Battery|domest batteri
 10678|BATTERY BODILY HARM|Battery|batteri bodili harm
 10679|INTERFERE WITH LAW ENFORCEMENT OBSTRUCT, RESIST, ETC|Obstruction|interfer law enforc obstruct resist etc
@@ -10744,7 +10744,7 @@
 10742|STOLEN PROPERTY BUYING|Theft|stolen properti buy
 10743|TRAFFIC CONTROL SIGNALS|Traffic Violation|traffic control signal
 10744|FAILURE TO DRIVE WITHIN MARKED LANE|Traffic Violation|failur drive within mark lane
-10745|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road 4 lane
+10745|FAILURE TO DRIVE RIGHT SIDE OF ROAD 4 LANES|Traffic Violation|failur drive right side road lane
 10746|RECKLESS DRIVING|Traffic Violation|reckless drive
 10747|DRIVE AROUND TIRE DEFLATION DEVICE PLACED BY LAW ENFORCEMENT OFFICER|Vehicle Violation|drive around tire deflat devic place law enforc offic
 10748|RESIST/OBSTRUCT ARREST|Obstruction|resist obstruct arrest
@@ -10819,3 +10819,72 @@
 10817|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
 10818|WILLFUL CRIMINAL DAMAGE TO PROPERTY|Property Damage|will crimin damag properti
 10819|PETIT THEFT|Theft|petit theft
+10820|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
+10821|POSSESSION OF PARAPHERNALIA|Drug Paraphernalia|possess paraphernalia
+10822|POSSESSION OF NARCOTICS|Narcotics|possess narcot
+10823|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
+10824|CRIMINAL TRESPASS|Trespass|crimin trespass
+10825|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
+10826|POSSESSION OF FIREARM BY A FELON|Firearms|possess firearm felon
+10827|UNLAWFUL POSSESSION OF METH|Meth|unlaw possess meth
+10828|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
+10829|STOLEN PROPERTY BUYING|Theft|stolen properti buy
+10830|BURGLARY AGGRAVATED RESIDENCE|Burglary|burglari aggrav resid
+10831|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
+10832|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
+10833|DRIVE RIGHT SIDE/4 LANES|Traffic Violation|drive right side lane
+10834|NO PROOF OF INSURANCE|Insurance|proof insur
+10835|DRIVING ON SUSPENDED/REVOKED/CANCELLED/FRAUDULENT DRIVERS LICENSE|License|drive suspend revok cancel fraudul driver licens
+10836|SEAT BELT REQUIRED|Traffic Violation|seat belt requir
+10837|ROBBERY FROM PERSON|Robbery|robberi person
+10838|ROBBERY FROM PERSON|Robbery|robberi person
+10839|PETIT THEFT|Theft|petit theft
+10840|OBSTRUCTING PUBLIC RIGHT OF WAY|Obstruction|obstruct public right way
+10841|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
+10842|DRIVING WHILE LICENSE CANCELLED/SUSPENDED/REVOKED|License|drive licens cancel suspend revok
+10843|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
+10844|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
+10845|BURGLARY RESIDENCE|Burglary|burglari resid
+10846|LARCENY B FROM BUILDING|Larceny|larceni b build
+10847|PETIT THEFT|Theft|petit theft
+10848|CRIMINAL TRESPASS|Trespass|crimin trespass
+10849|AGGRAVATED ASSAULT/DOMESTIC VIOLENCE|Assault|aggrav assault domest violenc
+10850|BATTERY DOMESTIC VIOLENCE|Battery|batteri domest violenc
+10851|DISORDERLY CONDUCT OFFENSIVE LANGUAGE|Disturbance|disorderli conduct offens languag
+10852|CRIMINAL TRESPASS|Trespass|crimin trespass
+10853|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
+10854|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
+10855|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
+10856|BATTERY BODILY HARM|Battery|batteri bodili harm
+10857|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
+10858|BATTERY BODILY HARM DOMESTIC|Battery|batteri bodili harm domest
+10859|VIOLATION OF PROTECTIVE ORDER DOMESTIC VIOLENCE|Court Order|violat protect order domest violenc
+10860|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
+10861|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
+10862|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
+10863|PETIT THEFT|Theft|petit theft
+10864|PETIT THEFT|Theft|petit theft
+10865|CRIMINAL POSSESSION OF FIREARM BY JUVENILE|Firearms|crimin possess firearm juvenil
+10866|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
+10867|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
+10868|FLEE OR ATTEMPT TO ELUDE POLICE OFFICER|Elusion|flee attempt elud polic offic
+10869|OTHER DESTRUCTION TO PROPERTY|Property Damage|destruct properti
+10870|STOLEN PROPERTY BUYING|Theft|stolen properti buy
+10871|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
+10872|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
+10873|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
+10874|TRAFFIC OF CONTRABAND IN A CORRECTIONAL INSTITUTION|Traffic Violation|traffic contraband correct institut
+10875|DISORDERLY CONDUCT BRAWLING/FIGHTING DOMESTIC VIOLENCE|Disturbance|disorderli conduct brawl fight domest violenc
+10876|DUI|DUI|dui
+10877|DUI INCAPABLE OF SAFELY OPERATING|DUI|dui incap safe oper
+10878|FAILURE TO SIGNAL TURN|Traffic Violation|failur signal turn
+10879|ILLEGAL TAG|Vehicle Violation|illeg tag
+10880|DRIVE RIGHT SIDE/4 LANES|Traffic Violation|drive right side lane
+10881|NO DRIVER'S LICENSE|License|driver licens
+10882|POSSESSION OF CONTROL MARIJUANA/HALLUCINOGENICS|Marijuana|possess control marijuana hallucinogen
+10883|POSSESSION OF DRUG PARAPHERNALIA|Drug Paraphernalia|possess drug paraphernalia
+10884|BATTERY BODILY HARM DOMESTIC|Battery|batteri bodili harm domest
+10885|FLEE OR ATTEMPT TO ELUDE POLICE OFFICER|Elusion|flee attempt elud polic offic
+10886|DRIVE UNDER THE INFLUENCE|DUI|drive influenc
+10887|POSSESSION OF MARIJUANA|Marijuana|possess marijuana
+10888|TRANSPORT OPEN CONTAINER LIQUOR|Alcohol|transport open contain liquor

@@ -1,6 +1,6 @@
 {
     "human traffick": "Human Trafficking",
-    "drug traffick": "Drug Trafficking",
+    "drug traffick": "Other Drugs",
     "sexual batteri" : "Sexual Battery",
     "sexual assault" : "Sexual Assault",
     "non narcotic" : "Non-Narcotics",
@@ -31,7 +31,7 @@
     "open contain": "Alcohol",
     "fals imperson": "Identity Theft",
     "improp pass" : "Traffic Violation",
-    "financi card" : "Theft",
+    "financi card" : "Fraud",
     "delinqu minor" : "Child Exploitation",
     "breach privaci" : "Privacy"
 }

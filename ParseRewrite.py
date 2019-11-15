@@ -4,6 +4,9 @@ import pandas as pd
 from nltk.stem import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import LabelEncoder
+from sklearn.svm import SVC
 
 HEADER_STR = 'Incidents with Offenses / Warrants'
 HEADER_OFFSET = len('Incidents with Offenses / Warrants')
@@ -11,6 +14,23 @@ logging.basicConfig(level=logging.INFO, filename='runtime.log', filemode='w', fo
 pd.set_option('display.max_rows', 1000)
 stemmer = PorterStemmer()
 tokenizer = RegexpTokenizer(r'\w+')
+vectorizer = TfidfVectorizer()
+encoder = LabelEncoder()
+
+def loadSVC():
+    # Combine the real data from the PDFs with fake arrests to create a prediction model
+    # As of 11/14/19, this model has roughly 99.5% accuracy
+    trueData = pd.read_csv('data/trueData.csv', sep='|')
+    fakeData = pd.read_csv('data/fakeData.csv', sep='|')
+    combinedData = trueData.append(fakeData)
+
+    x, y = combinedData['stems'], combinedData['tags']
+    x = vectorizer.fit_transform(x)
+    y = encoder.fit_transform(y)
+
+    svc = SVC(C=100.0, kernel='linear', degree=3, gamma=.1)
+    svc.fit(x, y)
+    return svc
 
 def loadJSON(_file):
     with open(_file) as f:
@@ -564,34 +584,46 @@ def getWarrantsFromRow(_rowText):
     return [code for code in getWarrantCodes(_rowText)]
 
 def getStemmedAndTokenizedArrest(_arrest):
-    _arrest = _arrest.lower()
-    _arrest = _arrest.replace(':', '')
-    _arrest = _arrest.replace('/', ' ')
+    _arrest = _arrest.lower().replace(':', '').replace('/', ' ')
+    _arrest = _arrest.replace(',', '').replace("'", '')
+
+    # Remove numbers from arrest if they exist
+    if not _arrest.replace(' ', '').isalpha():
+        _arrest = ''.join([i for i in _arrest if not i.isdigit()])
+
     tokens = tokenizer.tokenize(_arrest)
     filteredWords = filter(lambda token: token not in stopwords.words('english'), tokens)
     stemmedArrest = map(stemmer.stem, filteredWords)
     tokenizedAndStemmedArrest = ' '.join(stemmedArrest)
     return tokenizedAndStemmedArrest
 
-def matchWholeArrest(_arrestToMatch):
+def matchWholeArrest(_stemmedArrest):
+    if _stemmedArrest == "arrest list":
+        return None
     try:
-        return tagsWholeArrestsDict[_arrestToMatch]
+        return tagsWholeArrestsDict[_stemmedArrest]
     except KeyError:
-        return matchPhrases(_arrestToMatch)
+        return matchPhrases(_stemmedArrest)
 
-def matchPhrases(_arrestToMatch):
+def matchPhrases(_stemmedArrest):
     for key in tagsPhrasesDict:
-        if key in _arrestToMatch:
+        if key in _stemmedArrest:
             return tagsPhrasesDict[key]
-    return matchSingular(_arrestToMatch)
+    return matchSingular(_stemmedArrest)
 
-def matchSingular(_arrestToMatch):
+def matchSingular(_stemmedArrest):
     for key in tagsSingularDict:
-        if key in _arrestToMatch:
+        if key in _stemmedArrest:
             return tagsSingularDict[key]
-    print(_arrestToMatch)
-    logging.warning('TAG NOT FOUND FOR\n' + _arrestToMatch)
-    return None
+    logging.warning('TAG NOT FOUND FOR\n' + _stemmedArrest)
+    return predictTag(_stemmedArrest)
+
+def predictTag(_stemmedArrest):
+    stemmedVect = vectorizer.transform([_stemmedArrest])
+    predictedTagEnc = svc.predict(stemmedVect)
+    predictedTag = encoder.inverse_transform(predictedTagEnc)[0]
+    print('Predicting tag for', _stemmedArrest, ':', predictedTag)
+    return predictedTag
 
 def getTagsFromArrests(_arrestsList):
     if _arrestsList == ['No arrests listed.']:
@@ -627,6 +659,7 @@ def logProblemWithPDF(_pdf, _exception):
     logging.critical('EXITING FOR ' + _pdf)
 
 if __name__ == "__main__":
+    svc = loadSVC()
     arrestsSeries = pd.Series(data=[])
     abbreviations = loadJSON('JSONS/regexAbbreviations.json')
     replacements = loadJSON('JSONS/replacements.json')
@@ -634,6 +667,7 @@ if __name__ == "__main__":
     tagsWholeArrestsDict = loadJSON('JSONS/tagsWholeArrests.json')
     tagsPhrasesDict = loadJSON('JSONS/tagsPhrases.json')
     dfFull = pd.DataFrame(data=[])
+
     for pdf in getPDFs('PDFs/'):
         try:
             logging.info('Parsing... %s', pdf)
@@ -679,4 +713,3 @@ if __name__ == "__main__":
         except RuntimeError as e:
             logProblemWithPDF(pdf, e)
             continue
-    print(dfFull)
