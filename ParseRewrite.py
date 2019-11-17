@@ -1,6 +1,7 @@
 import PyPDF2
-import os, re, json, logging, nltk
+import os, re, json, logging, sys
 import pandas as pd
+from datetime import datetime, timedelta
 from nltk.stem import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
@@ -10,7 +11,7 @@ from sklearn.svm import SVC
 
 HEADER_STR = 'Incidents with Offenses / Warrants'
 HEADER_OFFSET = len('Incidents with Offenses / Warrants')
-logging.basicConfig(level=logging.INFO, filename='runtime.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, filename='logs/runtime.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
 pd.set_option('display.max_rows', 1000)
 stemmer = PorterStemmer()
 tokenizer = RegexpTokenizer(r'\w+')
@@ -36,10 +37,44 @@ def loadJSON(_file):
     with open(_file) as f:
         _dict = json.load(f)
     return _dict
+    
+def doesRewriteAll():
+    try:
+        return sys.argv[1] == '-r'
+    except IndexError:
+        return False
 
-def getPDFs(_path):
-    files = os.listdir(_path)
-    return [_path + file for file in files if file.endswith('.pdf')]
+def getExistingPDFDates():
+    return [pdf.replace('.pdf', '') for pdf in os.listdir("PDFs/") if pdf.endswith('.pdf')]
+
+def getCSVDates():
+    files = os.listdir("CSVs/")
+    csvDates = [file.replace('.csv', '') for file in files if file.endswith('.csv')]
+    return csvDates
+
+def addDaysToDate(_date, _numOfDays):
+    return datetime.strptime(_date, "%m-%d-%y") + timedelta(days=_numOfDays)
+
+def getConvertedDateCSVtoPDF(_date):
+    return addDaysToDate(_date, 1).strftime("%m-%d-%y")
+
+def getExistingCSVDates():
+    return [getConvertedDateCSVtoPDF(csvDate) for csvDate in getCSVDates()] 
+
+def getMissingParses():
+    return [parse for parse in getExistingPDFDates() if parse not in getExistingCSVDates()]
+
+def getPDFs():
+    # If parameter '-r' exists then rewrite all CSVs
+    if doesRewriteAll():
+        return ["PDFs/" + pdf + '.pdf' for pdf in getExistingPDFDates()]
+
+    missingParses = getMissingParses()
+
+    if not missingParses:
+        print('All files have been parsed!')
+
+    return ["PDFs/" + missingParse + '.pdf' for missingParse in missingParses]
 
 def openPDF(_filePath):
     pdfFile = open(_filePath, 'rb')
@@ -615,7 +650,7 @@ def matchSingular(_stemmedArrest):
     for key in tagsSingularDict:
         if key in _stemmedArrest:
             return tagsSingularDict[key]
-    logging.warning('TAG NOT FOUND FOR\n' + _stemmedArrest)
+    logging.warning('TAG NOT FOUND FOR:\t' + _stemmedArrest)
     return predictTag(_stemmedArrest)
 
 def predictTag(_stemmedArrest):
@@ -637,7 +672,8 @@ def writeCSV(_dataframe):
     dfDates = _dataframe['Date'].unique()
     for date in dfDates:
         dateSpecificDataframe = _dataframe.loc[_dataframe['Date'] == date]
-        csvName = 'CSVs/' + date.replace('/', '-') + ".csv"
+        formattedDate = datetime.strptime(date, "%m/%d/%Y").strftime("%m-%d-%y")
+        csvName = 'CSVs/' + formattedDate + ".csv"
         dateSpecificDataframe.to_csv(csvName, sep = '|')
         logging.info('Writing to ' + csvName)
 
@@ -668,7 +704,7 @@ if __name__ == "__main__":
     tagsPhrasesDict = loadJSON('JSONS/tagsPhrases.json')
     dfFull = pd.DataFrame(data=[])
 
-    for pdf in getPDFs('PDFs/'):
+    for pdf in getPDFs():
         try:
             logging.info('Parsing... %s', pdf)
             print('Parsing...', pdf)

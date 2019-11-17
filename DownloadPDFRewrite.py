@@ -4,7 +4,7 @@ import re, os, datetime, logging
 import urllib.parse, urllib.request
 
 arrestLink = re.compile('arrest', flags = re.I)
-logging.basicConfig(level=logging.INFO, filename='downloads.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, filename='logs/downloads.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
 
 def getPageContent(_URL):
     # Returns a soup object of the page's content
@@ -37,25 +37,26 @@ def getAlreadyExistingPDFs(_path = 'PDFs/'):
 def doesPDFExist(_pdf):
     return _pdf in getAlreadyExistingPDFs()
 
-def downloadPDF(_URL, _pdfName):
-    # Write pdf content from URL to file of pdfName
-    response = urllib.request.urlopen(_URL)
-    downloadPath = 'PDFs/' + _pdfName
-    logging.info('Downloading ' + _pdfName)
-    with open(downloadPath, 'wb') as f:
-        f.write(response.read())
-        logging.info(_pdfName + ' successfully downloaded.')
-        
-def getFormattedDateFromFileName(_pdfName):
+def getFormattedDateFromFileName(_pdfName, _format):
     # The date within the PDFs are of different format to those in the filename
     date = _pdfName.replace('.pdf', '')
     try:
-        date = datetime.datetime.strptime(date, "%m-%d-%y").strftime("%m/%d/%Y")
+        date = datetime.datetime.strptime(date, "%m-%d-%y").strftime(_format)
     except ValueError:
         # Rarely, the format of the filename is different from the standard
-        date = datetime.datetime.strptime(date, "%m-%d-%Y").strftime("%m/%d/%Y")
+        date = datetime.datetime.strptime(date, "%m-%d-%Y").strftime(_format)
     return date
 
+def downloadPDF(_URL, _pdfName):
+    # Write pdf content from URL to file of pdfName
+    response = urllib.request.urlopen(_URL)
+    formattedName = getFormattedDateFromFileName(_pdfName, "%m-%d-%y")
+    downloadPath = 'PDFs/' + formattedName + '.pdf'
+    logging.info('Downloading ' + formattedName)
+    with open(downloadPath, 'wb') as f:
+        f.write(response.read())
+        logging.info(formattedName + ' successfully downloaded.')
+        
 def openPDF(_filePath):
     pdfFile = open(_filePath, 'rb')
     pdfObject = PyPDF2.PdfFileReader(pdfFile)
@@ -76,7 +77,7 @@ def validatePDF(_pdfName):
     # Sometimes the wrong PDF is uploaded to Wichita PD's website
     # To check the validity, check for the date of the PDF to be within the PDF itself
     validatePath = 'PDFs/' + _pdfName
-    formattedDate = getFormattedDateFromFileName(_pdfName)
+    formattedDate = getFormattedDateFromFileName(_pdfName, "%m/%d/%Y")
     pdfObject = openPDF(validatePath)
     pdfText = getTextFromPages(pdfObject)
     logging.info('Validating ' + _pdfName)
