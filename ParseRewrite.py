@@ -29,6 +29,7 @@ def loadSVC():
     x = vectorizer.fit_transform(x)
     y = encoder.fit_transform(y)
 
+    # These were found to be the best parameters through GridSearchCV
     svc = SVC(C=100.0, kernel='linear', degree=3, gamma=.1)
     svc.fit(x, y)
     return svc
@@ -324,8 +325,7 @@ def getExpandedRaceSexInfoFromException(_rowText):
     trimmedRowText = _rowText.partition('No address listed...')[0]
     trimmedRowText = trimmedRowText.rpartition(' ')[2]
     raceSexInfo = ''.join(filter(lambda i: i.isalpha(), trimmedRowText))
-    if not raceSexInfo or len(raceSexInfo) > 3:
-        raise RuntimeError('UNUSUAL FORMATTING FOUND, REGEX FAILED, ALTERNATE SOLUTION FAILED')
+    assert raceSexInfo or len(raceSexInfo) > 3, 'Unusual formatting for raceSexInfo'
     expandedRaceSexInfo = getExpandedSexInfo(raceSexInfo).strip()
     return expandedRaceSexInfo.rpartition(' ')
 
@@ -411,6 +411,7 @@ def doesBeginAndEndWithNum(_str):
     return _str[0].isdigit() and _str[-1].isdigit()
 
 def removeTrailingNumbersAndCodesFromList(_list):
+    # If something like 19C123090 shows up as last word in list - delete it
     try:
         lastWordInList = _list[-1]
         if doesBeginAndEndWithNum(lastWordInList):
@@ -542,7 +543,7 @@ def getTrimmedAndFormattedArrestsList(_listOfArrests):
     for arrest in _listOfArrests:
         lastWord = getLastWordFromArrest(arrest)
         if '+' in lastWord:
-            # Plus signs get concatenated incorrectly and need to defer to the function
+            # Plus signs get concatenated incorrectly
             arrest = getFixedPlusSignInArrest(arrest)
             yield getFormattedArrest(arrest)
             continue
@@ -560,17 +561,21 @@ def getTrimmedAndFormattedArrestsList(_listOfArrests):
 def getArrestsFromRow(_rowText):
     incidentIdPattern = '\s?\d{2}C\d{6,}\ss\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
     warrantPattern = '\d{2}[A-Z]{2}\d{6}'
+    # Trim off incidents and warrants from the right
     trimmedIncidents = regexTrimLeftOrRight(incidentIdPattern, _rowText, False)
     trimmedWarrantsAndIncidents = regexTrimLeftOrRight(warrantPattern, trimmedIncidents, False)
-    trimmedRowText = getTrimmedArrestsText(trimmedWarrantsAndIncidents)
-    if not trimmedRowText:
+    # Trims off as much of the left row text as possible
+    trimmedArrestText = getTrimmedArrestsText(trimmedWarrantsAndIncidents)
+    if not trimmedArrestText:
         return ['No arrests listed.']
-    listOfArrests = getSplitArrests(trimmedRowText)
+    listOfArrests = getSplitArrests(trimmedArrestText)
+    # Finally clean up each arrest in the list
     trimmedAndFormattedListOfArrests = [arrest for arrest in getTrimmedAndFormattedArrestsList(listOfArrests)] 
     return trimmedAndFormattedListOfArrests
     
 def getListOfIncidents(_incidentText):
     incidentIdPattern = '\s?\d{2}C\d{6,}\s\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
+    # Trim out info from the left of the incidents
     listOfIncidents = regexSplitAndTrim(incidentIdPattern, _incidentText)
     return listOfIncidents
 
@@ -633,8 +638,8 @@ def getStemmedAndTokenizedArrest(_arrest):
     return tokenizedAndStemmedArrest
 
 def matchWholeArrest(_stemmedArrest):
-    if _stemmedArrest == "arrest list":
-        return None
+    # Arrests attempt to be matched in the following order:
+    # Whole arrests, phrases, singular words, and prediction if all fail
     try:
         return tagsWholeArrestsDict[_stemmedArrest]
     except KeyError:
@@ -654,6 +659,8 @@ def matchSingular(_stemmedArrest):
     return predictTag(_stemmedArrest)
 
 def predictTag(_stemmedArrest):
+    # Vectorize the incoming arrest and predict on the vector
+    # Inverse transform the prediction to get the tag
     stemmedVect = vectorizer.transform([_stemmedArrest])
     predictedTagEnc = svc.predict(stemmedVect)
     predictedTag = encoder.inverse_transform(predictedTagEnc)[0]
@@ -661,6 +668,7 @@ def predictTag(_stemmedArrest):
     return predictedTag
 
 def getTagsFromArrests(_arrestsList):
+    # If no arrests are found, then only warrants exist.
     if _arrestsList == ['No arrests listed.']:
         return ['Warrants']
     stemmedAndTokenizedArrests = map(getStemmedAndTokenizedArrest, _arrestsList)
@@ -696,13 +704,11 @@ def logProblemWithPDF(_pdf, _exception):
 
 if __name__ == "__main__":
     svc = loadSVC()
-    arrestsSeries = pd.Series(data=[])
     abbreviations = loadJSON('JSONS/regexAbbreviations.json')
     replacements = loadJSON('JSONS/replacements.json')
     tagsSingularDict = loadJSON('JSONS/tagsSingular.json')
     tagsWholeArrestsDict = loadJSON('JSONS/tagsWholeArrests.json')
     tagsPhrasesDict = loadJSON('JSONS/tagsPhrases.json')
-    dfFull = pd.DataFrame(data=[])
 
     for pdf in getPDFs():
         try:
@@ -744,8 +750,7 @@ if __name__ == "__main__":
             ])
 
             df = validateDates(df)
-            dfFull = dfFull.append(df, ignore_index=True)
             writeCSV(df)
-        except RuntimeError as e:
+        except Exception as e:
             logProblemWithPDF(pdf, e)
             continue
