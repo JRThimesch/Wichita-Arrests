@@ -148,7 +148,7 @@ def regexSplitAndTrim(_pattern, _str):
     listSplitAndTrimmed = list(filter(None, listSplit))
     return listSplitAndTrimmed
 
-def getExpandedGenderInfo(_abbreviation):
+def getExpandedSexInfo(_abbreviation):
     replacements = {
         'W' : 'WHITE',
         'B' : 'BLACK',
@@ -166,29 +166,29 @@ def getExpandedGenderInfo(_abbreviation):
     except KeyError:
         raise RuntimeError
 
-def findRaceGender(_fullText):
-    # The index for times is useful as the gender info is contained right after
+def findRaceSex(_fullText):
+    # The index for times is useful as the sex info is contained right after
     times = re.findall('(\d{2}:\d{2})', _fullText)
     lastIndex, spacingOffset = 0, 6
-    genderChar = ('M', 'F')
+    sexChar = ('M', 'F')
     for time in times:
         # lastIndex is used to ensure duplicate times are not a problem
         currentIndex = _fullText.find(time, lastIndex)
         currentIndexWithOffset = currentIndex + spacingOffset
         
-        genderInfo = _fullText[currentIndexWithOffset:currentIndexWithOffset + 3]
+        sexInfo = _fullText[currentIndexWithOffset:currentIndexWithOffset + 3]
 
         # Remove last character if it is not actual info
-        if not genderInfo.endswith(genderChar):
-            genderInfo = genderInfo[:-1]
+        if not sexInfo.endswith(sexChar):
+            sexInfo = sexInfo[:-1]
 
-        expandedGenderInfo = getExpandedGenderInfo(genderInfo)
-        endOfGenderInfoIndex = currentIndexWithOffset + len(genderInfo)
+        expandedSexInfo = getExpandedSexInfo(sexInfo)
+        endOfSexInfoIndex = currentIndexWithOffset + len(sexInfo)
 
-        # Replacement of the genderInfo with expandedGenderInfo
+        # Replacement of the sexInfo with expandedSexInfo
         # Cannot use .replace as that will replace parts in names/arrests/etc.
-        _fullText = _fullText[:currentIndexWithOffset] + expandedGenderInfo + _fullText[endOfGenderInfoIndex:]
-        lastIndex = currentIndex + len(expandedGenderInfo)
+        _fullText = _fullText[:currentIndexWithOffset] + expandedSexInfo + _fullText[endOfSexInfoIndex:]
+        lastIndex = currentIndex + len(expandedSexInfo)
     return _fullText
 
 def fixFullTextSpacing(_fullText):
@@ -198,7 +198,7 @@ def fixFullTextSpacing(_fullText):
     _fullText = regexSplitandJoin('(\d{2}\w{2}\d{6})', _fullText)
     _fullText = _fullText.replace('Sedgwick County Warrant', ' Sedgwick County Warrant ')
     _fullText = _fullText.replace(' +', '+')
-    _fullText = findRaceGender(_fullText)
+    _fullText = findRaceSex(_fullText)
 
     return ' '.join(_fullText.split())
 
@@ -320,21 +320,21 @@ def getAgeFromRow(_rowText):
     except AttributeError:
         return 'No age found.'
     
-def getExpandedRaceGenderInfoFromException(_rowText):
+def getExpandedRaceSexInfoFromException(_rowText):
     trimmedRowText = _rowText.partition('No address listed...')[0]
     trimmedRowText = trimmedRowText.rpartition(' ')[2]
-    raceGenderInfo = ''.join(filter(lambda i: i.isalpha(), trimmedRowText))
-    if not raceGenderInfo or len(raceGenderInfo) > 3:
+    raceSexInfo = ''.join(filter(lambda i: i.isalpha(), trimmedRowText))
+    if not raceSexInfo or len(raceSexInfo) > 3:
         raise RuntimeError('UNUSUAL FORMATTING FOUND, REGEX FAILED, ALTERNATE SOLUTION FAILED')
-    expandedRaceGenderInfo = getExpandedGenderInfo(raceGenderInfo).strip()
-    return expandedRaceGenderInfo.rpartition(' ')
+    expandedRaceSexInfo = getExpandedSexInfo(raceSexInfo).strip()
+    return expandedRaceSexInfo.rpartition(' ')
 
 def getSexFromExceptionRow(_rowText):
-    sex = getExpandedRaceGenderInfoFromException(_rowText)[2]
+    sex = getExpandedRaceSexInfoFromException(_rowText)[2]
     return sex
 
 def getRaceFromExceptionRow(_rowText):
-    race = getExpandedRaceGenderInfoFromException(_rowText)[0]
+    race = getExpandedRaceSexInfoFromException(_rowText)[0]
     return race
 
 def getRaceFromRow(_rowText):
@@ -594,7 +594,7 @@ def getIncidentsFromRow(_rowText):
     # Left trimming removes any before info not related to incidents
     incidentTextTrimmed = regexTrimLeftOrRight('\d{2}C\d{6}', incidentTextRightTrimmed)
     if incidentTextRightTrimmed == incidentTextTrimmed:
-        return 'No incidents found.'
+        return ['No incidents found.']
     cleanedIncidentsAndOffenses = getCleanedIncidentsAndOffenses(incidentTextTrimmed)
     return cleanedIncidentsAndOffenses
 
@@ -662,7 +662,7 @@ def predictTag(_stemmedArrest):
 
 def getTagsFromArrests(_arrestsList):
     if _arrestsList == ['No arrests listed.']:
-        return None
+        return ['Warrants']
     stemmedAndTokenizedArrests = map(getStemmedAndTokenizedArrest, _arrestsList)
     return [matchWholeArrest(arrest) for arrest in stemmedAndTokenizedArrests]
 
