@@ -1,25 +1,81 @@
 import PyPDF2
-import os, re, json, logging, nltk
+import os, re, json, logging, sys
 import pandas as pd
+from datetime import datetime, timedelta
 from nltk.stem import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import LabelEncoder
+from sklearn.svm import SVC
 
 HEADER_STR = 'Incidents with Offenses / Warrants'
 HEADER_OFFSET = len('Incidents with Offenses / Warrants')
-logging.basicConfig(level=logging.INFO, filename='runtime.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, filename='logs/runtime.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
 pd.set_option('display.max_rows', 1000)
 stemmer = PorterStemmer()
 tokenizer = RegexpTokenizer(r'\w+')
+vectorizer = TfidfVectorizer()
+encoder = LabelEncoder()
+
+def loadSVC():
+    # Combine the real data from the PDFs with fake arrests to create a prediction model
+    # As of 11/14/19, this model has roughly 99.5% accuracy
+    trueData = pd.read_csv('data/trueData.csv', sep='|')
+    fakeData = pd.read_csv('data/fakeData.csv', sep='|')
+    combinedData = trueData.append(fakeData)
+
+    x, y = combinedData['stems'], combinedData['tags']
+    x = vectorizer.fit_transform(x)
+    y = encoder.fit_transform(y)
+
+    # These were found to be the best parameters through GridSearchCV
+    svc = SVC(C=100.0, kernel='linear', degree=3, gamma=.1)
+    svc.fit(x, y)
+    return svc
 
 def loadJSON(_file):
     with open(_file) as f:
         _dict = json.load(f)
     return _dict
+    
+def doesRewriteAll():
+    try:
+        return sys.argv[1] == '-r'
+    except IndexError:
+        return False
 
-def getPDFs(_path):
-    files = os.listdir(_path)
-    return [_path + file for file in files if file.endswith('.pdf')]
+def getExistingPDFDates():
+    return [pdf.replace('.pdf', '') for pdf in os.listdir("PDFs/") if pdf.endswith('.pdf')]
+
+def getCSVDates():
+    files = os.listdir("CSVs/")
+    csvDates = [file.replace('.csv', '') for file in files if file.endswith('.csv')]
+    return csvDates
+
+def addDaysToDate(_date, _numOfDays):
+    return datetime.strptime(_date, "%m-%d-%y") + timedelta(days=_numOfDays)
+
+def getConvertedDateCSVtoPDF(_date):
+    return addDaysToDate(_date, 1).strftime("%m-%d-%y")
+
+def getExistingCSVDates():
+    return [getConvertedDateCSVtoPDF(csvDate) for csvDate in getCSVDates()] 
+
+def getMissingParses():
+    return [parse for parse in getExistingPDFDates() if parse not in getExistingCSVDates()]
+
+def getPDFs():
+    # If parameter '-r' exists then rewrite all CSVs
+    if doesRewriteAll():
+        return ["PDFs/" + pdf + '.pdf' for pdf in getExistingPDFDates()]
+
+    missingParses = getMissingParses()
+
+    if not missingParses:
+        print('All files have been parsed!')
+
+    return ["PDFs/" + missingParse + '.pdf' for missingParse in missingParses]
 
 def openPDF(_filePath):
     pdfFile = open(_filePath, 'rb')
@@ -93,7 +149,7 @@ def regexSplitAndTrim(_pattern, _str):
     listSplitAndTrimmed = list(filter(None, listSplit))
     return listSplitAndTrimmed
 
-def getExpandedGenderInfo(_abbreviation):
+def getExpandedSexInfo(_abbreviation):
     replacements = {
         'W' : 'WHITE',
         'B' : 'BLACK',
@@ -111,29 +167,29 @@ def getExpandedGenderInfo(_abbreviation):
     except KeyError:
         raise RuntimeError
 
-def findRaceGender(_fullText):
-    # The index for times is useful as the gender info is contained right after
+def findRaceSex(_fullText):
+    # The index for times is useful as the sex info is contained right after
     times = re.findall('(\d{2}:\d{2})', _fullText)
     lastIndex, spacingOffset = 0, 6
-    genderChar = ('M', 'F')
+    sexChar = ('M', 'F')
     for time in times:
         # lastIndex is used to ensure duplicate times are not a problem
         currentIndex = _fullText.find(time, lastIndex)
         currentIndexWithOffset = currentIndex + spacingOffset
         
-        genderInfo = _fullText[currentIndexWithOffset:currentIndexWithOffset + 3]
+        sexInfo = _fullText[currentIndexWithOffset:currentIndexWithOffset + 3]
 
         # Remove last character if it is not actual info
-        if not genderInfo.endswith(genderChar):
-            genderInfo = genderInfo[:-1]
+        if not sexInfo.endswith(sexChar):
+            sexInfo = sexInfo[:-1]
 
-        expandedGenderInfo = getExpandedGenderInfo(genderInfo)
-        endOfGenderInfoIndex = currentIndexWithOffset + len(genderInfo)
+        expandedSexInfo = getExpandedSexInfo(sexInfo)
+        endOfSexInfoIndex = currentIndexWithOffset + len(sexInfo)
 
-        # Replacement of the genderInfo with expandedGenderInfo
+        # Replacement of the sexInfo with expandedSexInfo
         # Cannot use .replace as that will replace parts in names/arrests/etc.
-        _fullText = _fullText[:currentIndexWithOffset] + expandedGenderInfo + _fullText[endOfGenderInfoIndex:]
-        lastIndex = currentIndex + len(expandedGenderInfo)
+        _fullText = _fullText[:currentIndexWithOffset] + expandedSexInfo + _fullText[endOfSexInfoIndex:]
+        lastIndex = currentIndex + len(expandedSexInfo)
     return _fullText
 
 def fixFullTextSpacing(_fullText):
@@ -143,7 +199,7 @@ def fixFullTextSpacing(_fullText):
     _fullText = regexSplitandJoin('(\d{2}\w{2}\d{6})', _fullText)
     _fullText = _fullText.replace('Sedgwick County Warrant', ' Sedgwick County Warrant ')
     _fullText = _fullText.replace(' +', '+')
-    _fullText = findRaceGender(_fullText)
+    _fullText = findRaceSex(_fullText)
 
     return ' '.join(_fullText.split())
 
@@ -265,21 +321,20 @@ def getAgeFromRow(_rowText):
     except AttributeError:
         return 'No age found.'
     
-def getExpandedRaceGenderInfoFromException(_rowText):
+def getExpandedRaceSexInfoFromException(_rowText):
     trimmedRowText = _rowText.partition('No address listed...')[0]
     trimmedRowText = trimmedRowText.rpartition(' ')[2]
-    raceGenderInfo = ''.join(filter(lambda i: i.isalpha(), trimmedRowText))
-    if not raceGenderInfo or len(raceGenderInfo) > 3:
-        raise RuntimeError('UNUSUAL FORMATTING FOUND, REGEX FAILED, ALTERNATE SOLUTION FAILED')
-    expandedRaceGenderInfo = getExpandedGenderInfo(raceGenderInfo).strip()
-    return expandedRaceGenderInfo.rpartition(' ')
+    raceSexInfo = ''.join(filter(lambda i: i.isalpha(), trimmedRowText))
+    assert raceSexInfo or len(raceSexInfo) > 3, 'Unusual formatting for raceSexInfo'
+    expandedRaceSexInfo = getExpandedSexInfo(raceSexInfo).strip()
+    return expandedRaceSexInfo.rpartition(' ')
 
 def getSexFromExceptionRow(_rowText):
-    sex = getExpandedRaceGenderInfoFromException(_rowText)[2]
+    sex = getExpandedRaceSexInfoFromException(_rowText)[2]
     return sex
 
 def getRaceFromExceptionRow(_rowText):
-    race = getExpandedRaceGenderInfoFromException(_rowText)[0]
+    race = getExpandedRaceSexInfoFromException(_rowText)[0]
     return race
 
 def getRaceFromRow(_rowText):
@@ -356,6 +411,7 @@ def doesBeginAndEndWithNum(_str):
     return _str[0].isdigit() and _str[-1].isdigit()
 
 def removeTrailingNumbersAndCodesFromList(_list):
+    # If something like 19C123090 shows up as last word in list - delete it
     try:
         lastWordInList = _list[-1]
         if doesBeginAndEndWithNum(lastWordInList):
@@ -481,13 +537,13 @@ def getFormattedArrest(_arrest):
     _arrest = getReplacementWords(_arrest)
     _arrest = getRegexReplacements(_arrest)
     logging.info('New Arrest:\t' + _arrest)
-    return _arrest
+    return _arrest.strip()
 
 def getTrimmedAndFormattedArrestsList(_listOfArrests):
     for arrest in _listOfArrests:
         lastWord = getLastWordFromArrest(arrest)
         if '+' in lastWord:
-            # Plus signs get concatenated incorrectly and need to defer to the function
+            # Plus signs get concatenated incorrectly
             arrest = getFixedPlusSignInArrest(arrest)
             yield getFormattedArrest(arrest)
             continue
@@ -505,17 +561,21 @@ def getTrimmedAndFormattedArrestsList(_listOfArrests):
 def getArrestsFromRow(_rowText):
     incidentIdPattern = '\s?\d{2}C\d{6,}\ss\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
     warrantPattern = '\d{2}[A-Z]{2}\d{6}'
+    # Trim off incidents and warrants from the right
     trimmedIncidents = regexTrimLeftOrRight(incidentIdPattern, _rowText, False)
     trimmedWarrantsAndIncidents = regexTrimLeftOrRight(warrantPattern, trimmedIncidents, False)
-    trimmedRowText = getTrimmedArrestsText(trimmedWarrantsAndIncidents)
-    if not trimmedRowText:
+    # Trims off as much of the left row text as possible
+    trimmedArrestText = getTrimmedArrestsText(trimmedWarrantsAndIncidents)
+    if not trimmedArrestText:
         return ['No arrests listed.']
-    listOfArrests = getSplitArrests(trimmedRowText)
-    trimmedAndFormattedListOfArrests = [e.strip() for e in getTrimmedAndFormattedArrestsList(listOfArrests)]
+    listOfArrests = getSplitArrests(trimmedArrestText)
+    # Finally clean up each arrest in the list
+    trimmedAndFormattedListOfArrests = [arrest for arrest in getTrimmedAndFormattedArrestsList(listOfArrests)] 
     return trimmedAndFormattedListOfArrests
     
 def getListOfIncidents(_incidentText):
     incidentIdPattern = '\s?\d{2}C\d{6,}\s\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
+    # Trim out info from the left of the incidents
     listOfIncidents = regexSplitAndTrim(incidentIdPattern, _incidentText)
     return listOfIncidents
 
@@ -539,7 +599,7 @@ def getIncidentsFromRow(_rowText):
     # Left trimming removes any before info not related to incidents
     incidentTextTrimmed = regexTrimLeftOrRight('\d{2}C\d{6}', incidentTextRightTrimmed)
     if incidentTextRightTrimmed == incidentTextTrimmed:
-        return 'No incidents found.'
+        return ['No incidents found.']
     cleanedIncidentsAndOffenses = getCleanedIncidentsAndOffenses(incidentTextTrimmed)
     return cleanedIncidentsAndOffenses
 
@@ -563,6 +623,68 @@ def getWarrantCodes(_rowText):
 def getWarrantsFromRow(_rowText):
     return [code for code in getWarrantCodes(_rowText)]
 
+def getStemmedAndTokenizedArrest(_arrest):
+    _arrest = _arrest.lower().replace(':', '').replace('/', ' ')
+    _arrest = _arrest.replace(',', '').replace("'", '')
+
+    # Remove numbers from arrest if they exist
+    if not _arrest.replace(' ', '').isalpha():
+        _arrest = ''.join([i for i in _arrest if not i.isdigit()])
+
+    tokens = tokenizer.tokenize(_arrest)
+    filteredWords = filter(lambda token: token not in stopwords.words('english'), tokens)
+    stemmedArrest = map(stemmer.stem, filteredWords)
+    tokenizedAndStemmedArrest = ' '.join(stemmedArrest)
+    return tokenizedAndStemmedArrest
+
+def matchWholeArrest(_stemmedArrest):
+    # Arrests attempt to be matched in the following order:
+    # Whole arrests, phrases, singular words, and prediction if all fail
+    try:
+        return tagsWholeArrestsDict[_stemmedArrest]
+    except KeyError:
+        return matchPhrases(_stemmedArrest)
+
+def matchPhrases(_stemmedArrest):
+    for key in tagsPhrasesDict:
+        if key in _stemmedArrest:
+            return tagsPhrasesDict[key]
+    return matchSingular(_stemmedArrest)
+
+def matchSingular(_stemmedArrest):
+    for key in tagsSingularDict:
+        if key in _stemmedArrest:
+            return tagsSingularDict[key]
+    logging.warning('TAG NOT FOUND FOR:\t' + _stemmedArrest)
+    return predictTag(_stemmedArrest)
+
+def predictTag(_stemmedArrest):
+    # Vectorize the incoming arrest and predict on the vector
+    # Inverse transform the prediction to get the tag
+    stemmedVect = vectorizer.transform([_stemmedArrest])
+    predictedTagEnc = svc.predict(stemmedVect)
+    predictedTag = encoder.inverse_transform(predictedTagEnc)[0]
+    print('Predicting tag for', _stemmedArrest, ':', predictedTag)
+    return predictedTag
+
+def getTagsFromArrests(_arrestsList):
+    # If no arrests are found, then only warrants exist.
+    if _arrestsList == ['No arrests listed.']:
+        return ['Warrants']
+    stemmedAndTokenizedArrests = map(getStemmedAndTokenizedArrest, _arrestsList)
+    return [matchWholeArrest(arrest) for arrest in stemmedAndTokenizedArrests]
+
+def writeCSV(_dataframe):
+    # Outputs to CSV based on dates in the dataframe
+    # Multiple dates -- multiple CSVs
+    dfDates = _dataframe['Date'].unique()
+    for date in dfDates:
+        dateSpecificDataframe = _dataframe.loc[_dataframe['Date'] == date]
+        formattedDate = datetime.strptime(date, "%m/%d/%Y").strftime("%m-%d-%y")
+        csvName = 'CSVs/' + formattedDate + ".csv"
+        dateSpecificDataframe.to_csv(csvName, sep = '|')
+        logging.info('Writing to ' + csvName)
+
 def validateDates(_dataframe):
     # In incredibly rare cases, the date is missing
     # So this counts the number of missing dates and selects the nearest date in the PDF
@@ -580,55 +702,15 @@ def logProblemWithPDF(_pdf, _exception):
     logging.exception(_exception)
     logging.critical('EXITING FOR ' + _pdf)
 
-def getSeparatedArrests(_dataframe):
-    listOfArrests = _dataframe['Arrests'].tolist()
-    for arrests in listOfArrests:
-        for arrest in arrests:
-            yield arrest
-
-def getStemmedAndTokenizedArrest(_arrest):
-    _arrest = _arrest.lower()
-    _arrest = _arrest.replace(':', '')
-    _arrest = _arrest.replace('/', ' ')
-    tokens = tokenizer.tokenize(_arrest)
-    filteredWords = filter(lambda token: token not in stopwords.words('english'), tokens)
-    stemmedArrest = [stemmer.stem(word) for word in filteredWords]
-    tokenizedAndStemmedArrest = ' '.join(stemmedArrest)
-    return tokenizedAndStemmedArrest
-
-def matchWholeArrest(_arrestToMatch):
-    try:
-        return tagsWholeArrestsDict[_arrestToMatch]
-    except KeyError:
-        return matchPhrases(_arrestToMatch)
-
-def matchPhrases(_arrestToMatch):
-    for key in tagsPhrasesDict:
-        if key in _arrestToMatch:
-            return tagsPhrasesDict[key]
-    return matchSingular(_arrestToMatch)
-
-def matchSingular(_arrestToMatch):
-    for key in tagsSingularDict:
-        if key in _arrestToMatch:
-            return tagsSingularDict[key]
-    print(_arrestToMatch)
-    return None
-
-def getTagsFromArrests(_arrestsList):
-    if _arrestsList == ['No arrests listed.']:
-        return None
-    stemmedAndTokenizedArrests = [getStemmedAndTokenizedArrest(arrest) for arrest in _arrestsList]
-    return [matchWholeArrest(arrest) for arrest in stemmedAndTokenizedArrests]
-
 if __name__ == "__main__":
-    arrestsSeries = pd.Series(data=[])
+    svc = loadSVC()
     abbreviations = loadJSON('JSONS/regexAbbreviations.json')
     replacements = loadJSON('JSONS/replacements.json')
     tagsSingularDict = loadJSON('JSONS/tagsSingular.json')
     tagsWholeArrestsDict = loadJSON('JSONS/tagsWholeArrests.json')
     tagsPhrasesDict = loadJSON('JSONS/tagsPhrases.json')
-    for pdf in getPDFs('PDFs/'):
+
+    for pdf in getPDFs():
         try:
             logging.info('Parsing... %s', pdf)
             print('Parsing...', pdf)
@@ -654,7 +736,6 @@ if __name__ == "__main__":
                     arrests,
                     getIncidentsFromRow(row),
                     getWarrantsFromRow(row),
-                    None,
                     getTagsFromArrests(arrests)
                 ])
 
@@ -665,32 +746,11 @@ if __name__ == "__main__":
                 'Name', 'Birthdate', 'Age', 
                 'Race', 'Sex', 'Date', 'Time', 
                 'Address', 'Arrests', 'Incidents', 
-                'Warrants', 'Category', 'Tags' 
+                'Warrants', 'Tags' 
             ])
 
             df = validateDates(df)
-
-            #print(df)
-
-            separatedArrests = [e for e in getSeparatedArrests(df)]
-            arrestsSeries = arrestsSeries.append(pd.Series(separatedArrests))
-        except RuntimeError as e:
+            writeCSV(df)
+        except Exception as e:
             logProblemWithPDF(pdf, e)
             continue
-
-    arrests = [arrest for arrest in arrestsSeries.tolist() if arrest != 'No arrests listed.']
-    tags = getTagsFromArrests(arrests)
-    stemmedArrests = [getStemmedAndTokenizedArrest(arrest) for arrest in arrests]
-    dataDict = {'arrests' : arrests, 'tags' : tags, 'stemmed' : stemmedArrests}
-    #uniqueArrests = pd.Series(arrestsSeries.unique()).tolist()
-    #tags = tags.drop(labels=None)
-    #arrestsSeries.drop('No arrests listed.')
-    #uniqueTags = getTagsFromArrests(uniqueArrests)
-    learningData = pd.DataFrame(data=dataDict)
-    learningData.to_csv('data/tagData.csv', sep = '|')
-    #print(learningData)
-    #learningDataCounts = pd.DataFrame(data =learningData.value_counts().sort_index(), columns = ['tag'])
-    #learningDataCounts['count'] = 0
-    #for index, val in learningDataCounts.iterrows():
-    #    learningDataCounts.loc[index, 'count'] = tags.count(index)
-    #print(learningDataCounts)

@@ -32,6 +32,7 @@
     "W/O": "WITHOUT",
     "BURG": "BURGLARY",
     "POL": "POLICE",
+    "POLICE OFF" : "POLICE OFFICER",
     "ATTMPT": "ATTEMPT",
     "DRV": "DRIVING",
     "DL": "DRIVERS LICENSE",
