@@ -422,6 +422,9 @@ def removeTrailingNumbersAndCodesFromList(_list):
 
 def getTrimmedAddress(_addressText):
     try:
+        # The presence of a comma in an address makes it simple to extract the necessary info
+        if ',' in _addressText:
+            return _addressText.partition(',')[0]
         addressTextList = _addressText.split()
         # Many times there is info that is incorrectly concatenated to the end of an address
         # By finding the last word, that info can be trimmed out
@@ -441,6 +444,7 @@ def getTrimmedAddress(_addressText):
 def getAddressFromRow(_rowText):
     if 'No address listed...' in _rowText:
         return 'No address listed.'
+    # addressText gets close to the actual address but rarely gets a clean address
     addressText = getTrimmedAddressText(_rowText)        
     # Typically addresses do not end in numbers, however, highways do
     # There is no way to differentiate an address ending number from an arrest code
@@ -448,7 +452,7 @@ def getAddressFromRow(_rowText):
     highwayAddressFound = findHighwaysInAddress(addressText)
     if highwayAddressFound:
         return highwayAddressFound
-
+    # Trim the address further to get the true address
     trimmedAddress = getTrimmedAddress(addressText)
     return trimmedAddress.strip()
 
