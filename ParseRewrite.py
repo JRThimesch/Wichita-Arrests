@@ -383,7 +383,7 @@ def getHighwayAddress(_address, _highways):
 def findHighwaysInAddress(_address):
     # The only highways that appear are in the tuple 'highways'
     # If a highway is in the address, the address will get trimmed down to match it
-    highways = ('I 135', 'K 96', 'I 235')
+    highways = ('I 135', 'K 96', 'I 235', 'I235', 'I135', 'K96', 'I 35', 'I35')
     if any(highway in _address for highway in highways):
         return getHighwayAddress(_address, highways)
     return None
@@ -671,12 +671,15 @@ def predictTag(_stemmedArrest):
     print('Predicting tag for', _stemmedArrest, ':', predictedTag)
     return predictedTag
 
-def getTagsFromArrests(_arrestsList):
+def getTagsFromArrests(_arrestsList, _warrantsList):
     # If no arrests are found, then only warrants exist.
     if _arrestsList == ['No arrests listed.']:
         return ['Warrants']
     stemmedAndTokenizedArrests = map(getStemmedAndTokenizedArrest, _arrestsList)
-    return [matchWholeArrest(arrest) for arrest in stemmedAndTokenizedArrests]
+    tags = [matchWholeArrest(arrest) for arrest in stemmedAndTokenizedArrests]
+    if _warrantsList:
+        tags.append('Warrants')
+    return tags
 
 def writeCSV(_dataframe):
     # Outputs to CSV based on dates in the dataframe
@@ -728,6 +731,7 @@ if __name__ == "__main__":
             for row in splitRows(fullTextSpaced, nameArray):
                 logging.info(row)
                 arrests = getArrestsFromRow(row)
+                warrants = getWarrantsFromRow(row)
                 rowsAsList.append([
                     getNamesFromRow(row),
                     getBirthdateFromRow(row),
@@ -740,7 +744,7 @@ if __name__ == "__main__":
                     arrests,
                     getIncidentsFromRow(row),
                     getWarrantsFromRow(row),
-                    getTagsFromArrests(arrests)
+                    getTagsFromArrests(arrests, warrants)
                 ])
 
             # Because of the algorithm, the list needs to be reversed for the correct order
