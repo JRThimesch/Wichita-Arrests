@@ -38,12 +38,6 @@ def loadJSON(_file):
     with open(_file) as f:
         _dict = json.load(f)
     return _dict
-    
-def doesRewriteAll():
-    try:
-        return sys.argv[1] == '-r'
-    except IndexError:
-        return False
 
 def getExistingPDFDates():
     return [pdf.replace('.pdf', '') for pdf in os.listdir("PDFs/") if pdf.endswith('.pdf')]
@@ -65,10 +59,26 @@ def getExistingCSVDates():
 def getMissingParses():
     return [parse for parse in getExistingPDFDates() if parse not in getExistingCSVDates()]
 
+def doesRewriteAll():
+    try:
+        return sys.argv[1] == '-a'
+    except IndexError:
+        return False
+
+def doesRewriteSome():
+    try:
+        return sys.argv[1] == '-r'
+    except IndexError:
+        return False
+
 def getPDFs():
-    # If parameter '-r' exists then rewrite all CSVs
+    # If parameter '-a' exists then rewrite all CSVs
     if doesRewriteAll():
         return ["PDFs/" + pdf + '.pdf' for pdf in getExistingPDFDates()]
+
+    # If parameter '-r' exists then rewrite some CSVs
+    if doesRewriteSome():
+        return ["PDFs/" + pdf for pdf in sys.argv[2:]]
 
     missingParses = getMissingParses()
 
