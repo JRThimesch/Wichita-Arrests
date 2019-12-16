@@ -34,12 +34,12 @@ def getArrestsFromColumn(_column):
 def getTagsFromColumn(_column):
     tags = []
     for listOfTags in _column:
-        tags += [tag.strip("'") for tag in listOfTags if tag]
+        tags += [tag.strip("'") for tag in listOfTags if tag != "'Warrants'"]
     return tags
 
 def getStemmedAndTokenizedArrest(_arrest):
-    _arrest = _arrest.lower().replace(':', '').replace('/', ' ')
-    _arrest = _arrest.replace(',', '').replace("'", '')
+    _arrest = _arrest.lower().replace(':', ' ').replace('/', ' ').replace('(', ' ').replace(')', ' ')
+    _arrest = _arrest.replace(',', ' ').replace("'", '').replace(';', ' ')
     
     # Remove numbers from arrest if they exist
     if not _arrest.replace(' ', '').isalpha():
@@ -55,9 +55,11 @@ def getTrueDataFromDataFrame(_df):
     arrestsFull = _df['Arrests']
     tagsFull = _df['Tags']
 
+    print(arrestsFull.shape, tagsFull.shape)
+
     arrests = getArrestsFromColumn(arrestsFull)
     tags = getTagsFromColumn(tagsFull)
-    stems = map(getStemmedAndTokenizedArrest, arrests)
+    stems = [getStemmedAndTokenizedArrest(arrest) for arrest in arrests]
 
     dataDict = {'arrests' : arrests, 'tags' : tags, 'stems' : stems}
     

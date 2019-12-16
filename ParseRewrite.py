@@ -7,7 +7,7 @@ from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
-from sklearn.svm import SVC
+from sklearn.svm import LinearSVC
 
 HEADER_STR = 'Incidents with Offenses / Warrants'
 HEADER_OFFSET = len('Incidents with Offenses / Warrants')
@@ -15,24 +15,20 @@ logging.basicConfig(level=logging.INFO, filename='logs/runtime.log', filemode='a
 pd.set_option('display.max_rows', 1000)
 stemmer = PorterStemmer()
 tokenizer = RegexpTokenizer(r'\w+')
-vectorizer = TfidfVectorizer()
+vectorizer = TfidfVectorizer(ngram_range=(1,2), max_df=.11)
 encoder = LabelEncoder()
 
-def loadSVC():
-    # Combine the real data from the PDFs with fake arrests to create a prediction model
-    # As of 11/14/19, this model has roughly 99.5% accuracy
-    trueData = pd.read_csv('data/trueData.csv', sep='|')
-    fakeData = pd.read_csv('data/fakeData.csv', sep='|')
-    combinedData = trueData.append(fakeData)
-
-    x, y = combinedData['stems'], combinedData['tags']
-    x = vectorizer.fit_transform(x)
-    y = encoder.fit_transform(y)
+def loadLinearSVC():
+    lawData = pd.read_csv('data/lawData.csv', sep='|')
+    
+    x, y = lawData['stems'], lawData['tags']
+    x_vect = vectorizer.fit_transform(x)
+    y_enc = encoder.fit_transform(y)
 
     # These were found to be the best parameters through GridSearchCV
-    svc = SVC(C=100.0, kernel='linear', degree=3, gamma=.1)
-    svc.fit(x, y)
-    return svc
+    linearSVC = LinearSVC(C = 10, tol=1e-3)
+    linearSVC.fit(x_vect, y_enc)
+    return linearSVC
 
 def loadJSON(_file):
     with open(_file) as f:
@@ -572,6 +568,19 @@ def getTrimmedAndFormattedArrestsList(_listOfArrests):
         arrest = correctPartOfArrest + newLastWord
         yield getFormattedArrest(arrest)
 
+def splitDomesticViolenceArrests(_listOfArrests):
+    replacements = ['/DOMESTIC VIOLENCE', 'DOMESTIC VIOLENCE', 'DOMESTIC']
+    for i, arrest in enumerate(_listOfArrests):
+        if 'DOMESTIC' in arrest and arrest != 'DOMESTIC VIOLENCE' and arrest != 'FIGHTING/DOMESTIC VIOLENCE':
+            for replacement in replacements:
+                arrest = arrest.replace(replacement, '').strip()
+            _listOfArrests[i] = arrest
+            if 'DOMESTIC VIOLENCE' not in _listOfArrests:
+                _listOfArrests.append('DOMESTIC VIOLENCE')
+            #print(arrest, _listOfArrests)
+
+    return _listOfArrests
+
 def getArrestsFromRow(_rowText):
     incidentIdPattern = '\s?\d{2}C\d{6,}\ss\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
     warrantPattern = '\d{2}[A-Z]{2}\d{6}'
@@ -584,7 +593,8 @@ def getArrestsFromRow(_rowText):
         return ['No arrests listed.']
     listOfArrests = getSplitArrests(trimmedArrestText)
     # Finally clean up each arrest in the list
-    trimmedAndFormattedListOfArrests = [arrest for arrest in getTrimmedAndFormattedArrestsList(listOfArrests)] 
+    trimmedAndFormattedListOfArrests = [arrest for arrest in getTrimmedAndFormattedArrestsList(listOfArrests)]  
+    trimmedAndFormattedListOfArrests = splitDomesticViolenceArrests(trimmedAndFormattedListOfArrests)
     return trimmedAndFormattedListOfArrests
     
 def getListOfIncidents(_incidentText):
@@ -676,7 +686,7 @@ def predictTag(_stemmedArrest):
     # Vectorize the incoming arrest and predict on the vector
     # Inverse transform the prediction to get the tag
     stemmedVect = vectorizer.transform([_stemmedArrest])
-    predictedTagEnc = svc.predict(stemmedVect)
+    predictedTagEnc = linearSVC.predict(stemmedVect)
     predictedTag = encoder.inverse_transform(predictedTagEnc)[0]
     print('Predicting tag for', _stemmedArrest, ':', predictedTag)
     return predictedTag
@@ -720,7 +730,7 @@ def logProblemWithPDF(_pdf, _exception):
     logging.critical('EXITING FOR ' + _pdf)
 
 if __name__ == "__main__":
-    svc = loadSVC()
+    linearSVC = loadLinearSVC()
     abbreviations = loadJSON('JSONS/regexAbbreviations.json')
     replacements = loadJSON('JSONS/replacements.json')
     tagsSingularDict = loadJSON('JSONS/tagsSingular.json')

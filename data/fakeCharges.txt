@@ -1,16 +1,9 @@
 INVASION OF PRIVACY|Privacy
 VIOLATION OF PRIVACY|Privacy
 HOME PRIVACY|Privacy
-BOMB THREAT|Terrorism
-BOMB|Terrorism
-MANUFACTURING BOMB|Terrorism
-TERRORISTIC ACTIONS|Terrorism
-ATTEMPT TO PERFORM TERRORISM|Terrorism
-DIGITAL EXTORTION|Extortion
-CYBER EXTORTION|Extortion
-BLACKMAIL|Extortion
-BLACK MAIL|Extortion
-RANSOM|Extortion
+BOMB THREAT|Weapons
+BOMB|Weapons
+MANUFACTURING BOMB|Weapons
 LAUNDERING|Money Laundering
 MONEY LAUNDERING|Money Laundering
 LAUNDER MONEY|Money Laundering
@@ -52,3 +45,5 @@ PERMIT FOR RENTAL|Property Violation
 FENCE IN DISREPAIR|Property Violation
 VANDAL|Property Damage
 VANDALISM|Property Damage
+LEWD|Public Indecency
+LASCIVIOUS|Public Indecency
