@@ -569,7 +569,7 @@ def getTrimmedAndFormattedArrestsList(_listOfArrests):
         yield getFormattedArrest(arrest)
 
 def splitDomesticViolenceArrests(_listOfArrests):
-    replacements = ['/DOMESTIC VIOLENCE', 'DOMESTIC VIOLENCE', 'DOMESTIC']
+    replacements = [', DOMESTIC VIOLENCE', '/DOMESTIC VIOLENCE', 'DOMESTIC VIOLENCE', 'DOMESTIC']
     for i, arrest in enumerate(_listOfArrests):
         if 'DOMESTIC' in arrest and arrest != 'DOMESTIC VIOLENCE' and arrest != 'FIGHTING/DOMESTIC VIOLENCE':
             for replacement in replacements:
