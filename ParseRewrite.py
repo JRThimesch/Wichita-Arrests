@@ -761,10 +761,10 @@ if __name__ == "__main__":
                     getDateFromRow(row),
                     getTimeFromRow(row),
                     getAddressFromRow(row),
-                    arrests,
-                    getIncidentsFromRow(row),
-                    getWarrantsFromRow(row),
-                    getTagsFromArrests(arrests, warrants)
+                    ';'.join(arrests),
+                    ';'.join(getIncidentsFromRow(row)),
+                    ';'.join(warrants),
+                    ';'.join(getTagsFromArrests(arrests, warrants))
                 ])
 
             # Because of the algorithm, the list needs to be reversed for the correct order
