@@ -3,9 +3,6 @@ DeleteData.py
 InsertData.py
 UpdateTagsInDB.py
 InsertIntoArrestsInfo.py
-CRUD.py
-Models.py
-exportData.py
 ViewData.py
 addressCoords.csv
 .Website
