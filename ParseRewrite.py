@@ -274,7 +274,7 @@ def getNamesFromRow(_rowText):
     # First digit signals the beginning of the date, ergo, the end of the name entry
     sliceIndex = getNumOfCharUntilNumber(_rowText)
     name = _rowText[:sliceIndex]
-    return name
+    return name.strip()
 
 def isBirthdateFound(_trimmedRowText):
     # Ideally, the row gets trimmed into a {birthdate} {age} {date} format
