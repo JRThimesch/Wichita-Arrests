@@ -1,23 +1,27 @@
 import os, json
 import pandas as pd
 import numpy as np
-from datetime import datetime
+from datetime import datetime, date
+from contextlib import contextmanager
 from sqlalchemy import Column, create_engine, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.types import DateTime, Float, Integer, String, Date
-from contextlib import contextmanager
+from geopy.geocoders import GoogleV3
 
 from Models import ArrestInfo, ArrestRecord, regenerateTables
 
 user = os.getenv('Postgres_USER')
 password = os.getenv('Postgres_PASSWORD')
+API_KEY = os.getenv('GOOGLEAPI_KEY')
 
 Base = declarative_base()
 
 dbURL = f'postgresql+psycopg2://{user}:{password}@localhost:5432/wichitaArrests'
 engine = create_engine(dbURL)
 Session = sessionmaker(bind=engine)
+
+googleAPI = GoogleV3(api_key=API_KEY)
 
 @contextmanager
 def sessionManager():
@@ -79,8 +83,18 @@ def getGroupsFromTags(_tags):
 def getUsableNumber(_number):
     if type(_number) is int:
         return _number
-    elif type(_number) is str and ':' not in _number:
+    else:
         return None
+
+def getUsableDate(_date):
+    if '/' in _date:
+        return _date
+    else:
+        return None
+
+def getUsableTime(_time):
+    if ':' in _time:
+        return _time
     else:
         return None
 
@@ -102,86 +116,157 @@ def getTimeOfYear(_date):
 def getDayOfTheWeek(_date):
     return datetime.strftime(datetime.strptime(_date, '%m/%d/%Y'), '%A')
 
-if __name__ == "__main__":
-    filters = loadJSON('./.Website/static/js/Filters.json')
-    regenerateTables()
-    dfCoordinates = pd.read_csv('addressCoords.csv', sep=';', index_col=False)
+def getListQuery(_query):
+    return list(zip(*_query))[0]
+
+def isAddressInDB(_session, _address):
+    query = _session.query(ArrestRecord.address).distinct().all()
+    listQuery = [i for i, in query]
+    return _address in listQuery
+
+def getCoordinatesFromDB(_session, _address):
+    print(f"Matching {_address} to DB")
+    return _session.query(ArrestRecord.latitude, ArrestRecord.longitude)\
+        .filter(ArrestRecord.address == _address).first()
+
+def getQueriedCoordinates(_address):
+    try:
+        _, coordinates = googleAPI.geocode(query=_address)
+        return coordinates
+    except Exception as e:
+        print(e)
+        print('Error with address:', _address)
+        print('Retrying on', _address)
+        return getQueriedCoordinates(_address)
+
+def getCoordinates(_session, _address):
+    if _address == 'No address listed.':
+        return (37.6872, -97.3301)
+    if isAddressInDB(_session, _address):
+        return getCoordinatesFromDB(_session, _address)
+    else:
+        extendedAddress = _address + " Wichita, Kansas, USA"
+        return getQueriedCoordinates(extendedAddress)
+
+def getExistingDates(_session):
+    query = _session.query(ArrestRecord.date)\
+        .distinct().all()
+    dates = [date.strftime(i, '%m-%d-%y') for i, in query]
+    return dates
+
+def getMissingDates(_session):
+    existingDates = getExistingDates(_session)
+    allCSVDates = getCSVDates()
+    return [date for date in allCSVDates if date not in existingDates]
+
+def writeFromCSVs(_session, rewrite=False):
+    if rewrite:
+        regenerateTables()
+        dfCoordinates = pd.read_csv('addressCoords.csv', sep=';', index_col=False)
+        dates = getCSVDates()
+    else:
+        dates = getMissingDates(_session)
+
+    for date in dates:
+        print(f"Inserting from...CSVs/{date}.csv")
+        df = getDataFrameFromCSV(date)
+        lastKey = getLastKeyInDB(_session, ArrestRecord.recordID)
+
+        for index, row in df.iterrows():
+            if rewrite:
+                try:
+                    matchingSeries = dfCoordinates.loc[dfCoordinates['Address'] == row['Address']]
+                    latitude = matchingSeries['Latitude'].values[0]
+                    longitude = matchingSeries['Longitude'].values[0]
+                except:
+                    latitude, longitude = getCoordinates(_session, row['Address'])
+            else:
+                latitude, longitude = getCoordinates(_session, row['Address'])
+
+            tags = row['Tags'].split(';')
+            groups = getGroupsFromTags(tags)
+            identifyingGroup = max(groups, key=groups.count)
+            age = getUsableNumber(row['Age'])
+            birthdate = getUsableDate(row['Birthdate'])
+            time = getUsableTime(row['Time'])
+
+            currentKey = lastKey + index + 1
+
+            _session.add(
+                ArrestRecord(
+                    recordID = currentKey,
+                    name = row['Name'],
+                    date = row['Date'],
+                    time = time,
+                    birthdate = birthdate,
+                    age = age,
+                    race = row['Race'],
+                    sex = row['Sex'],
+                    address = row['Address'],
+                    censoredAddress = getCensoredAddress(row['Address']),
+                    latitude = latitude,
+                    longitude = longitude,
+                    incidents = row['Incidents'],
+                    identifyingGroup = identifyingGroup
+                )
+            )
+            
+            arrests = row['Arrests'].split(';')
+            warrants = row['Warrants']
+            timeOfDay = getTimeOfDay(row['Time'])
+            timeOfYear = getTimeOfYear(row['Date'])
+            dayOfTheWeek = getDayOfTheWeek(row['Date'])
+
+            recordsToAdd = [ArrestInfo(
+                                arrestRecordFKey=currentKey,
+                                arrest=arrest,
+                                tag=tags[i],
+                                group=groups[i],
+                                warrant=None,
+                                timeOfDay=timeOfDay,
+                                timeOfYear=timeOfYear,
+                                dayOfTheWeek=dayOfTheWeek)
+                            for i, arrest in enumerate(arrests) 
+                            if arrest != "No arrests listed."]
+
+            _session.add_all(recordsToAdd)
+
+            if type(warrants) is str:
+                recordsToAdd = [ArrestInfo(
+                    arrestRecordFKey=currentKey,
+                    arrest=None,
+                    tag='Warrants',
+                    group='Warrants',
+                    warrant=warrant,
+                    timeOfDay=timeOfDay,
+                    timeOfYear=timeOfYear,
+                    dayOfTheWeek=dayOfTheWeek) 
+                for i, warrant in enumerate(warrants.split(';'))]
+
+            _session.add_all(recordsToAdd)
+
+def prompt():
+    response = input("1. Insert Data\n2. View Data\n3. Update Data\n4. Delete Data\n5. Regen Tables\n6. Regen and Rewrite Tables\n")
+    rangeOfResponses = [x for x in range(1, 7)]
+    try:
+        if int(response) not in rangeOfResponses:
+            print("Exiting...")
+            raise SystemExit
+    except:
+        raise SystemExit
+    return int(response)
+
+def selectAction():
+    response = prompt()
 
     with sessionManager() as s:
-
-        for date in getCSVDates():
-            print(f"Inserting from...CSVs/{date}.csv")
-            df = getDataFrameFromCSV(date)
-            lastKey = getLastKeyInDB(s, ArrestRecord.recordID)
-            arrestInfoKey = getLastKeyInDB(s, ArrestInfo.arrestID)
-            #print(lastKey)
-            #print(arrestInfoKey)
-
-            for index, row in df.iterrows():
-                matchingSeries = dfCoordinates.loc[dfCoordinates['Address'] == row['Address']]
-                latitude = matchingSeries['Latitude'].values[0]
-                longitude = matchingSeries['Longitude'].values[0]
-                tags = row['Tags'].split(';')
-                groups = getGroupsFromTags(tags)
-                identifyingGroup = max(groups, key=groups.count)
-                age = getUsableNumber(row['Age'])
-                birthdate = getUsableNumber(row['Birthdate'])
-                time = getUsableNumber(row['Time'])
-
-                currentKey = lastKey + index + 1
-                #print(currentKey)
-                s.add(
-                    ArrestRecord(
-                        recordID = currentKey,
-                        name = row['Name'],
-                        date = row['Date'],
-                        time = time,
-                        birthdate = birthdate,
-                        age = age,
-                        race = row['Race'],
-                        sex = row['Sex'],
-                        address = row['Address'],
-                        censoredAddress = getCensoredAddress(row['Address']),
-                        latitude = latitude,
-                        longitude = longitude,
-                        incidents = row['Incidents'],
-                        identifyingGroup = identifyingGroup
-                    )
-                )
-                
-                arrests = row['Arrests'].split(';')
-                warrants = row['Warrants']
-                timeOfDay = getTimeOfDay(row['Time'])
-                timeOfYear = getTimeOfYear(row['Date'])
-                dayOfTheWeek = getDayOfTheWeek(row['Date'])
-
-                
-
-
-                recordsToAdd = [ArrestInfo(
-                                    arrestRecordFKey=currentKey,
-                                    arrest=arrest,
-                                    tag=tags[i],
-                                    group=groups[i],
-                                    warrant=None,
-                                    timeOfDay=timeOfDay,
-                                    timeOfYear=timeOfYear,
-                                    dayOfTheWeek=dayOfTheWeek)
-                                for i, arrest in enumerate(arrests) 
-                                if arrest != "No arrests listed."]
-
-                s.add_all(recordsToAdd)
-
-
-                if type(warrants) is str:
-                    recordsToAdd = [ArrestInfo(
-                        arrestRecordFKey=currentKey,
-                        arrest=None,
-                        tag='Warrants',
-                        group='Warrants',
-                        warrant=warrant,
-                        timeOfDay=timeOfDay,
-                        timeOfYear=timeOfYear,
-                        dayOfTheWeek=dayOfTheWeek) 
-                    for i, warrant in enumerate(warrants.split(';'))]
-                s.add_all(recordsToAdd)
+        if response == 1:
+            writeFromCSVs(s, rewrite=False)
+        elif response == 6:
+            regenerateTables()
+        elif response == 7:
+            writeFromCSVs(s, rewrite=True)
+            
+if __name__ == "__main__":
+    filters = loadJSON('./.Website/static/js/Filters.json')
+    selectAction()

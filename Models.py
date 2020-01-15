@@ -53,6 +53,8 @@ def deleteTables():
     response = input(warning).lower()
     if response == 'y':
         Base.metadata.drop_all(engine)
+    else:
+        raise SystemExit
 
 def regenerateTables():
     deleteTables()
