@@ -694,7 +694,10 @@ def predictTag(_stemmedArrest):
 def getTagsFromArrests(_arrestsList, _warrantsList):
     # If no arrests are found, then only warrants exist.
     if _arrestsList == ['No arrests listed.']:
-        return ['Warrants']
+        if _warrantsList:
+            return ['Warrants']
+        else:
+            return []
     stemmedAndTokenizedArrests = map(getStemmedAndTokenizedArrest, _arrestsList)
     tags = [matchWholeArrest(arrest) for arrest in stemmedAndTokenizedArrests]
     if _warrantsList:
@@ -752,6 +755,7 @@ if __name__ == "__main__":
                 logging.info(row)
                 arrests = getArrestsFromRow(row)
                 warrants = getWarrantsFromRow(row)
+
                 rowsAsList.append([
                     getNamesFromRow(row),
                     getBirthdateFromRow(row),

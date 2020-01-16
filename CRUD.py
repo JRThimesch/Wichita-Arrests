@@ -81,9 +81,9 @@ def getGroupsFromTags(_tags):
     return groups
 
 def getUsableNumber(_number):
-    if type(_number) is int:
-        return _number
-    else:
+    try:
+        return int(_number)
+    except:
         return None
 
 def getUsableDate(_date):
@@ -161,7 +161,6 @@ def getMissingDates(_session):
 
 def writeFromCSVs(_session, rewrite=False):
     if rewrite:
-        regenerateTables()
         dfCoordinates = pd.read_csv('addressCoords.csv', sep=';', index_col=False)
         dates = getCSVDates()
     else:
@@ -182,10 +181,14 @@ def writeFromCSVs(_session, rewrite=False):
                     latitude, longitude = getCoordinates(_session, row['Address'])
             else:
                 latitude, longitude = getCoordinates(_session, row['Address'])
-
-            tags = row['Tags'].split(';')
-            groups = getGroupsFromTags(tags)
-            identifyingGroup = max(groups, key=groups.count)
+            try:
+                tags = row['Tags'].split(';')
+                groups = getGroupsFromTags(tags)
+                identifyingGroup = max(groups, key=groups.count)
+            except AttributeError:
+                tags = None
+                groups = None
+                identifyingGroup = None
             age = getUsableNumber(row['Age'])
             birthdate = getUsableDate(row['Birthdate'])
             time = getUsableTime(row['Time'])
@@ -226,8 +229,17 @@ def writeFromCSVs(_session, rewrite=False):
                                 timeOfDay=timeOfDay,
                                 timeOfYear=timeOfYear,
                                 dayOfTheWeek=dayOfTheWeek)
-                            for i, arrest in enumerate(arrests) 
-                            if arrest != "No arrests listed."]
+                            if arrest != "No arrests listed." or type(warrants) is str
+                            else ArrestInfo(
+                                arrestRecordFKey=currentKey,
+                                arrest=None,
+                                tag=None,
+                                group=None,
+                                warrant=None,
+                                timeOfDay=timeOfDay,
+                                timeOfYear=timeOfYear,
+                                dayOfTheWeek=dayOfTheWeek)
+                            for i, arrest in enumerate(arrests)]
 
             _session.add_all(recordsToAdd)
 
@@ -246,8 +258,8 @@ def writeFromCSVs(_session, rewrite=False):
             _session.add_all(recordsToAdd)
 
 def prompt():
-    response = input("1. Insert Data\n2. View Data\n3. Update Data\n4. Delete Data\n5. Regen Tables\n6. Regen and Rewrite Tables\n")
-    rangeOfResponses = [x for x in range(1, 7)]
+    response = input("1. Insert Data\n2. View Data\n3. Update Data\n4. Delete Data\n5. Regen Tables\n6. Regen and Rewrite Tables\n7. Debug (CHANGES AS NEEDED)\n")
+    rangeOfResponses = [x for x in range(1, 8)]
     try:
         if int(response) not in rangeOfResponses:
             print("Exiting...")
@@ -262,11 +274,14 @@ def selectAction():
     with sessionManager() as s:
         if response == 1:
             writeFromCSVs(s, rewrite=False)
+        elif response == 5:
+            regenerateTables()
         elif response == 6:
             regenerateTables()
+            writeFromCSVs(s, rewrite=True)
         elif response == 7:
             writeFromCSVs(s, rewrite=True)
-            
+
 if __name__ == "__main__":
     filters = loadJSON('./.Website/static/js/Filters.json')
     selectAction()
