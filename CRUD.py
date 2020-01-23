@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, date
 from contextlib import contextmanager
-from sqlalchemy import Column, create_engine, ForeignKey
+from sqlalchemy import Column, create_engine, ForeignKey, desc
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.types import DateTime, Float, Integer, String, Date
@@ -72,8 +72,9 @@ def getCensoredAddress(_address):
 
 def getLastKeyInDB(_session, _column):
     try:
-        return _session.query(_column).all().pop()[0]
-    except IndexError:
+        lastKey = _session.query(_column).order_by(desc(_column)).first()[0]
+        return lastKey
+    except TypeError:
         return 0
 
 def getGroupsFromTags(_tags):
@@ -192,7 +193,9 @@ def writeFromCSVs(_session, rewrite=False):
             age = getUsableNumber(row['Age'])
             birthdate = getUsableDate(row['Birthdate'])
             time = getUsableTime(row['Time'])
-
+            timeOfDay = getTimeOfDay(row['Time'])
+            timeOfYear = getTimeOfYear(row['Date'])
+            dayOfTheWeek = getDayOfTheWeek(row['Date'])
             currentKey = lastKey + index + 1
 
             _session.add(
@@ -210,35 +213,30 @@ def writeFromCSVs(_session, rewrite=False):
                     latitude = latitude,
                     longitude = longitude,
                     incidents = row['Incidents'],
-                    identifyingGroup = identifyingGroup
+                    identifyingGroup = identifyingGroup,
+                    timeOfDay=timeOfDay,
+                    timeOfYear=timeOfYear,
+                    dayOfTheWeek=dayOfTheWeek
                 )
             )
             
             arrests = row['Arrests'].split(';')
             warrants = row['Warrants']
-            timeOfDay = getTimeOfDay(row['Time'])
-            timeOfYear = getTimeOfYear(row['Date'])
-            dayOfTheWeek = getDayOfTheWeek(row['Date'])
+
 
             recordsToAdd = [ArrestInfo(
                                 arrestRecordFKey=currentKey,
                                 arrest=arrest,
                                 tag=tags[i],
                                 group=groups[i],
-                                warrant=None,
-                                timeOfDay=timeOfDay,
-                                timeOfYear=timeOfYear,
-                                dayOfTheWeek=dayOfTheWeek)
+                                warrant=None)
                             if arrest != "No arrests listed." or type(warrants) is str
                             else ArrestInfo(
                                 arrestRecordFKey=currentKey,
                                 arrest=None,
                                 tag=None,
                                 group=None,
-                                warrant=None,
-                                timeOfDay=timeOfDay,
-                                timeOfYear=timeOfYear,
-                                dayOfTheWeek=dayOfTheWeek)
+                                warrant=None)
                             for i, arrest in enumerate(arrests)]
 
             _session.add_all(recordsToAdd)
@@ -249,10 +247,7 @@ def writeFromCSVs(_session, rewrite=False):
                     arrest=None,
                     tag='Warrants',
                     group='Warrants',
-                    warrant=warrant,
-                    timeOfDay=timeOfDay,
-                    timeOfYear=timeOfYear,
-                    dayOfTheWeek=dayOfTheWeek) 
+                    warrant=warrant) 
                 for i, warrant in enumerate(warrants.split(';'))]
 
             _session.add_all(recordsToAdd)

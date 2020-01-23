@@ -29,6 +29,9 @@ class ArrestRecord(Base):
     longitude = Column(Float())
     incidents = Column(String(length=1024))
     identifyingGroup = Column(String(length=48))
+    timeOfDay = Column(String(length=16))
+    timeOfYear = Column(String(length=32))
+    dayOfTheWeek = Column(String(length=16))
 
     children = relationship("ArrestInfo")
 
@@ -41,9 +44,6 @@ class ArrestInfo(Base):
     warrant = Column(String(length=10))
     tag = Column(String(length=48))
     group = Column(String(length=48))
-    timeOfDay = Column(String(length=16))
-    timeOfYear = Column(String(length=32))
-    dayOfTheWeek = Column(String(length=16))
 
 def createTables():
     Base.metadata.create_all(engine)
