@@ -225,20 +225,26 @@ def writeFromCSVs(_session, rewrite=False):
             for i, arrest in enumerate(arrests):
                 if arrest != 'No arrests listed.':
                     recordsToAdd.append(ArrestInfo(
-                                arrestRecordFKey=currentKey,
-                                arrest=arrest,
-                                tag=tags[i],
-                                group=groups[i],
-                                warrant=None))
+                        arrestRecordFKey=currentKey,
+                        arrest=arrest,
+                        tag=tags[i],
+                        group=groups[i],
+                        warrant=None))
                 elif type(warrants) is float:
-                    print(arrests)
-                else:
                     recordsToAdd.append(ArrestInfo(
-                                arrestRecordFKey=currentKey,
-                                arrest=None,
-                                tag=None,
-                                group=None,
-                                warrant=None))
+                        arrestRecordFKey=currentKey,
+                        arrest=None,
+                        tag=None,
+                        group=None,
+                        warrant=None))
+                else:
+                    for j, warrant in enumerate(warrants.split(';')): 
+                        recordsToAdd.append(ArrestInfo(
+                            arrestRecordFKey=currentKey,
+                            arrest=None,
+                            tag='Warrants',
+                            group='Warrants',
+                            warrant=warrant))
 
             _session.add_all(recordsToAdd)
 
