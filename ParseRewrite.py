@@ -628,21 +628,10 @@ def getIncidentsFromRow(_rowText):
     return cleanedIncidentsAndOffenses
 
 def getWarrantCodes(_rowText):
-    try:
-        # Each warrant can be found by spotting the warrantText and subtracting the code offset
-        warrantText = ' Sedgwick County Warrant'
-        warrantIndex = _rowText.index(warrantText)
-        # Each warrant is 10 characters long
-        warrantCodeOffset = warrantIndex - 10
-        # Code lies before the warrantText
-        warrantCode = _rowText[warrantCodeOffset:warrantIndex]
-        # Recursion requires the warrantText to be removed from the _rowText
-        trimmedText = _rowText.replace(warrantText, '', 1)
-        yield warrantCode
-        yield from getWarrantCodes(trimmedText)
-    except ValueError:
-        # Exits recursion when .index does not find a warrant
-        pass
+    # All warrants can be found through regex
+    warrantPattern = '\d{2}[A-Z]{2}\d{6}'
+    warrantCodes = re.findall(warrantPattern, _rowText)
+    return warrantCodes
 
 def getWarrantsFromRow(_rowText):
     return [code for code in getWarrantCodes(_rowText)]

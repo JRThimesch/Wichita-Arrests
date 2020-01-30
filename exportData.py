@@ -8,13 +8,13 @@ from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.types import DateTime, Float, Integer, String, Date
 from contextlib import contextmanager
 
+from Models import ArrestInfo, ArrestRecord
+
 user = os.getenv('Postgres_USER')
 password = os.getenv('Postgres_PASSWORD')
 
-dbURL = f'postgresql+psycopg2://{user}:{password}@localhost:5432/wichita-arrests'
+dbURL = f'postgresql+psycopg2://{user}:{password}@localhost:5432/wichitaArrests'
 engine = create_engine(dbURL)
-metadata = MetaData()
-wichitaArrests = Table('wichita-arrests', metadata, autoload=True, autoload_with=engine)
 Session = sessionmaker(bind=engine)
 
 @contextmanager
@@ -31,7 +31,7 @@ def sessionManager():
 
 if __name__ == "__main__":
     with sessionManager() as s:
-        test = s.query(wichitaArrests.c.address, wichitaArrests.c.lat, wichitaArrests.c.lng).distinct().all()
-        data = [list(item) for item in test]
+        query = s.query(ArrestRecord.address, ArrestRecord.latitude, ArrestRecord.longitude).distinct().all()
+        data = [list(item) for item in query]
     df = pd.DataFrame(data=data, columns=['Address', 'Latitude', 'Longitude'])
     df.to_csv(index=False, sep=';', path_or_buf='addressCoords.csv')

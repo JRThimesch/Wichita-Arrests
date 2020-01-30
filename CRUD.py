@@ -35,8 +35,6 @@ def sessionManager():
     finally:
         session.close()
 
-
-
 def loadJSON(_file):
     with open(_file) as f:
         _dict = json.load(f)
@@ -223,21 +221,24 @@ def writeFromCSVs(_session, rewrite=False):
             arrests = row['Arrests'].split(';')
             warrants = row['Warrants']
 
-
-            recordsToAdd = [ArrestInfo(
+            recordsToAdd = []
+            for i, arrest in enumerate(arrests):
+                if arrest != 'No arrests listed.':
+                    recordsToAdd.append(ArrestInfo(
                                 arrestRecordFKey=currentKey,
                                 arrest=arrest,
                                 tag=tags[i],
                                 group=groups[i],
-                                warrant=None)
-                            if arrest != "No arrests listed." or type(warrants) is str
-                            else ArrestInfo(
+                                warrant=None))
+                elif type(warrants) is float:
+                    print(arrests)
+                else:
+                    recordsToAdd.append(ArrestInfo(
                                 arrestRecordFKey=currentKey,
                                 arrest=None,
                                 tag=None,
                                 group=None,
-                                warrant=None)
-                            for i, arrest in enumerate(arrests)]
+                                warrant=None))
 
             _session.add_all(recordsToAdd)
 
