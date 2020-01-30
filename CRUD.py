@@ -222,40 +222,30 @@ def writeFromCSVs(_session, rewrite=False):
             warrants = row['Warrants']
 
             recordsToAdd = []
-            for i, arrest in enumerate(arrests):
-                if arrest != 'No arrests listed.':
-                    recordsToAdd.append(ArrestInfo(
-                        arrestRecordFKey=currentKey,
-                        arrest=arrest,
-                        tag=tags[i],
-                        group=groups[i],
-                        warrant=None))
-                elif type(warrants) is float:
-                    recordsToAdd.append(ArrestInfo(
-                        arrestRecordFKey=currentKey,
-                        arrest=None,
-                        tag=None,
-                        group=None,
-                        warrant=None))
-                else:
-                    for j, warrant in enumerate(warrants.split(';')): 
+            try:
+                for i, tag in enumerate(tags):
+                    if tag != "Warrants":
                         recordsToAdd.append(ArrestInfo(
                             arrestRecordFKey=currentKey,
-                            arrest=None,
-                            tag='Warrants',
-                            group='Warrants',
-                            warrant=warrant))
-
-            _session.add_all(recordsToAdd)
-
-            if type(warrants) is str:
-                recordsToAdd = [ArrestInfo(
+                            arrest=arrests[i],
+                            tag=tag,
+                            group=groups[i],
+                            warrant=None))
+                    else:
+                        for warrant in warrants.split(';'): 
+                            recordsToAdd.append(ArrestInfo(
+                                arrestRecordFKey=currentKey,
+                                arrest=None,
+                                tag='Warrants',
+                                group='Warrants',
+                                warrant=warrant))
+            except TypeError:
+                recordsToAdd.append(ArrestInfo(
                     arrestRecordFKey=currentKey,
                     arrest=None,
-                    tag='Warrants',
-                    group='Warrants',
-                    warrant=warrant) 
-                for i, warrant in enumerate(warrants.split(';'))]
+                    tag=None,
+                    group=None,
+                    warrant=None))
 
             _session.add_all(recordsToAdd)
 
