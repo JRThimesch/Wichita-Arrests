@@ -451,7 +451,7 @@ def getAddressFromRow(_rowText):
     if 'No address listed...' in _rowText:
         return 'No address listed.'
     # addressText gets close to the actual address but rarely gets a clean address
-    addressText = getTrimmedAddressText(_rowText)        
+    addressText = getTrimmedAddressText(_rowText)
     # Typically addresses do not end in numbers, however, highways do
     # There is no way to differentiate an address ending number from an arrest code
     # Therefore, the easiest solution is to look for those highways before continuing on
@@ -566,6 +566,9 @@ def getTrimmedAndFormattedArrestsList(_listOfArrests):
         # Cannot use .replace here because of the recursion for finding the lastWord
         # If the function recurses, then the failed lastWords would remain at the end of the arrest
         arrest = correctPartOfArrest + newLastWord
+        arrest = arrest.strip()
+        if arrest[-1].isnumeric():
+            arrest = arrest[:-1]
         yield getFormattedArrest(arrest)
 
 def splitDomesticViolenceArrests(_listOfArrests):
@@ -582,7 +585,7 @@ def splitDomesticViolenceArrests(_listOfArrests):
     return _listOfArrests
 
 def getArrestsFromRow(_rowText):
-    incidentIdPattern = '\s?\d{2}C\d{6,}\ss\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
+    incidentIdPattern = '\s?\d{2}C\d{6,}\ss\d{3,}\s-\s|\s?\d{2}C\d{6}\s?-?\s?\d{1,4}'
     warrantPattern = '\d{2}[A-Z]{2}\d{6}'
     # Trim off incidents and warrants from the right
     trimmedIncidents = regexTrimLeftOrRight(incidentIdPattern, _rowText, False)
