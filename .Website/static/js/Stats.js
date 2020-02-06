@@ -286,18 +286,23 @@ export default class Stats extends React.Component {
         })))
     }
 
-
-
     removeBar = (key) => {
         this.setState(prevState => ({
             data: {
                 numbers: prevState.data.numbers.filter((_, i) => i !== key),
                 labels: prevState.data.labels.filter((_, i) => i !== key),
-                colors: prevState.data.colors.filter((_, i) => i !== key)
-            },
-            genderData: {
-                maleCounts: prevState.genderData.maleCounts.filter((_, i) => i !== key),
-                femaleCounts: prevState.genderData.femaleCounts.filter((_, i) => i !== key)
+                colors: prevState.data.colors.filter((_, i) => i !== key),
+                genderData: {
+                    maleCounts: prevState.data.genderData.maleCounts.filter((_, i) => i !== key),
+                    femaleCounts: prevState.data.genderData.femaleCounts.filter((_, i) => i !== key)
+                },
+                ageData: {
+                    averages: prevState.data.ageData.averages.filter((_, i) => i !== key)
+                },
+                timeData: {
+                    dayCounts: prevState.data.timeData.dayCounts.filter((_, i) => i !== key),
+                    nightCounts: prevState.data.timeData.nightCounts.filter((_, i) => i !== key)
+                }
             }
         }))
     }
@@ -337,7 +342,6 @@ export default class Stats extends React.Component {
 
     render = () => {
         let sortReady = (this.state.data.genderData && this.state.data.ageData && this.state.data.timeData && this.state.data.dayData)
-        let num = Math.random() * 100000
         return (
             <>
                 <div className="Stats-container">
