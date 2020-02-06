@@ -1,0 +1,267 @@
+[
+  {
+    "tag": "Alcohol",
+    "identifier": "Other",
+    "color" : "#666666"
+  },
+  {
+    "tag": "Animals",
+    "identifier": "Other",
+    "color" : "#666666"
+  },
+  {
+    "tag": "Arson",
+    "identifier": "Violence",
+    "color" : "#a21111"
+  },
+  {
+    "tag": "Assault",
+    "identifier": "Violence",
+    "color" : "#a21111"
+  },
+  {
+    "tag": "Battery",
+    "identifier": "Violence",
+    "color" : "#a21111"
+  },
+  {
+    "tag": "Bribery",
+    "identifier": "Violence",
+    "color" : "#a21111"
+  },
+  {
+    "tag": "Burglary",
+    "identifier": "Property",
+    "color" : "#1faabb"
+  },
+  {
+    "tag": "Child Abuse",
+    "identifier": "Violence",
+    "color" : "#a21111"
+  },
+  {
+    "tag": "Child Exploitation",
+    "identifier": "Sex",
+    "color" : "#8322b1"
+  },
+  {
+    "tag": "Court Order",
+    "identifier": "Other",
+    "color" : "#666666"
+  },
+  {
+    "tag": "Curfew",
+    "identifier": "Other",
+    "color" : "#666666"
+  },
+  {
+    "tag": "DUI",
+    "identifier": "Vehicles",
+    "color" : "#c4ca32"
+  },
+  {
+    "tag": "Disturbance",
+    "identifier": "Other",
+    "color" : "#666666"
+  },
+  {
+    "tag": "Domestic Violence",
+    "identifier": "Violence",
+    "color" : "#a21111"
+  },
+  {
+    "tag": "Drug Paraphernalia",
+    "identifier": "Drugs",
+    "color" : "#0d8c1f"
+  },
+  {
+    "tag": "Elusion",
+    "identifier": "Other",
+    "color" : "#666666"
+  },
+  {
+    "tag": "Embezzlement",
+    "identifier": "Other",
+    "color" : "#666666"
+  },
+  {
+    "tag": "Firearms",
+    "identifier": "Violence",
+    "color" : "#a21111"
+  },
+  {
+    "tag": "Fraud",
+    "identifier": "Other",
+    "color" : "#666666"
+  },
+  {
+    "tag": "Gambling",
+    "identifier": "Other",
+    "color" : "#666666"
+  },
+  {
+    "tag": "Hit and Run",
+    "identifier": "Vehicles",
+    "color" : "#c4ca32"
+  },
+  {
+    "tag": "Human Trafficking",
+    "identifier": "Sex",
+    "color" : "#8322b1"
+  },
+  {
+    "tag": "Insurance",
+    "identifier": "Vehicles",
+    "color" : "#c4ca32"
+  },
+  {
+    "tag": "Intimidation",
+    "identifier": "Violence",
+    "color" : "#a21111"
+  },
+  {
+    "tag": "Kidnapping",
+    "identifier": "Other",
+    "color" : "#666666"
+  },
+  {
+    "tag": "Larceny",
+    "identifier": "Property",
+    "color" : "#1faabb"
+  },
+  {
+    "tag": "License",
+    "identifier": "Vehicles",
+    "color" : "#c4ca32"
+  },
+  {
+    "tag": "Littering",
+    "identifier": "Property",
+    "color" : "#1faabb"
+  },
+  {
+    "tag": "Manslaughter",
+    "identifier": "Violence",
+    "color" : "#a21111"
+  },
+  {
+    "tag": "Marijuana",
+    "identifier": "Drugs",
+    "color" : "#0d8c1f"
+  },
+  {
+    "tag": "Meth",
+    "identifier": "Drugs",
+    "color" : "#0d8c1f"
+  },
+  {
+    "tag": "Money Laundering",
+    "identifier": "Property",
+    "color" : "#1faabb"
+  },
+  {
+    "tag": "Murder",
+    "identifier": "Violence",
+    "color" : "#a21111"
+  },
+  {
+    "tag": "Narcotics / Other Drugs",
+    "identifier": "Drugs",
+    "color" : "#0d8c1f"
+  },
+  {
+    "tag": "Obstruction",
+    "identifier": "Other",
+    "color" : "#666666"
+  },
+  {
+    "tag": "Privacy",
+    "identifier": "Other",
+    "color" : "#666666"
+  },
+  {
+    "tag": "Procurement",
+    "identifier": "Sex",
+    "color" : "#8322b1"
+  },
+  {
+    "tag": "Property Damage",
+    "identifier": "Property",
+    "color" : "#1faabb"
+  },
+  {
+    "tag": "Property Violation",
+    "identifier": "Property",
+    "color" : "#1faabb"
+  },
+  {
+    "tag": "Public Indecency",
+    "identifier": "Sex",
+    "color" : "#8322b1"
+  },
+  {
+    "tag": "Rape",
+    "identifier": "Sex",
+    "color" : "#8322b1"
+  },
+  {
+    "tag": "Robbery",
+    "identifier": "Violence",
+    "color" : "#a21111"
+  },
+  {
+    "tag": "Runaway",
+    "identifier": "Other",
+    "color" : "#666666"
+  },
+  {
+    "tag": "Sexual Assault",
+    "identifier": "Sex",
+    "color" : "#8322b1"
+  },
+  {
+    "tag": "Solicitation",
+    "identifier": "Sex",
+    "color" : "#8322b1"
+  },
+  {
+    "tag": "Speed Limit",
+    "identifier": "Vehicles",
+    "color" : "#c4ca32"
+  },
+  {
+    "tag": "Stalking",
+    "identifier": "Other",
+    "color" : "#666666"
+  },
+  {
+    "tag": "Theft",
+    "identifier": "Property",
+    "color" : "#1faabb"
+  },
+  {
+    "tag": "Trespass",
+    "identifier": "Property",
+    "color" : "#1faabb"
+  },
+  {
+    "tag": "Vehicle Theft",
+    "identifier": "Vehicles",
+    "color" : "#c4ca32"
+  },
+  {
+    "tag": "Vehicle / Traffic Violation",
+    "identifier": "Vehicles",
+    "color" : "#c4ca32"
+  },
+  {
+    "tag": "Warrants",
+    "identifier": "Warrants",
+    "color" : "#142292"
+  },
+  {
+    "tag": "Weapons",
+    "identifier": "Violence",
+    "color" : "#a21111"
+  }
+]

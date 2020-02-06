@@ -1,0 +1,97 @@
+[
+    {
+        "group" : "Drugs",
+        "tags": [
+            "Drug Paraphernalia",
+            "Marijuana",
+            "Meth",
+            "Narcotics / Other Drugs"
+        ],
+        "color": "#0d8c1f"
+    },
+    {
+        "group" : "Other",
+        "tags": [
+            "Alcohol",
+            "Animals",
+            "Court Order",
+            "Curfew",
+            "Disturbance",
+            "Elusion",
+            "Embezzlement",
+            "Fraud",
+            "Gambling",
+            "Kidnapping",
+            "Obstruction",
+            "Privacy",
+            "Runaway",
+            "Stalking"
+        ],
+        "color": "#666666"
+    },
+    {
+        "group" : "Property",
+        "tags": [
+            "Burglary",
+            "Larceny",
+            "Littering",
+            "Money Laundering",
+            "Property Damage",
+            "Property Violation",
+            "Theft",
+            "Trespass"
+        ],
+        "color": "#1faabb"
+    },
+    {
+        "group" : "Sex",
+        "tags": [
+            "Child Exploitation",
+            "Human Trafficking",
+            "Procurement",
+            "Public Indecency",
+            "Rape",
+            "Sexual Assault",
+            "Solicitation"
+        ],
+        "color": "#8322b1"
+    },
+    {
+        "group" : "Vehicles",
+        "tags": [
+            "DUI",
+            "Hit and Run",
+            "Insurance",
+            "License",
+            "Speed Limit",
+            "Vehicle Theft",
+            "Vehicle / Traffic Violation"
+        ],
+        "color": "#c4ca32"
+    },
+    {
+        "group" : "Violence",
+        "tags": [
+            "Arson",
+            "Assault",
+            "Battery",
+            "Bribery",
+            "Child Abuse",
+            "Domestic Violence",
+            "Firearms",
+            "Intimidation",
+            "Manslaughter",
+            "Murder",
+            "Robbery",
+            "Weapons"
+        ],
+        "color": "#a21111"
+    },
+    {
+        "group" : "Warrants",
+        "tags": [
+            "Warrants"
+        ],
+        "color": "#142292"
+    }
+]

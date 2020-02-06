@@ -1,0 +1,32 @@
+$container-width: 200px;
+$dropbutton-width: 22px;
+
+.GroupFilter{
+    &-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        background-color: #f3efe6;
+    }
+    
+    &-label {
+        display: flex;
+        width: $container-width - $dropbutton-width;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    &-img {
+        height: 26px;
+        margin: 2px 5px 2px 5px;
+    }
+
+    &-title {
+        text-decoration: none;
+        font-family: QuickSand;
+        font-size: 1.1em;
+        font-weight: 300;
+    }
+}
