@@ -1911,6 +1911,4 @@ def groupDayData():
 
     
 if __name__ == "__main__":
-    import socket
-    print(socket.getaddrinfo('localhost', 12000))
-    app.run(debug=True, use_reloader=True, host="localhost:12000")
+    app.run(debug=True, use_reloader=True)
