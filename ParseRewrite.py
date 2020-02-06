@@ -26,7 +26,7 @@ def loadLinearSVC():
     y_enc = encoder.fit_transform(y)
 
     # These were found to be the best parameters through GridSearchCV
-    linearSVC = LinearSVC(C = 10, tol=1e-3)
+    linearSVC = LinearSVC(C = 10, tol = 1e-3)
     linearSVC.fit(x_vect, y_enc)
     return linearSVC
 
