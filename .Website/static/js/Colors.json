@@ -1,0 +1,30 @@
+[
+  {
+    "group" : "Drugs",
+    "color" : "#0d8c1f"
+  },
+  {
+    "group" : "Other",
+    "color" : "#666666"
+  },
+  {
+    "group" : "Property",
+    "color" : "#1faabb"
+  },
+  {
+    "group" : "Sex",
+    "color" : "#8322b1"
+  },
+  {
+    "group" : "Vehicles",
+    "color" : "#c4ca32"
+  },
+  {
+    "group" : "Violence",
+    "color" : "#a21111"
+  },
+  {
+    "group" : "Warrants",
+    "color" : "#142292"
+  }
+]

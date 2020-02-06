@@ -1,0 +1,81 @@
+.AddressSearch {
+    &-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        position: fixed;
+        background-color: white;
+        right: 60px;
+        top: 70px;
+        width: auto;
+    }
+
+    &-suggestion {
+        font-size: 1em;
+        text-decoration: none;
+        font-family: QuickSand;
+        padding: 5px 30px 5px 10px;
+        color: #666666;
+
+        &:hover {
+            color: #000000;
+            cursor: pointer;
+        }
+        &:active {
+            background-color: #fdfaf3;
+        }
+    }
+    &-bar {
+        font-size: 1em;
+        text-decoration: none;
+        font-family: QuickSand;
+        width: 100px;
+        box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
+        border-radius: 2px;
+        border-style: none;
+        text-align: center;
+    }
+    
+    @media only screen and (min-width: 360px) and (max-width: 600px) {
+        &-container {
+            left: 60px;
+            top: 70px;
+            width: 170px;
+        }
+
+        &-bar {
+            padding: 0;
+            width: 170px;
+            height: 40px;
+            box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
+            border-radius: 2px;
+            border-style: none;
+            text-align: center;
+            
+        }
+        &-suggestion-container {
+            text-align: left;
+        }
+    }
+
+    @media only screen and (min-width: 600px) {
+        &-container {
+            left: 60px;
+            top: 70px;
+            width: 280px;
+        }
+        &-bar {
+            padding: 0;
+            width: 280px;
+            height: 40px;
+            box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
+            border-radius: 2px;
+            border-style: none;
+            text-align: center;
+        }
+        &-suggestion-container {
+            text-align: center;
+        }
+    }
+
+}

@@ -1,0 +1,19 @@
+.Filter {
+    &-label {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #fdfaf3;
+        cursor: pointer;
+        text-align: center;
+    }
+    &-img {
+        height: 26px;
+        margin: 2px 5px 2px 5px;
+    }
+    &-title {
+        font-size: 1em;
+        text-decoration: none;
+        font-family: QuickSand;
+    }
+}
