@@ -12,7 +12,9 @@ export default class RemoveButton extends React.Component {
 
     render = () => {
         return (
-            <div onClick={this.handleClick} className="RemoveButton"/>
+            <div onClick={this.handleClick} className="RemoveButton">
+                <div className="RemoveButton-dash"/>
+            </div>
         )
     }
 }

@@ -354,12 +354,18 @@ export default class Stats extends React.Component {
                         hoverdata={this.getHoverData}
                         getinfoboxdata={this.getInfoBoxData}
                     />
-                    <div className="Stats-right-container">
+                    <div className="Stats-right-container">       
                         <div className="Stats-button-container">
+                            <div className="Stats-button-container-group" style={{alignItems:'center', justifyContent:'center'}}>
+                                <GraphButton
+                                    handleclick={this.tutorial}
+                                    ><p style={{fontSize: '50px'}}>?</p></GraphButton>
+                            </div>
+                            <hr className="Stats-button-container-line"/>
                             <div className="Stats-button-container-group">
                                 <GraphButton
-                                handleclick={this.createCustomGraph}
-                                ><img src="static/images/customGraph.png"/></GraphButton>
+                                    handleclick={this.createCustomGraph}
+                                    ><img src="static/images/customGraph.png"/></GraphButton>
                                 {this.state.activeData.queryType != 'distinct' 
                                     ? <GraphButton
                                     handleclick={this.toggleQuery}
