@@ -2,54 +2,49 @@
 0|INVASION OF PRIVACY|Privacy|invas privaci
 1|VIOLATION OF PRIVACY|Privacy|violat privaci
 2|HOME PRIVACY|Privacy|home privaci
-3|BOMB THREAT|Terrorism|bomb threat
-4|BOMB|Terrorism|bomb
-5|MANUFACTURING BOMB|Terrorism|manufactur bomb
-6|TERRORISTIC ACTIONS|Terrorism|terrorist action
-7|ATTEMPT TO PERFORM TERRORISM|Terrorism|attempt perform terror
-8|DIGITAL EXTORTION|Extortion|digit extort
-9|CYBER EXTORTION|Extortion|cyber extort
-10|BLACKMAIL|Extortion|blackmail
-11|BLACK MAIL|Extortion|black mail
-12|RANSOM|Extortion|ransom
-13|LAUNDERING|Money Laundering|launder
-14|MONEY LAUNDERING|Money Laundering|money launder
-15|LAUNDER MONEY|Money Laundering|launder money
-16|ATTEMPT TO BRIBE POLICE|Bribery|attempt bribe polic
-17|BRIBERY|Bribery|briberi
-18|ATTEMPT TO BRIBE WITNESS|Bribery|attempt bribe wit
-19|ATTEMPT TO BRIBE|Bribery|attempt bribe
-20|BRIBE|Bribery|bribe
-21|CHILD PORNOGRAPHY|Child Exploitation|child pornographi
-22|CHILD PORN|Child Exploitation|child porn
-23|UNLAWFUL USE OF CREDIT CARD|Child Exploitation|unlaw use credit card
-24|UNLAWFUL USE OF DEBIT CARD|Fraud|unlaw use debit card
-25|THEFT OF CREDIT CARD|Fraud|theft credit card
-26|CREDIT CARD|Fraud|credit card
-27|UNLAWFUL USE OF FINANCIAL CARD|Fraud|unlaw use financi card
-28|ELECTRONIC SOLICITATION|Solicitation|electron solicit
-29|SOLICITING MINORS|Solicitation|solicit minor
-30|SOLITATION OF A MINOR|Solicitation|solit minor
-31|FOLLOWING HOME|Stalking|follow home
-32|STALKING RESTRAINING ORDER|Stalking|stalk restrain order
-33|STALK HARRASSMENT|Stalking|stalk harrass
-34|FOLLOWING/MAKE THREATS|Stalking|follow make threat
-35|KILLING ANIMAL|Animal Cruelty|kill anim
-36|ANIMAL ABUSE|Animal Cruelty|anim abus
-37|MISTREATMENT OF PET|Animal Cruelty|mistreat pet
-38|MISTREATING ANIMAL|Animal Cruelty|mistreat anim
-39|TRAFFICK HUMANS FOR SEXUAL PURPOSES|Human Trafficking|traffick human sexual purpos
-40|SEX TRAFFICK|Human Trafficking|sex traffick
-41|TRAFFICK HUMANS FOR SALE|Human Trafficking|traffick human sale
-42|SALE OF HUMANS|Human Trafficking|sale human
-43|ENTER AFTER HOURS|Trespass|enter hour
-44|STAY AFTER HOURS|Trespass|stay hour
-45|TREES OVERGROWN|Property Violation|tree overgrown
-46|UNSAFE LIMBS IN YARD|Property Violation|unsaf limb yard
-47|MAINTENANCE CODE|Property Violation|mainten code
-48|BUILDING NOT SECURE|Property Violation|build secur
-49|WINDOW NOT IN PLACE|Property Violation|window place
-50|PERMIT FOR RENTAL|Property Violation|permit rental
-51|FENCE IN DISREPAIR|Property Violation|fenc disrepair
-52|VANDAL|Property Damage|vandal
-53|VANDALISM|Property Damage|vandal
+3|BOMB THREAT|Weapons|bomb threat
+4|BOMB|Weapons|bomb
+5|MANUFACTURING BOMB|Weapons|manufactur bomb
+6|LAUNDERING|Money Laundering|launder
+7|MONEY LAUNDERING|Money Laundering|money launder
+8|LAUNDER MONEY|Money Laundering|launder money
+9|ATTEMPT TO BRIBE POLICE|Bribery|attempt bribe polic
+10|BRIBERY|Bribery|briberi
+11|ATTEMPT TO BRIBE WITNESS|Bribery|attempt bribe wit
+12|ATTEMPT TO BRIBE|Bribery|attempt bribe
+13|BRIBE|Bribery|bribe
+14|CHILD PORNOGRAPHY|Child Exploitation|child pornographi
+15|CHILD PORN|Child Exploitation|child porn
+16|UNLAWFUL USE OF CREDIT CARD|Child Exploitation|unlaw use credit card
+17|UNLAWFUL USE OF DEBIT CARD|Fraud|unlaw use debit card
+18|THEFT OF CREDIT CARD|Fraud|theft credit card
+19|CREDIT CARD|Fraud|credit card
+20|UNLAWFUL USE OF FINANCIAL CARD|Fraud|unlaw use financi card
+21|ELECTRONIC SOLICITATION|Solicitation|electron solicit
+22|SOLICITING MINORS|Solicitation|solicit minor
+23|SOLITATION OF A MINOR|Solicitation|solit minor
+24|FOLLOWING HOME|Stalking|follow home
+25|STALKING RESTRAINING ORDER|Stalking|stalk restrain order
+26|STALK HARRASSMENT|Stalking|stalk harrass
+27|FOLLOWING/MAKE THREATS|Stalking|follow make threat
+28|KILLING ANIMAL|Animal Cruelty|kill anim
+29|ANIMAL ABUSE|Animal Cruelty|anim abus
+30|MISTREATMENT OF PET|Animal Cruelty|mistreat pet
+31|MISTREATING ANIMAL|Animal Cruelty|mistreat anim
+32|TRAFFICK HUMANS FOR SEXUAL PURPOSES|Human Trafficking|traffick human sexual purpos
+33|SEX TRAFFICK|Human Trafficking|sex traffick
+34|TRAFFICK HUMANS FOR SALE|Human Trafficking|traffick human sale
+35|SALE OF HUMANS|Human Trafficking|sale human
+36|ENTER AFTER HOURS|Trespass|enter hour
+37|STAY AFTER HOURS|Trespass|stay hour
+38|TREES OVERGROWN|Property Violation|tree overgrown
+39|UNSAFE LIMBS IN YARD|Property Violation|unsaf limb yard
+40|MAINTENANCE CODE|Property Violation|mainten code
+41|BUILDING NOT SECURE|Property Violation|build secur
+42|WINDOW NOT IN PLACE|Property Violation|window place
+43|PERMIT FOR RENTAL|Property Violation|permit rental
+44|FENCE IN DISREPAIR|Property Violation|fenc disrepair
+45|VANDAL|Property Damage|vandal
+46|VANDALISM|Property Damage|vandal
+47|LEWD|Public Indecency|lewd
+48|LASCIVIOUS|Public Indecency|lascivi

@@ -7,7 +7,7 @@ from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
-from sklearn.svm import SVC
+from sklearn.svm import LinearSVC
 
 HEADER_STR = 'Incidents with Offenses / Warrants'
 HEADER_OFFSET = len('Incidents with Offenses / Warrants')
@@ -15,35 +15,25 @@ logging.basicConfig(level=logging.INFO, filename='logs/runtime.log', filemode='a
 pd.set_option('display.max_rows', 1000)
 stemmer = PorterStemmer()
 tokenizer = RegexpTokenizer(r'\w+')
-vectorizer = TfidfVectorizer()
+vectorizer = TfidfVectorizer(ngram_range=(1,2), max_df=.11)
 encoder = LabelEncoder()
 
-def loadSVC():
-    # Combine the real data from the PDFs with fake arrests to create a prediction model
-    # As of 11/14/19, this model has roughly 99.5% accuracy
-    trueData = pd.read_csv('data/trueData.csv', sep='|')
-    fakeData = pd.read_csv('data/fakeData.csv', sep='|')
-    combinedData = trueData.append(fakeData)
-
-    x, y = combinedData['stems'], combinedData['tags']
-    x = vectorizer.fit_transform(x)
-    y = encoder.fit_transform(y)
+def loadLinearSVC():
+    lawData = pd.read_csv('data/lawData.csv', sep='|')
+    
+    x, y = lawData['stems'], lawData['tags']
+    x_vect = vectorizer.fit_transform(x)
+    y_enc = encoder.fit_transform(y)
 
     # These were found to be the best parameters through GridSearchCV
-    svc = SVC(C=100.0, kernel='linear', degree=3, gamma=.1)
-    svc.fit(x, y)
-    return svc
+    linearSVC = LinearSVC(C = 10, tol = 1e-3)
+    linearSVC.fit(x_vect, y_enc)
+    return linearSVC
 
 def loadJSON(_file):
     with open(_file) as f:
         _dict = json.load(f)
     return _dict
-    
-def doesRewriteAll():
-    try:
-        return sys.argv[1] == '-r'
-    except IndexError:
-        return False
 
 def getExistingPDFDates():
     return [pdf.replace('.pdf', '') for pdf in os.listdir("PDFs/") if pdf.endswith('.pdf')]
@@ -65,10 +55,26 @@ def getExistingCSVDates():
 def getMissingParses():
     return [parse for parse in getExistingPDFDates() if parse not in getExistingCSVDates()]
 
+def doesRewriteAll():
+    try:
+        return sys.argv[1] == '-a'
+    except IndexError:
+        return False
+
+def doesRewriteSome():
+    try:
+        return sys.argv[1] == '-r'
+    except IndexError:
+        return False
+
 def getPDFs():
-    # If parameter '-r' exists then rewrite all CSVs
+    # If parameter '-a' exists then rewrite all CSVs
     if doesRewriteAll():
         return ["PDFs/" + pdf + '.pdf' for pdf in getExistingPDFDates()]
+
+    # If parameter '-r' exists then rewrite some CSVs
+    if doesRewriteSome():
+        return ["PDFs/" + pdf for pdf in sys.argv[2:]]
 
     missingParses = getMissingParses()
 
@@ -268,7 +274,7 @@ def getNamesFromRow(_rowText):
     # First digit signals the beginning of the date, ergo, the end of the name entry
     sliceIndex = getNumOfCharUntilNumber(_rowText)
     name = _rowText[:sliceIndex]
-    return name
+    return name.strip()
 
 def isBirthdateFound(_trimmedRowText):
     # Ideally, the row gets trimmed into a {birthdate} {age} {date} format
@@ -445,7 +451,7 @@ def getAddressFromRow(_rowText):
     if 'No address listed...' in _rowText:
         return 'No address listed.'
     # addressText gets close to the actual address but rarely gets a clean address
-    addressText = getTrimmedAddressText(_rowText)        
+    addressText = getTrimmedAddressText(_rowText)
     # Typically addresses do not end in numbers, however, highways do
     # There is no way to differentiate an address ending number from an arrest code
     # Therefore, the easiest solution is to look for those highways before continuing on
@@ -560,10 +566,26 @@ def getTrimmedAndFormattedArrestsList(_listOfArrests):
         # Cannot use .replace here because of the recursion for finding the lastWord
         # If the function recurses, then the failed lastWords would remain at the end of the arrest
         arrest = correctPartOfArrest + newLastWord
+        arrest = arrest.strip()
+        if arrest[-1].isnumeric():
+            arrest = arrest[:-1]
         yield getFormattedArrest(arrest)
 
+def splitDomesticViolenceArrests(_listOfArrests):
+    replacements = [', DOMESTIC VIOLENCE', '/DOMESTIC VIOLENCE', 'DOMESTIC VIOLENCE', 'DOMESTIC']
+    for i, arrest in enumerate(_listOfArrests):
+        if 'DOMESTIC' in arrest and arrest != 'DOMESTIC VIOLENCE' and arrest != 'FIGHTING/DOMESTIC VIOLENCE':
+            for replacement in replacements:
+                arrest = arrest.replace(replacement, '').strip()
+            _listOfArrests[i] = arrest
+            if 'DOMESTIC VIOLENCE' not in _listOfArrests:
+                _listOfArrests.append('DOMESTIC VIOLENCE')
+            #print(arrest, _listOfArrests)
+
+    return _listOfArrests
+
 def getArrestsFromRow(_rowText):
-    incidentIdPattern = '\s?\d{2}C\d{6,}\ss\d{3,}\s-\s|\s?\d{2}C\d{6}\s?'
+    incidentIdPattern = '\s?\d{2}C\d{6,}\ss\d{3,}\s-\s|\s?\d{2}C\d{6}\s?-?\s?\d{1,4}'
     warrantPattern = '\d{2}[A-Z]{2}\d{6}'
     # Trim off incidents and warrants from the right
     trimmedIncidents = regexTrimLeftOrRight(incidentIdPattern, _rowText, False)
@@ -574,7 +596,8 @@ def getArrestsFromRow(_rowText):
         return ['No arrests listed.']
     listOfArrests = getSplitArrests(trimmedArrestText)
     # Finally clean up each arrest in the list
-    trimmedAndFormattedListOfArrests = [arrest for arrest in getTrimmedAndFormattedArrestsList(listOfArrests)] 
+    trimmedAndFormattedListOfArrests = [arrest for arrest in getTrimmedAndFormattedArrestsList(listOfArrests)]  
+    trimmedAndFormattedListOfArrests = splitDomesticViolenceArrests(trimmedAndFormattedListOfArrests)
     return trimmedAndFormattedListOfArrests
     
 def getListOfIncidents(_incidentText):
@@ -608,21 +631,10 @@ def getIncidentsFromRow(_rowText):
     return cleanedIncidentsAndOffenses
 
 def getWarrantCodes(_rowText):
-    try:
-        # Each warrant can be found by spotting the warrantText and subtracting the code offset
-        warrantText = ' Sedgwick County Warrant'
-        warrantIndex = _rowText.index(warrantText)
-        # Each warrant is 10 characters long
-        warrantCodeOffset = warrantIndex - 10
-        # Code lies before the warrantText
-        warrantCode = _rowText[warrantCodeOffset:warrantIndex]
-        # Recursion requires the warrantText to be removed from the _rowText
-        trimmedText = _rowText.replace(warrantText, '', 1)
-        yield warrantCode
-        yield from getWarrantCodes(trimmedText)
-    except ValueError:
-        # Exits recursion when .index does not find a warrant
-        pass
+    # All warrants can be found through regex
+    warrantPattern = '\d{2}[A-Z]{2}\d{6}'
+    warrantCodes = re.findall(warrantPattern, _rowText)
+    return warrantCodes
 
 def getWarrantsFromRow(_rowText):
     return [code for code in getWarrantCodes(_rowText)]
@@ -666,7 +678,7 @@ def predictTag(_stemmedArrest):
     # Vectorize the incoming arrest and predict on the vector
     # Inverse transform the prediction to get the tag
     stemmedVect = vectorizer.transform([_stemmedArrest])
-    predictedTagEnc = svc.predict(stemmedVect)
+    predictedTagEnc = linearSVC.predict(stemmedVect)
     predictedTag = encoder.inverse_transform(predictedTagEnc)[0]
     print('Predicting tag for', _stemmedArrest, ':', predictedTag)
     return predictedTag
@@ -674,7 +686,10 @@ def predictTag(_stemmedArrest):
 def getTagsFromArrests(_arrestsList, _warrantsList):
     # If no arrests are found, then only warrants exist.
     if _arrestsList == ['No arrests listed.']:
-        return ['Warrants']
+        if _warrantsList:
+            return ['Warrants']
+        else:
+            return []
     stemmedAndTokenizedArrests = map(getStemmedAndTokenizedArrest, _arrestsList)
     tags = [matchWholeArrest(arrest) for arrest in stemmedAndTokenizedArrests]
     if _warrantsList:
@@ -710,7 +725,7 @@ def logProblemWithPDF(_pdf, _exception):
     logging.critical('EXITING FOR ' + _pdf)
 
 if __name__ == "__main__":
-    svc = loadSVC()
+    linearSVC = loadLinearSVC()
     abbreviations = loadJSON('JSONS/regexAbbreviations.json')
     replacements = loadJSON('JSONS/replacements.json')
     tagsSingularDict = loadJSON('JSONS/tagsSingular.json')
@@ -732,6 +747,7 @@ if __name__ == "__main__":
                 logging.info(row)
                 arrests = getArrestsFromRow(row)
                 warrants = getWarrantsFromRow(row)
+
                 rowsAsList.append([
                     getNamesFromRow(row),
                     getBirthdateFromRow(row),
@@ -741,10 +757,10 @@ if __name__ == "__main__":
                     getDateFromRow(row),
                     getTimeFromRow(row),
                     getAddressFromRow(row),
-                    arrests,
-                    getIncidentsFromRow(row),
-                    getWarrantsFromRow(row),
-                    getTagsFromArrests(arrests, warrants)
+                    ';'.join(arrests),
+                    ';'.join(getIncidentsFromRow(row)),
+                    ';'.join(warrants),
+                    ';'.join(getTagsFromArrests(arrests, warrants))
                 ])
 
             # Because of the algorithm, the list needs to be reversed for the correct order

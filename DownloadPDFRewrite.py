@@ -26,6 +26,7 @@ def getPDFFileNameFromURL(_URL):
     # rpartition to get /11-05-19%20arrest%20report.pdf then partition the to get the name
     pdfName = _URL.rpartition('/')[2]
     pdfName = pdfName.partition('%')[0]
+    pdfName = getFormattedDateFromFileName(pdfName, "%m-%d-%y")
     pdfName += '.pdf'
     return pdfName 
 
