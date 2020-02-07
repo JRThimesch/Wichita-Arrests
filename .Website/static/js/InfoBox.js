@@ -1,4 +1,5 @@
 import React from "react";
+import GraphButton from "./GraphButton";
 import "./InfoBox.css"
 
 export default class InfoBox extends React.PureComponent {
@@ -49,7 +50,15 @@ export default class InfoBox extends React.PureComponent {
                 <img className="InfoBox-info-img" src="static/images/agesIcon.png"/>
                 {data.averageAge}
             </span> : null
-            
+
+        let warningIcon = this.props.graphlevel > 0 ? 
+            <>
+            <hr className="InfoBox-line-large"/>
+            <GraphButton
+                handleclick={this.warning}
+                ><p style={{fontSize: '50px', fontWeight: 900, color: 'red'}}>!</p></GraphButton>
+            </> : null
+
         return (
             <div style={this.props.style} className="InfoBox-main-container">
                 <div className="InfoBox-title-container">
@@ -67,6 +76,7 @@ export default class InfoBox extends React.PureComponent {
                 <div className="InfoBox-info-container">
                     {subcontainers}
                 </div>
+                {warningIcon}
             </div>
         )
     }

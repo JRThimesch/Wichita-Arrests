@@ -961,7 +961,7 @@ def getHoverData(_data):
                     .all()
 
                 print(query)
-                titles = ['Top 10 Relevant Arrests', 'Gender Data', 'Week Data']
+                titles = [f'Top {len(query)} Arrests Belonging to {label}', 'Gender Data', 'Week Data']
                 labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
                 counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
                 actives = ['arrests', 'genders', 'days']
@@ -1292,7 +1292,7 @@ def getHoverData(_data):
                     .all()
 
                 print(query)
-                titles = ['Top 10 Relevant Arrests', 'Gender Data', 'Week Data']
+                titles = [f'Top {len(query)} Arrests Belonging to {label}', 'Gender Data', 'Week Data']
                 labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
                 counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
                 actives = ['arrests', 'genders', 'days']
@@ -1829,6 +1829,190 @@ def statsDefaultData():
         'labels': tags,
         'colors' : colors
     }
+    return jsonify(data)
+
+def getSingleLabelCountSubquery(s, _column, _label, _joinTable = ArrestInfo, _charges = False):
+    if not _charges:
+        if _column != ArrestRecord.time:
+            return s.query(_column)\
+                .join(_joinTable)\
+                .distinct(ArrestInfo.arrestRecordFKey)\
+                .group_by(ArrestInfo.arrestRecordFKey, _column)\
+                .filter(_column == _label)\
+                .subquery()
+        else:
+            return s.query(_column)\
+                .join(_joinTable)\
+                .distinct(ArrestInfo.arrestRecordFKey)\
+                .group_by(ArrestInfo.arrestRecordFKey, _column)\
+                .filter(_column.contains(_label))\
+                .subquery()
+    else:
+        if _column != ArrestRecord.time:
+            return s.query(_column)\
+                .join(_joinTable)\
+                .group_by(_column)\
+                .filter(_column == _label)\
+                .subquery()
+        else:
+            return s.query(_column)\
+                .join(_joinTable)\
+                .group_by(_column)\
+                .filter(_column.contains(_label))\
+                .subquery()
+
+def getSingleLabelData(_data):
+    print(_data)
+    activeBars = _data['dataActive']
+    queryType = _data['queryType']
+    label = _data['labels'][0]
+
+    colorDict = {
+        'genders': {
+            'MALE': '#80d8f2', 
+            'FEMALE': '#eb88d4'
+        },
+        'days': {
+            'Sunday': '#FF5500',
+            'Monday': '#FF6D00',
+            'Tuesday': '#FF8500',
+            'Wednesday': '#FF9D00',
+            'Thursday': '#FFBC22',
+            'Friday': '#FFDB44',
+            'Saturday': '#FFFA66'
+        },
+        'months': {
+            "January": "#0095FF",
+            "February": "#10A4CC",
+            "March": "#20B39A",
+            "April": "#30C268",
+            "May": "#40D136",
+            "June": "#6FC628",
+            "July": "#9FBB1B",
+            "August": "#CFB00D",
+            "September": "#FFA600",
+            "October": "#B19B45",
+            "November": "#64918B",
+            "December": "#1787D1"
+        },
+        'dates': {
+            "01": "#0095FF",
+            "02": "#10A4CC",
+            "03": "#20B39A",
+            "04": "#30C268",
+            "05": "#40D136",
+            "06": "#6FC628",
+            "07": "#9FBB1B",
+            "08": "#CFB00D",
+            "09": "#FFA600",
+            "10": "#B19B45",
+            "11": "#64918B",
+            "12": "#1787D1"
+        }
+    }
+
+    timeColors = ["#00044A", "#051553", "#0A275C", "#0F3866", 
+        "#144A6F", "#195B78", "#1E6D82", "#237E8B", 
+        "#289094", "#2DA19E", "#32B3A7", "#37C4B0", 
+        "#3CD6BA", "#36C2AF", "#31AFA5", "#2B9C9B", 
+        "#268991", "#207687", "#1B637C", "#155072", 
+        "#103D68", "#0A2A5E", "#051754", "#00044A"]
+
+    filtersDict = loadJSON("./static/js/FiltersImproved.json")
+
+    with sessionManager() as s:
+        if queryType == 'distinct':
+            if activeBars == 'groups':
+                subq = getSingleLabelCountSubquery(s, ArrestInfo.group, label, _joinTable=ArrestRecord)
+                count = s.query(func.count(subq.c.group))\
+                    .all()[0][0]
+                # NEED COLOR
+            elif activeBars == 'tags':
+                subq = getSingleLabelCountSubquery(s, ArrestInfo.tag, label, _joinTable=ArrestRecord)
+                count = s.query(func.count(subq.c.tag))\
+                    .all()[0][0]
+                # NEED COLOR
+            elif activeBars == 'arrests':
+                subq = getSingleLabelCountSubquery(s, ArrestInfo.arrest, label, _joinTable=ArrestRecord)
+                count = s.query(func.count(subq.c.arrest))\
+                    .all()[0][0]
+                # NEED COLOR
+            elif activeBars == 'ages':
+                subq = getSingleLabelCountSubquery(s, ArrestRecord.age, label)
+                count = s.query(func.count(subq.c.age))\
+                    .all()[0][0]
+                color = '#123123'
+            elif activeBars == "dates":
+                subq = getSingleLabelCountSubquery(s, ArrestRecord.date, label)
+                count = s.query(func.count(subq.c.date))\
+                    .all()[0][0]
+                color = colorDict['dates'][label.partition(' ')[0]]
+            elif activeBars == "genders":
+                subq = getSingleLabelCountSubquery(s, ArrestRecord.sex, label)
+                count = s.query(func.count(subq.c.sex))\
+                    .all()[0][0]
+                color = colorDict['genders'][label]
+            elif activeBars == "times":
+                hour = label.partition(':')[0] + ':'
+                subq = getSingleLabelCountSubquery(s, ArrestRecord.time, hour)
+                count = s.query(func.count(subq.c.time))\
+                    .all()[0][0]
+                color = timeColors[int(hour)]
+            elif activeBars == "days":
+                subq = getSingleLabelCountSubquery(s, ArrestRecord.dayOfTheWeek, label)
+                count = s.query(func.count(subq.c.dayOfTheWeek))\
+                    .all()[0][0]
+
+                color = colorDict['days'][label]
+            elif activeBars == "months":
+                subq = getSingleLabelCountSubquery(s, ArrestRecord.timeOfYear, label)
+                count = s.query(func.count(subq.c.timeOfYear))\
+                    .all()[0][0]
+                color = colorDict['months'][label.partition(' ')[0]]
+
+        elif queryType == 'charges':
+            # NEED CHARGES
+            
+    return count, color
+
+@app.route('/api/stats/label', methods=['GET', 'POST'])
+def statsSingleLabelData():
+    data = request.get_json()
+
+    count, color = getSingleLabelData(data)
+
+    genderCounts = getGenderData(data)
+    averageAgeCounts = getAgeData(data)
+    timesCounts = getTimesData(data) 
+    daysCounts = getDaysData(data)
+
+    data = {
+        'numbers': [count],
+        'labels': data['labels'],
+        'colors' : [color],
+        'genderData': {
+            'maleCounts': genderCounts[0],
+            'femaleCounts': genderCounts[1]
+        },
+        'ageData': {
+            'averages' : averageAgeCounts
+        },
+        'timeData': {
+            'dayCounts': timesCounts[0],
+            'nightCounts': timesCounts[1]
+        },
+        'dayData': {
+            'sundayCounts': daysCounts[0],
+            'mondayCounts': daysCounts[1],
+            'tuesdayCounts': daysCounts[2],
+            'wednesdayCounts': daysCounts[3],
+            'thursdayCounts': daysCounts[4],
+            'fridayCounts': daysCounts[5],
+            'saturdayCounts': daysCounts[6]
+        }
+    }
+
+    print(data)
     return jsonify(data)
 
 @app.route('/api/stats/hover', methods=['GET', 'POST'])

@@ -1,7 +1,7 @@
 import React from "react";
 import BarGraph from "./BarGraph";
-import './Stats.css'
 import GraphButton from "./GraphButton";
+import './Stats.css'
 
 const AnimatedBars = props => {
     return <div className="AnimatedBars-container">
@@ -16,13 +16,14 @@ export default class Stats extends React.Component {
         super(props);
         this.state = {
             ascending: true,
+            level: 0,
             activeData: {
                 barsActive: 'groups',
                 groupingActive: 'default',
                 queryType: 'distinct'
             },
             data: { 
-                numbers: Array.from(Array(150), () => 0),
+                numbers: Array.from(Array(5), () => 0),
                 labels: [],
                 colors: null,
                 genderData: {
@@ -35,39 +36,64 @@ export default class Stats extends React.Component {
                 timeData: {
                     dayCounts: null,
                     nightCounts: null,
+                },
+                dayData: {
+                    sundayCounts: null,
+                    mondayCounts: null,
+                    tuesdayCounts: null,
+                    wednesdayCounts: null,
+                    thursdayCounts: null,
+                    fridayCounts: null,
+                    saturdayCounts: null
                 }
             },
-            key: 0
+            key: 0,
+            inactiveLabels: [],
+            inactiveLabelsVisible: false
         }
     }
 
     createCustomGraph = () => {
-        this.setState({data: { 
-            numbers: Array.from(Array(150), () => 0),
-            labels: [],
-            colors: null,
-            genderData: {
-                maleCounts: null,
-                femaleCounts: null
+        this.setState(prevState => ({
+            data: { 
+                numbers: Array.from(Array(5), () => 0),
+                labels: [],
+                colors: null,
+                genderData: {
+                    maleCounts: null,
+                    femaleCounts: null
+                },
+                ageData : {
+                    averages: null
+                },
+                timeData: {
+                    dayCounts: null,
+                    nightCounts: null,
+                },
+                dayData: {
+                    sundayCounts: null,
+                    mondayCounts: null,
+                    tuesdayCounts: null,
+                    wednesdayCounts: null,
+                    thursdayCounts: null,
+                    fridayCounts: null,
+                    saturdayCounts: null
+                },
             },
-            ageData : {
-                averages: null
-            },
-            timeData: {
-                dayCounts: null,
-                nightCounts: null,
-            }
-        }})
+            inactiveLabels: [...prevState.data.labels, ...prevState.inactiveLabels]
+        }))
     }
 
     getInfoBoxData = (passedData, active) => {
         this.setState(prevState => ({
+            level: prevState.level + 1,
             activeData: {
                 barsActive: active,
                 groupingActive: 'default',
                 queryType: prevState.activeData.queryType
             },
-            data: passedData
+            data: passedData,
+            key : Math.random() * 10000
         }))
     }
 
@@ -302,21 +328,107 @@ export default class Stats extends React.Component {
                 timeData: {
                     dayCounts: prevState.data.timeData.dayCounts.filter((_, i) => i !== key),
                     nightCounts: prevState.data.timeData.nightCounts.filter((_, i) => i !== key)
-                }
-            }
+                },
+                dayData: {
+                    'sundayCounts': prevState.data.dayData.sundayCounts.filter((_, i) => i !== key),
+                    'mondayCounts': prevState.data.dayData.mondayCounts.filter((_, i) => i !== key),
+                    'tuesdayCounts': prevState.data.dayData.tuesdayCounts.filter((_, i) => i !== key),
+                    'wednesdayCounts': prevState.data.dayData.wednesdayCounts.filter((_, i) => i !== key),
+                    'thursdayCounts': prevState.data.dayData.thursdayCounts.filter((_, i) => i !== key),
+                    'fridayCounts': prevState.data.dayData.fridayCounts.filter((_, i) => i !== key),
+                    'saturdayCounts': prevState.data.dayData.saturdayCounts.filter((_, i) => i !== key)
+                },
+            },
+            inactiveLabels: [...prevState.inactiveLabels, prevState.data.labels[key]]
         }))
     }
 
-    addBar = () => {
+    toggleInactiveVisible = () => {
+        this.setState(prevState => ({inactiveLabelsVisible: !prevState.inactiveLabelsVisible}))
+    }
+
+    closeInactiveLabels = (e) => {
+        e.stopPropagation()
+        this.setState({inactiveLabelsVisible: false})
+    }
+
+
+    addBar = (e) => {
+        e.stopPropagation()
+        let label = e.currentTarget.innerHTML
+        fetch(`/api/stats/label`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                labels: [label],
+                queryType: this.state.activeData.queryType,
+                dataActive: this.state.activeData.barsActive
+            })
+        })
+        .then(response => response.json())
+        .then(data => this.setState(prevState => ({
+            data: {
+                numbers: [...prevState.data.numbers, ...data.numbers],
+                labels: [...prevState.data.labels, label],
+                colors: [...prevState.data.colors, ...data.colors],
+                genderData: {
+                    maleCounts: [...prevState.data.genderData.maleCounts, ...data.genderData.maleCounts],
+                    femaleCounts: [...prevState.data.genderData.femaleCounts, ...data.genderData.femaleCounts]
+                },
+                ageData: {
+                    averages: [...prevState.data.ageData.averages, ...data.ageData.averages]
+                },
+                timeData: {
+                    dayCounts: [...prevState.data.timeData.dayCounts, ...data.timeData.dayCounts],
+                    nightCounts: [...prevState.data.timeData.nightCounts, ...data.timeData.nightCounts]
+                },
+                dayData: {
+                    sundayCounts: [...prevState.data.dayData.sundayCounts, ...data.dayData.sundayCounts],
+                    mondayCounts: [...prevState.data.dayData.mondayCounts, ...data.dayData.mondayCounts],
+                    tuesdayCounts: [...prevState.data.dayData.tuesdayCounts, ...data.dayData.tuesdayCounts],
+                    wednesdayCounts: [...prevState.data.dayData.wednesdayCounts, ...data.dayData.wednesdayCounts],
+                    thursdayCounts: [...prevState.data.dayData.thursdayCounts, ...data.dayData.thursdayCounts],
+                    fridayCounts: [...prevState.data.dayData.fridayCounts, ...data.dayData.fridayCounts],
+                    saturdayCounts: [...prevState.data.dayData.saturdayCounts, ...data.dayData.saturdayCounts]
+                }
+            },
+            inactiveLabels: prevState.inactiveLabels.filter((item, _) => item != label)
+
+        })))
+        /*
         this.setState(prevState => ({
             data: {
-                numbers: [...prevState.data.numbers, Math.round(Math.random() * 900)],
-                labels: [...prevState.data.labels, 'new test label'],
-                colors: [...prevState.data.colors, '#123123']
-            }
-        }))
-    }
+                numbers: prevState.data.numbers,
+                labels: [...prevState.data.labels, label],
+                colors: prevState.data.colors,
+                genderData: {
+                    maleCounts: prevState.data.genderData.maleCounts,
+                    femaleCounts: prevState.data.genderData.femaleCounts
+                },
+                ageData: {
+                    averages: prevState.data.ageData.averages
+                },
+                timeData: {
+                    dayCounts: prevState.data.timeData.dayCounts,
+                    nightCounts: prevState.data.timeData.nightCounts
+                },
+                dayData: {
+                    sundayCounts: prevState.data.dayData.sundayCounts,
+                    mondayCounts: prevState.data.dayData.mondayCounts,
+                    tuesdayCounts: prevState.data.dayData.tuesdayCounts,
+                    wednesdayCounts: prevState.data.dayData.wednesdayCounts,
+                    thursdayCounts: prevState.data.dayData.thursdayCounts,
+                    fridayCounts: prevState.data.dayData.fridayCounts,
+                    saturdayCounts: prevState.data.dayData.saturdayCounts
+                }
+            },
+            inactiveLabels: prevState.inactiveLabels.filter((item, _) => item != label)
 
+        }))*/
+    }
 
     componentDidMount = () => {
         let currentData = 'groups'
@@ -342,6 +454,32 @@ export default class Stats extends React.Component {
 
     render = () => {
         let sortReady = (this.state.data.genderData && this.state.data.ageData && this.state.data.timeData && this.state.data.dayData)
+        let truncatedLabels = this.state.inactiveLabels.length !== 0  ? 
+            this.state.inactiveLabels.sort().map(label =>{
+                if (label.length > 16) {
+                    return label.slice(0, 16) + "..."
+                } else {
+                    return label
+                }
+            }) : []
+        let inactiveLabels = this.state.inactiveLabelsVisible ?
+            <div className="Stats-add-container">
+                <div style={{display:'flex', justifyContent:'flex-end'}}>
+                    labels to add
+                    <span className="Stats-add-button-close" onClick={this.closeInactiveLabels}/>
+                </div>
+                <div className="Stats-add-label-container">
+                    {truncatedLabels.map((label, i) => {
+                        return <span className="Stats-add-label" onClick={this.addBar} key={i}>{label}</span>
+                    })}
+                </div>
+            </div> : null
+            
+        let addButton = this.state.inactiveLabels.length !== 0 ? <div
+            className="Stats-add-button"
+            onClick={this.toggleInactiveVisible}
+            ><p style={{fontSize: '50px', fontWeight: 900}}>+</p>{inactiveLabels}</div> : null
+        
         return (
             <>
                 <div className="Stats-container">
@@ -349,10 +487,10 @@ export default class Stats extends React.Component {
                         data={this.state.data}
                         key={this.state.key}
                         activedata={this.state.activeData}
-                        addbar={this.addBar}
                         removebar={this.removeBar}
                         hoverdata={this.getHoverData}
                         getinfoboxdata={this.getInfoBoxData}
+                        graphlevel={this.state.level}
                     />
                     <div className="Stats-right-container">       
                         <div className="Stats-button-container">
@@ -366,6 +504,7 @@ export default class Stats extends React.Component {
                                 <GraphButton
                                     handleclick={this.createCustomGraph}
                                     ><img src="static/images/customGraph.png"/></GraphButton>
+                                {addButton}
                                 {this.state.activeData.queryType != 'distinct' 
                                     ? <GraphButton
                                     handleclick={this.toggleQuery}

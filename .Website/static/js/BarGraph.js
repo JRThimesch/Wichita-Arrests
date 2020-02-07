@@ -221,8 +221,7 @@ export default class BarGraph extends React.Component {
         //console.log(this.props.data.numbers, this.props.data.labels, this.props.data.colors)
         return (
             <div className="BarGraph-main-container">
-                <AddButton addbar={this.props.addbar}/>
-                {this.state.activeBar ? <InfoBox closeinfo={this.closeInfo} getinfoboxdata={this.props.getinfoboxdata} currentcount={this.state.currentCount} data={this.state.extendedData}/> : null}
+                {this.state.activeBar ? <InfoBox graphlevel={this.props.graphlevel} closeinfo={this.closeInfo} getinfoboxdata={this.props.getinfoboxdata} currentcount={this.state.currentCount} data={this.state.extendedData}/> : null}
                 <div className="BarGraph-title-container">
                     <span className="BarGraph-title-main">Number of Arrests</span>
                     <span className="BarGraph-title-subtext">(by {this.props.activedata.barsActive})</span>
