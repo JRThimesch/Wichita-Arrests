@@ -56,28 +56,28 @@ export default class Stats extends React.Component {
     createCustomGraph = () => {
         this.setState(prevState => ({
             data: { 
-                numbers: Array.from(Array(5), () => 0),
+                numbers: [],
                 labels: [],
-                colors: null,
+                colors: [],
                 genderData: {
-                    maleCounts: null,
-                    femaleCounts: null
+                    maleCounts: [],
+                    femaleCounts: []
                 },
                 ageData : {
-                    averages: null
+                    averages: []
                 },
                 timeData: {
-                    dayCounts: null,
-                    nightCounts: null,
+                    dayCounts: [],
+                    nightCounts: [],
                 },
                 dayData: {
-                    sundayCounts: null,
-                    mondayCounts: null,
-                    tuesdayCounts: null,
-                    wednesdayCounts: null,
-                    thursdayCounts: null,
-                    fridayCounts: null,
-                    saturdayCounts: null
+                    sundayCounts: [],
+                    mondayCounts: [],
+                    tuesdayCounts: [],
+                    wednesdayCounts: [],
+                    thursdayCounts: [],
+                    fridayCounts: [],
+                    saturdayCounts: []
                 },
             },
             inactiveLabels: [...prevState.data.labels, ...prevState.inactiveLabels]
@@ -355,7 +355,7 @@ export default class Stats extends React.Component {
 
     addBar = (e) => {
         e.stopPropagation()
-        let label = e.currentTarget.innerHTML
+        let label = e.currentTarget.getAttribute('title')
         fetch(`/api/stats/label`, {
             method: 'POST',
             headers: {
@@ -470,7 +470,7 @@ export default class Stats extends React.Component {
                 </div>
                 <div className="Stats-add-label-container">
                     {truncatedLabels.map((label, i) => {
-                        return <span className="Stats-add-label" onClick={this.addBar} key={i}>{label}</span>
+                        return <span title={this.state.inactiveLabels[i]} className="Stats-add-label" onClick={this.addBar} key={i}>{label}</span>
                     })}
                 </div>
             </div> : null

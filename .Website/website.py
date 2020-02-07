@@ -1926,17 +1926,18 @@ def getSingleLabelData(_data):
                 subq = getSingleLabelCountSubquery(s, ArrestInfo.group, label, _joinTable=ArrestRecord)
                 count = s.query(func.count(subq.c.group))\
                     .all()[0][0]
-                # NEED COLOR
+                color = [i['color'] for i in filtersDict if label == i['group']][0]
             elif activeBars == 'tags':
                 subq = getSingleLabelCountSubquery(s, ArrestInfo.tag, label, _joinTable=ArrestRecord)
                 count = s.query(func.count(subq.c.tag))\
                     .all()[0][0]
-                # NEED COLOR
+                color = [i['color'] for i in filtersDict if label in i['tags']][0]
             elif activeBars == 'arrests':
                 subq = getSingleLabelCountSubquery(s, ArrestInfo.arrest, label, _joinTable=ArrestRecord)
+                tag = s.query(ArrestInfo.tag).filter(ArrestInfo.arrest == label).limit(1).all()[0][0]
                 count = s.query(func.count(subq.c.arrest))\
                     .all()[0][0]
-                # NEED COLOR
+                color = [i['color'] for i in filtersDict if tag in i['tags']][0]
             elif activeBars == 'ages':
                 subq = getSingleLabelCountSubquery(s, ArrestRecord.age, label)
                 count = s.query(func.count(subq.c.age))\
@@ -1962,7 +1963,6 @@ def getSingleLabelData(_data):
                 subq = getSingleLabelCountSubquery(s, ArrestRecord.dayOfTheWeek, label)
                 count = s.query(func.count(subq.c.dayOfTheWeek))\
                     .all()[0][0]
-
                 color = colorDict['days'][label]
             elif activeBars == "months":
                 subq = getSingleLabelCountSubquery(s, ArrestRecord.timeOfYear, label)
@@ -1972,6 +1972,7 @@ def getSingleLabelData(_data):
 
         elif queryType == 'charges':
             # NEED CHARGES
+            pass
             
     return count, color
 
