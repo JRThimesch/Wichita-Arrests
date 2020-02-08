@@ -53,35 +53,69 @@ export default class Stats extends React.Component {
         }
     }
 
-    createCustomGraph = () => {
-        this.setState(prevState => ({
-            data: { 
-                numbers: [],
-                labels: [],
-                colors: [],
-                genderData: {
-                    maleCounts: [],
-                    femaleCounts: []
+    deleteGraph = () => {
+        if (this.state.inactiveLabelsVisible) {
+            this.setState(prevState => ({
+                data: { 
+                    numbers: [],
+                    labels: [],
+                    colors: [],
+                    genderData: {
+                        maleCounts: [],
+                        femaleCounts: []
+                    },
+                    ageData : {
+                        averages: []
+                    },
+                    timeData: {
+                        dayCounts: [],
+                        nightCounts: [],
+                    },
+                    dayData: {
+                        sundayCounts: [],
+                        mondayCounts: [],
+                        tuesdayCounts: [],
+                        wednesdayCounts: [],
+                        thursdayCounts: [],
+                        fridayCounts: [],
+                        saturdayCounts: []
+                    },
                 },
-                ageData : {
-                    averages: []
+                inactiveLabels: [...prevState.data.labels, ...prevState.inactiveLabels],
+                inactiveLabelsVisible: false
+            }))
+        } else {
+            this.setState(prevState => ({
+                data: { 
+                    numbers: [],
+                    labels: [],
+                    colors: [],
+                    genderData: {
+                        maleCounts: [],
+                        femaleCounts: []
+                    },
+                    ageData : {
+                        averages: []
+                    },
+                    timeData: {
+                        dayCounts: [],
+                        nightCounts: [],
+                    },
+                    dayData: {
+                        sundayCounts: [],
+                        mondayCounts: [],
+                        tuesdayCounts: [],
+                        wednesdayCounts: [],
+                        thursdayCounts: [],
+                        fridayCounts: [],
+                        saturdayCounts: []
+                    },
                 },
-                timeData: {
-                    dayCounts: [],
-                    nightCounts: [],
-                },
-                dayData: {
-                    sundayCounts: [],
-                    mondayCounts: [],
-                    tuesdayCounts: [],
-                    wednesdayCounts: [],
-                    thursdayCounts: [],
-                    fridayCounts: [],
-                    saturdayCounts: []
-                },
-            },
-            inactiveLabels: [...prevState.data.labels, ...prevState.inactiveLabels]
-        }))
+                inactiveLabels: [...prevState.data.labels, ...prevState.inactiveLabels]
+            }))
+        }
+
+
     }
 
     getInfoBoxData = (passedData, active) => {
@@ -313,6 +347,9 @@ export default class Stats extends React.Component {
     }
 
     removeBar = (key) => {
+        let uniqueLabels = [...new Set(this.state.inactiveLabels)]
+        console.log(uniqueLabels.length)
+
         this.setState(prevState => ({
             data: {
                 numbers: prevState.data.numbers.filter((_, i) => i !== key),
@@ -398,36 +435,6 @@ export default class Stats extends React.Component {
             inactiveLabels: prevState.inactiveLabels.filter((item, _) => item != label)
 
         })))
-        /*
-        this.setState(prevState => ({
-            data: {
-                numbers: prevState.data.numbers,
-                labels: [...prevState.data.labels, label],
-                colors: prevState.data.colors,
-                genderData: {
-                    maleCounts: prevState.data.genderData.maleCounts,
-                    femaleCounts: prevState.data.genderData.femaleCounts
-                },
-                ageData: {
-                    averages: prevState.data.ageData.averages
-                },
-                timeData: {
-                    dayCounts: prevState.data.timeData.dayCounts,
-                    nightCounts: prevState.data.timeData.nightCounts
-                },
-                dayData: {
-                    sundayCounts: prevState.data.dayData.sundayCounts,
-                    mondayCounts: prevState.data.dayData.mondayCounts,
-                    tuesdayCounts: prevState.data.dayData.tuesdayCounts,
-                    wednesdayCounts: prevState.data.dayData.wednesdayCounts,
-                    thursdayCounts: prevState.data.dayData.thursdayCounts,
-                    fridayCounts: prevState.data.dayData.fridayCounts,
-                    saturdayCounts: prevState.data.dayData.saturdayCounts
-                }
-            },
-            inactiveLabels: prevState.inactiveLabels.filter((item, _) => item != label)
-
-        }))*/
     }
 
     componentDidMount = () => {
@@ -478,7 +485,7 @@ export default class Stats extends React.Component {
         let addButton = this.state.inactiveLabels.length !== 0 ? <div
             className="Stats-add-button"
             onClick={this.toggleInactiveVisible}
-            ><p style={{fontSize: '50px', fontWeight: 900}}>+</p>{inactiveLabels}</div> : null
+            ><img src="static/images/addGraph.png"/>{inactiveLabels}</div> : null
         
         return (
             <>
@@ -491,6 +498,7 @@ export default class Stats extends React.Component {
                         hoverdata={this.getHoverData}
                         getinfoboxdata={this.getInfoBoxData}
                         graphlevel={this.state.level}
+                        removeReady={sortReady}
                     />
                     <div className="Stats-right-container">       
                         <div className="Stats-button-container">
@@ -502,8 +510,8 @@ export default class Stats extends React.Component {
                             <hr className="Stats-button-container-line"/>
                             <div className="Stats-button-container-group">
                                 <GraphButton
-                                    handleclick={this.createCustomGraph}
-                                    ><img src="static/images/customGraph.png"/></GraphButton>
+                                    handleclick={this.deleteGraph}
+                                    ><img src="static/images/eraseGraph.png"/></GraphButton>
                                 {addButton}
                                 {this.state.activeData.queryType != 'distinct' 
                                     ? <GraphButton
@@ -520,16 +528,16 @@ export default class Stats extends React.Component {
                             <div className="Stats-button-container-group">
                                 <GraphButton
                                     handleclick={this.getData}
-                                    type="arrests"
-                                    ><img src="static/images/arrestsIcon.png"/></GraphButton>
+                                    type="groups"
+                                    ><img src="static/images/groupsIcon.png"/></GraphButton>
                                 <GraphButton 
                                     handleclick={this.getData}
                                     type="tags"
                                     ><img src="static/images/tagsIcon.png"/></GraphButton>
                                 <GraphButton
                                     handleclick={this.getData}
-                                    type="groups"
-                                    ><img src="static/images/groupsIcon.png"/></GraphButton>
+                                    type="arrests"
+                                    ><img src="static/images/arrestsIcon.png"/></GraphButton>
                                 <GraphButton
                                     handleclick={this.getData}
                                     type="ages"

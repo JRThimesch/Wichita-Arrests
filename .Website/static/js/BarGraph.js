@@ -171,7 +171,7 @@ export default class BarGraph extends React.Component {
         }
 
         let labels = this.props.data.labels.map((label, i) => {
-            return <span key={i} style={labelStyle}>{buttons[i]}{label}</span>
+            return <span key={i} style={labelStyle}>{this.props.removeReady ? buttons[i] : null}{label}</span>
         })
 
         let colors = this.props.data.colors

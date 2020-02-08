@@ -1958,7 +1958,7 @@ def getSingleLabelData(_data):
                 subq = getSingleLabelCountSubquery(s, ArrestRecord.time, hour)
                 count = s.query(func.count(subq.c.time))\
                     .all()[0][0]
-                color = timeColors[int(hour)]
+                color = timeColors[int(hour[:-1])]
             elif activeBars == "days":
                 subq = getSingleLabelCountSubquery(s, ArrestRecord.dayOfTheWeek, label)
                 count = s.query(func.count(subq.c.dayOfTheWeek))\
