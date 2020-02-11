@@ -82,7 +82,8 @@ export default class Stats extends React.Component {
                     },
                 },
                 inactiveLabels: [...prevState.data.labels, ...prevState.inactiveLabels],
-                inactiveLabelsVisible: false
+                inactiveLabelsVisible: false,
+                level: 0
             }))
         } else {
             this.setState(prevState => ({
@@ -111,7 +112,8 @@ export default class Stats extends React.Component {
                         saturdayCounts: []
                     },
                 },
-                inactiveLabels: [...prevState.data.labels, ...prevState.inactiveLabels]
+                inactiveLabels: [...prevState.data.labels, ...prevState.inactiveLabels],
+                level: 0
             }))
         }
 
@@ -319,7 +321,8 @@ export default class Stats extends React.Component {
                     groupingActive: 'default',
                     queryType: prevState.activeData.queryType
                 },
-                key : Math.random() * 10000
+                key : Math.random() * 10000,
+                level: 0
             }))
         })
     }
@@ -376,7 +379,8 @@ export default class Stats extends React.Component {
                     'saturdayCounts': prevState.data.dayData.saturdayCounts.filter((_, i) => i !== key)
                 },
             },
-            inactiveLabels: [...prevState.inactiveLabels, prevState.data.labels[key]]
+            inactiveLabels: [...prevState.inactiveLabels, prevState.data.labels[key]],
+            level: 0
         }))
     }
 
@@ -432,8 +436,8 @@ export default class Stats extends React.Component {
                     saturdayCounts: [...prevState.data.dayData.saturdayCounts, ...data.dayData.saturdayCounts]
                 }
             },
-            inactiveLabels: prevState.inactiveLabels.filter((item, _) => item != label)
-
+            inactiveLabels: prevState.inactiveLabels.filter((item, _) => item != label),
+            level: 0
         })))
     }
 
