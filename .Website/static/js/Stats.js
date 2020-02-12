@@ -116,8 +116,6 @@ export default class Stats extends React.Component {
                 level: 0
             }))
         }
-
-
     }
 
     getInfoBoxData = (passedData, active) => {
@@ -131,6 +129,10 @@ export default class Stats extends React.Component {
             data: passedData,
             key : Math.random() * 10000
         }))
+        this.groupGenders(passedData, active)
+        this.groupAges(passedData, active)
+        this.groupTimes(passedData, active)
+        this.groupDays(passedData, active)
     }
 
     groupGenders = (passedData, active) => {
@@ -351,7 +353,6 @@ export default class Stats extends React.Component {
 
     removeBar = (key) => {
         let uniqueLabels = [...new Set(this.state.inactiveLabels)]
-        console.log(uniqueLabels.length)
 
         this.setState(prevState => ({
             data: {
@@ -370,13 +371,13 @@ export default class Stats extends React.Component {
                     nightCounts: prevState.data.timeData.nightCounts.filter((_, i) => i !== key)
                 },
                 dayData: {
-                    'sundayCounts': prevState.data.dayData.sundayCounts.filter((_, i) => i !== key),
-                    'mondayCounts': prevState.data.dayData.mondayCounts.filter((_, i) => i !== key),
-                    'tuesdayCounts': prevState.data.dayData.tuesdayCounts.filter((_, i) => i !== key),
-                    'wednesdayCounts': prevState.data.dayData.wednesdayCounts.filter((_, i) => i !== key),
-                    'thursdayCounts': prevState.data.dayData.thursdayCounts.filter((_, i) => i !== key),
-                    'fridayCounts': prevState.data.dayData.fridayCounts.filter((_, i) => i !== key),
-                    'saturdayCounts': prevState.data.dayData.saturdayCounts.filter((_, i) => i !== key)
+                    sundayCounts: prevState.data.dayData.sundayCounts.filter((_, i) => i !== key),
+                    mondayCounts: prevState.data.dayData.mondayCounts.filter((_, i) => i !== key),
+                    tuesdayCounts: prevState.data.dayData.tuesdayCounts.filter((_, i) => i !== key),
+                    wednesdayCounts: prevState.data.dayData.wednesdayCounts.filter((_, i) => i !== key),
+                    thursdayCounts: prevState.data.dayData.thursdayCounts.filter((_, i) => i !== key),
+                    fridayCounts: prevState.data.dayData.fridayCounts.filter((_, i) => i !== key),
+                    saturdayCounts: prevState.data.dayData.saturdayCounts.filter((_, i) => i !== key)
                 },
             },
             inactiveLabels: [...prevState.inactiveLabels, prevState.data.labels[key]],
@@ -392,7 +393,6 @@ export default class Stats extends React.Component {
         e.stopPropagation()
         this.setState({inactiveLabelsVisible: false})
     }
-
 
     addBar = (e) => {
         e.stopPropagation()

@@ -10,7 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.svm import LinearSVC
 
 HEADER_STR = 'Incidents with Offenses / Warrants'
-HEADER_OFFSET = len('Incidents with Offenses / Warrants')
+HEADER_OFFSET = len(HEADER_STR)
 logging.basicConfig(level=logging.INFO, filename='logs/runtime.log', filemode='a', format='%(name)s - %(levelname)s - %(message)s')
 pd.set_option('display.max_rows', 1000)
 stemmer = PorterStemmer()

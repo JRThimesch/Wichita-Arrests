@@ -249,6 +249,9 @@ def writeFromCSVs(_session, rewrite=False):
 
             _session.add_all(recordsToAdd)
 
+def executeSQL(_session, _sql):
+    print([i for i in _session.execute(_sql)])
+
 def prompt():
     response = input("1. Insert Data\n2. View Data\n3. Update Data\n4. Delete Data\n5. Regen Tables\n6. Regen and Rewrite Tables\n7. Debug (CHANGES AS NEEDED)\n")
     rangeOfResponses = [x for x in range(1, 8)]
@@ -266,6 +269,8 @@ def selectAction():
     with sessionManager() as s:
         if response == 1:
             writeFromCSVs(s, rewrite=False)
+        elif response == 2:
+            executeSQL(s, input('Input raw sql: '))
         elif response == 5:
             regenerateTables()
         elif response == 6:

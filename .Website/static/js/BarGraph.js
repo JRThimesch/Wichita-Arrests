@@ -14,15 +14,15 @@ export default class BarGraph extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            'extendedData' : {
-                'subtitles': null,
-                'sublabels': null,
-                'subnumbers': null,
-                'currentLabel': null
+            extendedData : {
+                subtitles: null,
+                sublabels: null,
+                subnumbers: null,
+                currentLabel: null
             },
-            'activeBar' : null,
-            'currentCount' : null,
-
+            activeBar : null,
+            currentCount : null,
+            selectedIndex: [null, null]
         }
     }
 
@@ -77,7 +77,7 @@ export default class BarGraph extends React.Component {
         let sublabel = e.currentTarget.getAttribute('label')
         //let label = e.currentTarget.innerHTML
         let barNumber = null
-        if (parentIndex != this.state.activeBar || sublabelIndex != this.state.activeSubBar) {
+        if (parentIndex != this.state.activeBar || sublabel != this.state.activeSubBar) {
             barNumber = parentIndex
             fetch(`api/stats/hover`, {
                 method: 'POST',
@@ -96,10 +96,11 @@ export default class BarGraph extends React.Component {
                     extendedData,
                     activeBar: barNumber,
                     activeSubBar: sublabel,
-                    currentCount: currentCount
+                    currentCount: currentCount,
+                    selectedIndex: [parentIndex, sublabelIndex]
             })))
         } else {
-            this.setState({activeBar: null})
+            this.setState({activeBar: null, selectedIndex: [null, null]})
         }
     }
 
