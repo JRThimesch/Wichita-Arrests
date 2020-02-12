@@ -2,6 +2,16 @@ import React from "react";
 import GraphButton from "./GraphButton";
 import "./InfoBox.css"
 
+const AnimatedGraphBars = props => {
+    return <div className="AnimatedGraphBars-container" {...props}>
+        <div className="AnimatedGraphBars" style={{ height: "18px" }} />
+        <div className="AnimatedGraphBars" style={{ height: "25px" }}/>
+        <div className="AnimatedGraphBars" style={{ height: "16px" }} />
+        <div className="AnimatedGraphBars" style={{ height: "8px" }} />
+        <div className="AnimatedGraphBars" style={{ height: "12px" }} />
+    </div>
+} 
+
 export default class InfoBox extends React.PureComponent {
     constructor(props) {
         super(props)
@@ -23,12 +33,12 @@ export default class InfoBox extends React.PureComponent {
         let subcontainers = data.subtitles ?
             data.subtitles.map((subtitle, i) => {
                 return (
-                    <div className="InfoBox-info-subcontainer">
+                    <div key={i} className="InfoBox-info-subcontainer">
                         <span className="InfoBox-subtitle"><u>{subtitle}</u></span>
                         {data.sublabels[i].map((sublabel, j) => {
-                            return <span className="InfoBox-text"><b>{j+1})</b> {sublabel}: ({data.subnumbers[i][j]})</span>
+                            return <span key={j} className="InfoBox-text"><b>{j+1})</b> {sublabel}: ({data.subnumbers[i][j]})</span>
                         })}
-                        <img key={i} index={i} onClick={this.handleClick} className="InfoBox-info-img" src="static/images/createGraphIcon.png"/>
+                        <AnimatedGraphBars key={i} index={i} onClick={this.handleClick}/>
                     </div>
                 )
             }) : null
@@ -54,9 +64,7 @@ export default class InfoBox extends React.PureComponent {
         let warningIcon = this.props.graphlevel > 0 ? 
             <>
             <hr className="InfoBox-line-large"/>
-            <GraphButton
-                handleclick={this.warning}
-                ><p style={{fontSize: '50px', fontWeight: 900, color: 'red'}}>!</p></GraphButton>
+            <p style={{fontSize: '50px', fontWeight: 900, color: 'red'}}>!</p>
             </> : null
 
         return (

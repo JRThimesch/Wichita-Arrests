@@ -475,8 +475,8 @@ export default class Stats extends React.Component {
             }) : []
         let inactiveLabels = this.state.inactiveLabelsVisible ?
             <div className="Stats-add-container">
-                <div style={{display:'flex', justifyContent:'flex-end'}}>
-                    labels to add
+                <div className="Stats-add-title-container" onClick={(e) => e.stopPropagation()}>
+                    <span className="Stats-add-title">Add Labels</span>
                     <span className="Stats-add-button-close" onClick={this.closeInactiveLabels}/>
                 </div>
                 <div className="Stats-add-label-container">

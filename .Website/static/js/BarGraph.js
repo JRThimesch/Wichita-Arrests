@@ -1,5 +1,4 @@
 import React from "react";
-import AddButton from './AddButton'
 import RemoveButton from './RemoveButton'
 import InfoBox from "./InfoBox";
 import "./BarGraph.css"
@@ -47,13 +46,13 @@ export default class BarGraph extends React.Component {
 
     getIncrements = (numbers) => {
         let ceiling = this.getCeiling(numbers)
-        return [
+        return ceiling != Number.NEGATIVE_INFINITY ? [
             0, 
             ceiling / 4, 
             ceiling / 2, 
             3 * ceiling / 4, 
             ceiling
-        ]
+        ] : [0, 0, 0, 0, 0]
     }
 
     getWidths = (numbers) => {
