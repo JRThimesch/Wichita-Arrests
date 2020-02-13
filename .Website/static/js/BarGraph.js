@@ -199,7 +199,7 @@ export default class BarGraph extends React.Component {
         }
 
         let labels = this.props.data.labels.map((label, i) => {
-            return <span key={i} style={labelStyle}>{this.props.removeReady ? buttons[i] : null}{label}</span>
+            return <div className="BarGraph-y-axis-label-container" style={labelStyle}>{this.props.removeReady ? buttons[i] : null}<span key={i} style={labelStyle}>{label}</span></div>
         })
 
         let colors = this.props.data.colors
