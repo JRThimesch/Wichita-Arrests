@@ -74,7 +74,6 @@ export default class BarGraph extends React.Component {
         let sublabelIndex = e.currentTarget.getAttribute('index')
         let currentCount = e.currentTarget.getAttribute('count')
         let sublabel = e.currentTarget.getAttribute('label')
-        //let label = e.currentTarget.innerHTML
         let barNumber = null
         if (parentIndex != this.state.activeBar || sublabel != this.state.activeSubBar) {
             barNumber = parentIndex
@@ -97,42 +96,93 @@ export default class BarGraph extends React.Component {
                     activeSubBar: sublabel,
                     currentCount: currentCount,
                     selectedIndex: [parentIndex, sublabelIndex]
-            })))
+            }))).then(this.opacityOnSelect(parentIndex, sublabelIndex))
         } else {
             this.setState({activeBar: null, selectedIndex: [null, null]})
         }
     }
 
     closeInfo = () => {
-        this.setState({activeBar: null})
+        this.setState({activeBar: null, selectedIndex: [null, null]})
+        this.opacityOnCloseInfo()
     }
 
     opacityHover = (e) => {
+        let parentIndex = this.state.selectedIndex[0]
+        let childIndex = this.state.selectedIndex[1]
+        
         let hoveredIndex = e.currentTarget.parentNode.getAttribute('class').split(' ')[1]
-        let range = [...Array(this.props.data.numbers.length).keys()]
         let subIndex = e.currentTarget.getAttribute('index')
-        let children = null
-        range.forEach(i => {
-            if (i != hoveredIndex) {
-                document.getElementsByClassName(i)[0].style.opacity = .5
-            } else {
-                children = Array.from(document.getElementsByClassName(i)[0].childNodes)
-                children.forEach((child, k) => {
-                    if (subIndex !== child.getAttribute('index')) {
-                        child.style.opacity = .5
-                    } else {
-                        child.style.opacity = 1
-                    }
-                })
+        let bars = Array.from(document.getElementsByClassName('BarGraph-bar'))
+
+        if (parentIndex != null) {
+            bars.forEach(element => element.style.opacity = 1)
+            let filteredBars = bars.filter((_, i) => i != hoveredIndex && i != parentIndex)
+            filteredBars.forEach(element => element.style.opacity = .5)
+            let hoveredBarChildren = Array.from(bars[hoveredIndex].childNodes)
+            let filteredChildren = hoveredBarChildren.filter((_, i) => i != subIndex)
+            filteredChildren.forEach(element => element.style.opacity = .5)
+            bars[parentIndex].childNodes[childIndex].style.opacity = 1
+            if (hoveredIndex == parentIndex) {
+                bars[parentIndex].childNodes[subIndex].style.opacity = 1
             }
-        })
+        } else {
+            let filteredBars = bars.filter((_, i) => i != hoveredIndex)
+            filteredBars.forEach(element => element.style.opacity = .5)
+            let hoveredBarChildren = Array.from(bars[hoveredIndex].childNodes)
+            let filteredChildren = hoveredBarChildren.filter((_, i) => i != subIndex)
+            filteredChildren.forEach(element => element.style.opacity = .5)
+        }
     }
 
     opacityReset = (e) => {
+        let parentIndex = this.state.selectedIndex[0]
+        let childIndex = this.state.selectedIndex[1]
+        let bars = Array.from(document.getElementsByClassName('BarGraph-bar'))
+
+        if (parentIndex != null) {
+            bars.forEach(element => element.style.opacity = 1)
+            let hoveredBarChildren = Array.from(e.currentTarget.parentNode.childNodes)
+            hoveredBarChildren.forEach(child => child.style.opacity = 1)
+            let filteredBars = bars.filter((_, i) => i != parentIndex)
+            filteredBars.forEach(element => element.style.opacity = .5)
+            let selectedBarChildren = Array.from(bars[parentIndex].childNodes)
+            let filteredChildren = selectedBarChildren.filter((_, i) => i != childIndex)
+            filteredChildren.forEach(element => element.style.opacity = .5)
+        } else {
+            bars.forEach(element => element.style.opacity = 1)
+            let hoveredBarChildren = Array.from(e.currentTarget.parentNode.childNodes)
+            hoveredBarChildren.forEach(child => child.style.opacity = 1)
+        }
+    }
+
+    opacityOnSelect = (parentIndex, childIndex) => {
+        let oldParentIndex = this.state.selectedIndex[0]
+        let oldChildIndex = this.state.selectedIndex[0]
+
+        if (oldParentIndex != null) {
+            let bars = Array.from(document.getElementsByClassName('BarGraph-bar'))
+            bars[oldParentIndex].style.opacity = .5
+            let oldSelectedChildren = Array.from(bars[oldParentIndex].childNodes)
+            oldSelectedChildren.forEach(element => element.style.opacity = 1)
+            if (parentIndex == oldParentIndex) {
+                let selectedChildren = Array.from(bars[parentIndex].childNodes)
+                bars[parentIndex].style.opacity = 1
+                let filteredChildren = selectedChildren.filter((_, i) => i != childIndex)
+                filteredChildren.forEach(element => element.style.opacity = .5)
+            }
+        }
+    } 
+
+    opacityOnCloseInfo = () => {
         let bars = Array.from(document.getElementsByClassName('BarGraph-bar'))
         bars.forEach(element => element.style.opacity = 1)
-        let hoveredBarChildren = Array.from(e.currentTarget.parentNode.childNodes)
-        hoveredBarChildren.forEach(child => child.style.opacity = 1)
+        let selectedParent = this.state.selectedIndex[0]
+        let selectedChild = this.state.selectedIndex[1]
+
+        let selectedChildren = Array.from(bars[selectedParent].childNodes)
+        let childrenToReset = selectedChildren.filter((_, i) => i !== selectedChild)
+        childrenToReset.forEach(element => element.style.opacity = 1)
     }
 
     render = () => {
@@ -199,7 +249,7 @@ export default class BarGraph extends React.Component {
         }
 
         let labels = this.props.data.labels.map((label, i) => {
-            return <div className="BarGraph-y-axis-label-container" style={labelStyle}>{this.props.removeReady ? buttons[i] : null}<span key={i} style={labelStyle}>{label}</span></div>
+            return <div key={i} className="BarGraph-y-axis-label-container" style={labelStyle}>{this.props.removeReady ? buttons[i] : null}<span>{label}</span></div>
         })
 
         let colors = this.props.data.colors
@@ -245,8 +295,6 @@ export default class BarGraph extends React.Component {
             } 
         }) : null
 
-        //console.log(this.props.activedata.barsActive)
-        //console.log(this.props.data.numbers, this.props.data.labels, this.props.data.colors)
         return (
             <div className="BarGraph-main-container">
                 {this.state.activeBar ? <InfoBox graphlevel={this.props.graphlevel} closeinfo={this.closeInfo} getinfoboxdata={this.props.getinfoboxdata} currentcount={this.state.currentCount} data={this.state.extendedData}/> : null}
