@@ -31,8 +31,9 @@ export default class BarGraph extends React.Component {
 
     getCeiling = (numbers) => { 
         let max = this.getMax(numbers)
+        console.log(max)
         
-        let defaultIncrements = [5, 10, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+        let defaultIncrements = [4, 5, 10, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
         let selectedIncrement = 500
         for (const increment of defaultIncrements) {
             if(increment/max > .1) {
@@ -158,7 +159,6 @@ export default class BarGraph extends React.Component {
 
     opacityOnSelect = (parentIndex, childIndex) => {
         let oldParentIndex = this.state.selectedIndex[0]
-        let oldChildIndex = this.state.selectedIndex[0]
 
         if (oldParentIndex != null) {
             let bars = Array.from(document.getElementsByClassName('BarGraph-bar'))

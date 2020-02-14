@@ -11,6 +11,17 @@ const AnimatedBars = props => {
     </div>
 } 
 
+const LoadingContainer = props => {
+    return (
+        <GraphButton>
+            {props.children}
+            <div className="LoadingContainerFilter-before-load">
+                <div className="LoadingCircleFilter"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+            </div>
+        </GraphButton>
+    )
+  }
+
 export default class Stats extends React.Component {
     constructor(props) {
         super(props);
@@ -324,7 +335,8 @@ export default class Stats extends React.Component {
                     queryType: prevState.activeData.queryType
                 },
                 key : Math.random() * 10000,
-                level: 0
+                level: 0,
+                inactiveLabels: []
             }))
         })
     }
@@ -575,21 +587,27 @@ export default class Stats extends React.Component {
                                     type="genders"
                                     ><img src="static/images/gendersIcon.png"/>
                                     <AnimatedBars/>
-                                    </GraphButton> : null }
+                                    </GraphButton> : <LoadingContainer>
+                                        <img style={{opacity: "50%"}} src="static/images/gendersIcon.png"/>
+                                    </LoadingContainer> }
                                 {this.state.activeData.barsActive != 'ages' &&
                                     this.state.data.ageData ? <GraphButton
                                     handleclick={this.toggleGrouping}
                                     type="ages"
                                     ><img src="static/images/agesIcon.png"/>
                                     <AnimatedBars/>
-                                    </GraphButton> : null }
+                                    </GraphButton> : <LoadingContainer>
+                                        <img style={{opacity: "50%"}} src="static/images/agesIcon.png"/>
+                                    </LoadingContainer> } 
                                 {this.state.activeData.barsActive != 'times' &&
                                     this.state.data.timeData ? <GraphButton
                                     handleclick={this.toggleGrouping}
                                     type="times"
                                     ><img src="static/images/timesIcon.png"/>
                                     <AnimatedBars/>
-                                    </GraphButton> : null }
+                                    </GraphButton> : <LoadingContainer>
+                                        <img style={{opacity: "50%"}} src="static/images/timesIcon.png"/>
+                                    </LoadingContainer> }
                                 {this.state.activeData.barsActive != 'dates' &&
                                     this.state.activeData.barsActive != 'days' &&
                                     this.state.data.dayData ? <GraphButton
@@ -597,18 +615,24 @@ export default class Stats extends React.Component {
                                     type="days"
                                     ><img src="static/images/daysIcon.png"/>
                                     <AnimatedBars/>
-                                    </GraphButton> : null }
+                                    </GraphButton> : <LoadingContainer>
+                                        <img style={{opacity: "50%"}} src="static/images/daysIcon.png"/>
+                                    </LoadingContainer> }
                             </div>
                             <hr className="Stats-button-container-line"/>
                             <div className="Stats-button-container-group">
                                 {sortReady ? <GraphButton
                                     handleclick={this.sortData}
                                     type="numeric"
-                                    ><p>1</p><p>2</p><p>3</p></GraphButton> : null }
+                                    ><p>1</p><p>2</p><p>3</p></GraphButton> : <LoadingContainer>
+                                        <div style={{opacity: "50%"}}><p>1</p><p>2</p><p>3</p></div>
+                                    </LoadingContainer> }
                                 {sortReady ? <GraphButton 
                                     handleclick={this.sortData}
                                     type="alpha"
-                                    ><p>A</p><p>B</p><p>C</p></GraphButton> : null }
+                                    ><p>A</p><p>B</p><p>C</p></GraphButton> : <LoadingContainer>
+                                        <div style={{opacity: "50%"}}><p>A</p><p>B</p><p>C</p></div>
+                                    </LoadingContainer> }
                             </div>
                         </div>
                     </div>

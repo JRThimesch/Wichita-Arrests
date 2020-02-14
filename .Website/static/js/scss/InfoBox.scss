@@ -112,8 +112,18 @@
         font-family: QuickSand;
         font-size: .8em;
         text-align: center;
-        width: 150px;
+        width: 120px;
         text-overflow: ellipsis;
+        display: block;
+        white-space: nowrap;
+        overflow-x: hidden;
+        &-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 120px;
+            height: auto;
+        }
     }
     &-line {
         width: 55%;

@@ -28,6 +28,10 @@ export default class InfoBox extends React.PureComponent {
         this.props.getinfoboxdata(data, active)
     }
 
+    isInt = (num) => {
+        return parseInt(num) === num
+    }
+
     render = () => {
         let data = this.props.data
         let subcontainers = data.subtitles ?
@@ -36,7 +40,12 @@ export default class InfoBox extends React.PureComponent {
                     <div key={i} className="InfoBox-info-subcontainer">
                         <span className="InfoBox-subtitle"><u>{subtitle}</u></span>
                         {data.sublabels[i].map((sublabel, j) => {
-                            return <span key={j} className="InfoBox-text"><b>{j+1})</b> {sublabel}: ({data.subnumbers[i][j]})</span>
+                            let title = "Summary for: " + sublabel + " (" + data.subnumbers[i][j]+ ")"
+                            return <div key={j} title={title} className="InfoBox-text-container">
+                                <b style={{marginRight: '5px'}}>{j+1})</b> 
+                                <span className="InfoBox-text">{sublabel}: </span>
+                                <span style={{marginLeft: '5px'}}>({data.subnumbers[i][j]})</span>
+                            </div>
                         })}
                         <AnimatedGraphBars key={i} index={i} onClick={this.handleClick}/>
                     </div>
@@ -67,10 +76,12 @@ export default class InfoBox extends React.PureComponent {
             <p style={{fontSize: '50px', fontWeight: 900, color: 'red'}}>!</p>
             </> : null
 
+        let count = this.isInt(parseFloat(this.props.currentcount)) ? this.props.currentcount : parseFloat(this.props.currentcount).toFixed(2)
+
         return (
             <div style={this.props.style} className="InfoBox-main-container">
                 <div className="InfoBox-title-container">
-                    <span className="InfoBox-count">{this.props.currentcount}</span>
+                    <span className="InfoBox-count">{count}</span>
                     <span className="InfoBox-title">Expanded Info for <b>{this.props.data.currentLabel}</b></span>
                     <span className="InfoBox-button-close" onClick={this.props.closeinfo}/>
                 </div>
