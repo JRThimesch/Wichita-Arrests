@@ -503,6 +503,12 @@ export default class Stats extends React.Component {
             onClick={this.toggleInactiveVisible}
             ><img src="static/images/addGraph.png"/>{inactiveLabels}</div> : null
         
+        let isChargeButtonActive = (this.state.activeData.barsActive != 'arrests' &&
+            this.state.activeData.barsActive != 'tags' &&
+            this.state.activeData.barsActive != 'groups')
+
+        let queryTypeToSwitch = this.state.activeData.queryType == 'distinct' ? 'charges' : 'distinct'
+        let queryTypeToSwitchIcon = `static/images/${queryTypeToSwitch}Icon.png`
         return (
             <>
                 <div className="Stats-container">
@@ -529,16 +535,16 @@ export default class Stats extends React.Component {
                                     handleclick={this.deleteGraph}
                                     ><img src="static/images/eraseGraph.png"/></GraphButton>
                                 {addButton}
-                                {this.state.activeData.queryType != 'distinct' 
+                                {isChargeButtonActive
                                     ? <GraphButton
-                                    handleclick={this.toggleQuery}
-                                    type="distinct"
-                                    ><img src="static/images/recordsIcon.png"/></GraphButton> : null }
-                                {this.state.activeData.queryType != 'charges' 
-                                    ? <GraphButton 
-                                    handleclick={this.toggleQuery}
-                                    type="charges"
-                                    ><img src="static/images/chargesIcon.png"/></GraphButton> : null }
+                                        handleclick={this.toggleQuery}
+                                        type={queryTypeToSwitch}
+                                        ><img src={queryTypeToSwitchIcon}/></GraphButton> 
+                                    : <GraphButton
+                                        handleclick={()=>{}}>
+                                        <img src={queryTypeToSwitchIcon} 
+                                            style={{opacity: '20%'}}/>
+                                    </GraphButton>}
                             </div>
                             <hr className="Stats-button-container-line"/>
                             <div className="Stats-button-container-group">
