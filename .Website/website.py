@@ -3,10 +3,10 @@ from operator import itemgetter
 from datetime import datetime, timedelta, date
 import json, random, itertools, os
 import sqlalchemy as SQL
-from sqlalchemy import create_engine, func, and_, or_, desc
+from sqlalchemy import create_engine, func, and_, or_, desc, literal_column
 from sqlalchemy.types import Integer, Date, Float
 from sqlalchemy.orm.session import sessionmaker
-from sqlalchemy.sql.expression import cast
+from sqlalchemy.sql.expression import cast, case, literal
 from contextlib import contextmanager
 from Models import ArrestInfo, ArrestRecord
 
@@ -262,6 +262,61 @@ def getGenderData(_data):
                     .filter(and_(ArrestRecord.sex == sex, ArrestRecord.timeOfYear == label))\
                     .count() for label in labels] for sex in sexes]
     return genderCounts
+
+def splitListInChunks(_list, _n, _index=None):
+    if _index != None:
+        return [_list[i * _n:(i + 1) * _n][_index] for i in range((len(_list) + _n - 1) // _n)]
+    else:
+        return [_list[i * _n:(i + 1) * _n] for i in range((len(_list) + _n - 1) // _n)]
+
+def getDaysInfoFromArrestInfo(_s, _queryColumn):
+    arrestSubq = _s.query(_queryColumn)\
+        .distinct(_queryColumn)\
+        .filter(_queryColumn != None)\
+        .subquery()
+
+    daysSubq = _s.query(ArrestRecord.dayOfTheWeek)\
+        .distinct(ArrestRecord.dayOfTheWeek)\
+        .subquery()
+
+    cartesionProduct = _s.query(arrestSubq, daysSubq)\
+        .join(daysSubq, literal(True))\
+        .subquery()
+
+    countSubq = _s.query(_queryColumn, ArrestRecord.dayOfTheWeek, 
+            func.count(ArrestRecord.dayOfTheWeek).label('count'))\
+        .join(ArrestRecord)\
+        .filter(_queryColumn != None)\
+        .group_by(_queryColumn, ArrestRecord.dayOfTheWeek)\
+        .subquery()
+
+    if _queryColumn == ArrestInfo.arrest:
+        countColumn = countSubq.c.arrest
+        productColumn = cartesionProduct.c.arrest
+
+    elif _queryColumn == ArrestInfo.tag:
+        countColumn = countSubq.c.tag
+        productColumn = cartesionProduct.c.tag
+
+    elif _queryColumn == ArrestInfo.group:
+        countColumn = countSubq.c.group
+        productColumn = cartesionProduct.c.group
+
+    query = _s.query(countSubq.c.count, cartesionProduct)\
+        .outerjoin(countSubq, and_(countSubq.c.dayOfTheWeek == cartesionProduct.c.dayOfTheWeek,
+            countColumn == productColumn))\
+        .order_by(productColumn, case([
+            (cartesionProduct.c.dayOfTheWeek == "Sunday", 1),
+            (cartesionProduct.c.dayOfTheWeek == "Monday", 2),
+            (cartesionProduct.c.dayOfTheWeek == "Tuesday", 3),
+            (cartesionProduct.c.dayOfTheWeek == "Wednesday", 4),
+            (cartesionProduct.c.dayOfTheWeek == "Thursday", 5),
+            (cartesionProduct.c.dayOfTheWeek == "Friday", 6),
+            (cartesionProduct.c.dayOfTheWeek == "Saturday", 7)
+        ]))\
+        .all()
+    
+    return query
 
 def getDaysData(_data):
     active = _data['dataActive']
@@ -922,7 +977,6 @@ def getHoverData(_data):
                 tagColors = [i['color'] for j in query for i in filtersDict if label == i['group']]
                 colors = [tagColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
             elif activeBars == 'tags':
-                print('t1234123est')
                 subq = s.query(ArrestInfo.tag, ArrestInfo.arrest, ArrestInfo.group)\
                     .join(ArrestRecord)\
                     .distinct(ArrestInfo.arrestRecordFKey)\
@@ -931,13 +985,11 @@ def getHoverData(_data):
                     ArrestRecord.timeOfDay.in_(activeTimes),
                     ArrestRecord.dayOfTheWeek.in_(activeDays)))\
                     .subquery()
-                print('asdasd')
                 query = s.query(subq.c.arrest, func.count(subq.c.tag), subq.c.group)\
                     .group_by(subq.c.arrest, subq.c.tag, subq.c.group)\
                     .order_by(desc(func.count(subq.c.tag)))\
                     .limit(10)\
                     .all()
-                print('test')
 
                 group = s.query(ArrestInfo.group)\
                     .filter(ArrestInfo.tag == label)\
