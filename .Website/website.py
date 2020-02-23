@@ -6,7 +6,7 @@ import sqlalchemy as SQL
 from sqlalchemy import create_engine, func, and_, or_, desc, literal_column
 from sqlalchemy.types import Integer, Date, Float
 from sqlalchemy.orm.session import sessionmaker
-from sqlalchemy.sql.expression import cast, case, literal
+from sqlalchemy.sql.expression import cast, case, literal, extract
 from contextlib import contextmanager
 from Models import ArrestInfo, ArrestRecord
 
@@ -263,60 +263,215 @@ def getGenderData(_data):
                     .count() for label in labels] for sex in sexes]
     return genderCounts
 
-def splitListInChunks(_list, _n, _index=None):
-    if _index != None:
-        return [_list[i * _n:(i + 1) * _n][_index] for i in range((len(_list) + _n - 1) // _n)]
-    else:
-        return [_list[i * _n:(i + 1) * _n] for i in range((len(_list) + _n - 1) // _n)]
+def getGroupingData(_s, _queryColumn, _groupingColumn, _joinTable=ArrestRecord, _queryType = 'distinct'):
+    # QUERY METHOD NEEDS TO BE DIFFERENT FOR TIME
+    # TIMES ARE EXACT AND WOULD MAKE ANALYSIS AWFUL IF DONE UNIQUELY
+    if _queryColumn == ArrestRecord.time:
+        dataSubq = _s.query(func.substr(_queryColumn, 0, 4).label('time'))\
+            .distinct(func.substr(_queryColumn, 0, 4))\
+            .filter(_queryColumn != None)\
+            .subquery()
+        #print(_s.query(dataSubq).all())
+    elif _queryColumn != ArrestRecord.time:
+        dataSubq = _s.query(_queryColumn)\
+            .distinct(_queryColumn)\
+            .filter(_queryColumn != None)\
+            .subquery()
 
-def getDaysInfoFromArrestInfo(_s, _queryColumn):
-    arrestSubq = _s.query(_queryColumn)\
-        .distinct(_queryColumn)\
-        .filter(_queryColumn != None)\
+    categorySubq = _s.query(_groupingColumn)\
+        .distinct(_groupingColumn)\
         .subquery()
 
-    daysSubq = _s.query(ArrestRecord.dayOfTheWeek)\
-        .distinct(ArrestRecord.dayOfTheWeek)\
+    cartesionProduct = _s.query(dataSubq, categorySubq)\
+        .join(categorySubq, literal(True))\
         .subquery()
 
-    cartesionProduct = _s.query(arrestSubq, daysSubq)\
-        .join(daysSubq, literal(True))\
-        .subquery()
+    if _queryType == 'distinct':
+        if _queryColumn == ArrestRecord.time:
+            distinctCountSubq = _s.query(func.substr(_queryColumn, 0, 4).label('time'), _groupingColumn)\
+                .join(_joinTable)\
+                .distinct(ArrestRecord.recordID, func.substr(_queryColumn, 0, 4))\
+                .filter(_queryColumn != None)\
+                .group_by(ArrestRecord.recordID, func.substr(_queryColumn, 0, 4))\
+                .subquery()
 
-    countSubq = _s.query(_queryColumn, ArrestRecord.dayOfTheWeek, 
-            func.count(ArrestRecord.dayOfTheWeek).label('count'))\
-        .join(ArrestRecord)\
-        .filter(_queryColumn != None)\
-        .group_by(_queryColumn, ArrestRecord.dayOfTheWeek)\
-        .subquery()
+        elif _queryColumn != ArrestRecord.time:
+            distinctCountSubq = _s.query(_queryColumn, _groupingColumn)\
+                .join(_joinTable)\
+                .distinct(ArrestRecord.recordID, _queryColumn)\
+                .filter(_queryColumn != None)\
+                .group_by(ArrestRecord.recordID, _queryColumn)\
+                .subquery()
+        
+        # IF/ELSE BLOCK FOR SELECTING DISTINCT COUNTS FOR CATEGORY COLUMN
+        if _queryColumn == ArrestInfo.arrest:
+            distinctCountColumn = distinctCountSubq.c.arrest
+        elif _queryColumn == ArrestInfo.tag:
+            distinctCountColumn = distinctCountSubq.c.tag
+        elif _queryColumn == ArrestInfo.group:
+            distinctCountColumn = distinctCountSubq.c.group
+        elif _queryColumn == ArrestRecord.age:
+            distinctCountColumn = distinctCountSubq.c.age
+        elif _queryColumn == ArrestRecord.timeOfYear:
+            distinctCountColumn = distinctCountSubq.c.timeOfYear
+        elif _queryColumn == ArrestRecord.dayOfTheWeek:
+            distinctCountColumn = distinctCountSubq.c.dayOfTheWeek
+        elif _queryColumn == ArrestRecord.date:
+            distinctCountColumn = distinctCountSubq.c.date
+        elif _queryColumn == ArrestRecord.time:
+            distinctCountColumn = distinctCountSubq.c.time
 
+        # IF/ELSE BLOCK FOR SELECTING GROUPING COLUMNS
+        if _groupingColumn == ArrestRecord.dayOfTheWeek:
+            distinctCategoryCountColumn = distinctCountSubq.c.dayOfTheWeek
+        elif _groupingColumn == ArrestRecord.sex:
+            distinctCategoryCountColumn = distinctCountSubq.c.sex
+        elif _groupingColumn == ArrestRecord.timeOfDay:
+            distinctCategoryCountColumn = distinctCountSubq.c.timeOfDay
+        elif _groupingColumn == ArrestRecord.age:
+            distinctCategoryCountColumn = distinctCountSubq.c.age
+            query = _s.query(distinctCountColumn, 
+                cast(func.avg(distinctCategoryCountColumn), Integer).label('count'))\
+                .group_by(distinctCountColumn)\
+                .all()
+            return query
+
+        if _queryColumn == ArrestRecord.time:
+            countSubq = _s.query(distinctCountColumn, distinctCategoryCountColumn, 
+                func.count(distinctCategoryCountColumn).label('count'))\
+                .group_by(distinctCountColumn, distinctCategoryCountColumn)\
+                .subquery()
+            
+        elif _queryColumn != ArrestRecord.time:
+            countSubq = _s.query(distinctCountColumn, distinctCategoryCountColumn, 
+                func.count(distinctCategoryCountColumn).label('count'))\
+                .group_by(distinctCountColumn, distinctCategoryCountColumn)\
+                .subquery()
+        #print(_s.query(countSubq).all())
+
+    elif _queryType == 'charges':
+        if _queryColumn == ArrestRecord.time:
+            timeSplitSubq = _s.query(func.substr(_queryColumn, 0, 4).label('time'), _groupingColumn)\
+                .join(ArrestInfo)\
+                .filter(_queryColumn != None)\
+                .subquery()
+
+            if _groupingColumn == ArrestRecord.dayOfTheWeek:
+                timeCategoryCountColumn = timeSplitSubq.c.dayOfTheWeek
+            elif _groupingColumn == ArrestRecord.sex:
+                timeCategoryCountColumn = timeSplitSubq.c.sex
+            elif _groupingColumn == ArrestRecord.timeOfDay:
+                timeCategoryCountColumn = timeSplitSubq.c.timeOfDay
+            elif _groupingColumn == ArrestRecord.age:
+                timeCategoryCountColumn = timeSplitSubq.c.age
+                query = _s.query(timeSplitSubq.c.time, 
+                    cast(func.avg(timeCategoryCountColumn), Integer).label('count'))\
+                    .group_by(timeSplitSubq.c.time)\
+                    .all()
+                print(query)
+                return query
+
+            countSubq = _s.query(timeSplitSubq.c.time, timeCategoryCountColumn, 
+                    func.count(timeCategoryCountColumn).label('count'))\
+                .group_by(timeSplitSubq.c.time, timeCategoryCountColumn)\
+                .subquery()
+        elif _queryColumn != ArrestRecord.time:
+            if _groupingColumn == ArrestRecord.age:
+                query = _s.query(_queryColumn, 
+                    cast(func.avg(_groupingColumn), Integer).label('count'))\
+                    .group_by(_queryColumn)\
+                    .all()
+                print(query)
+                return query
+            countSubq = _s.query(_queryColumn, _groupingColumn, 
+                    func.count(_groupingColumn).label('count'))\
+                .join(_joinTable)\
+                .filter(_queryColumn != None)\
+                .group_by(_queryColumn, _groupingColumn)\
+                .subquery()
+            
+
+    # IF/ELSE BLOCK FOR DECLARING CATEGORY COLUMNS
     if _queryColumn == ArrestInfo.arrest:
         countColumn = countSubq.c.arrest
         productColumn = cartesionProduct.c.arrest
-
     elif _queryColumn == ArrestInfo.tag:
         countColumn = countSubq.c.tag
         productColumn = cartesionProduct.c.tag
-
     elif _queryColumn == ArrestInfo.group:
         countColumn = countSubq.c.group
         productColumn = cartesionProduct.c.group
+    elif _queryColumn == ArrestRecord.age:
+        countColumn = countSubq.c.age
+        productColumn = cartesionProduct.c.age
+    elif _queryColumn == ArrestRecord.timeOfYear:
+        countColumn = countSubq.c.timeOfYear
+        productColumn = cartesionProduct.c.timeOfYear
+    elif _queryColumn == ArrestRecord.dayOfTheWeek:
+        countColumn = countSubq.c.dayOfTheWeek
+        productColumn = cartesionProduct.c.dayOfTheWeek
+    elif _queryColumn == ArrestRecord.date:
+        countColumn = countSubq.c.date
+        productColumn = cartesionProduct.c.date
+    elif _queryColumn == ArrestRecord.time:
+        countColumn = countSubq.c.time
+        productColumn = cartesionProduct.c.time
+    elif _queryColumn == ArrestRecord.sex:
+        countColumn = countSubq.c.sex
+        productColumn = cartesionProduct.c.sex
 
-    query = _s.query(countSubq.c.count, cartesionProduct)\
-        .outerjoin(countSubq, and_(countSubq.c.dayOfTheWeek == cartesionProduct.c.dayOfTheWeek,
+    # IF/ELSE BLOCK FOR DECLARING GROUPING COLUMNS
+    if _groupingColumn == ArrestRecord.dayOfTheWeek:
+        countCategoryColumn = countSubq.c.dayOfTheWeek
+        productCategoryColumn = cartesionProduct.c.dayOfTheWeek
+        allowedGroupings = ["Sunday", "Monday", "Tuesday", 
+            "Wednesday", "Thursday", "Friday", "Saturday"]
+        orderCase = case([
+            (productCategoryColumn == "Sunday", 1),
+            (productCategoryColumn == "Monday", 2),
+            (productCategoryColumn == "Tuesday", 3),
+            (productCategoryColumn == "Wednesday", 4),
+            (productCategoryColumn == "Thursday", 5),
+            (productCategoryColumn == "Friday", 6),
+            (productCategoryColumn == "Saturday", 7)
+        ])
+    elif _groupingColumn == ArrestRecord.sex:
+        countCategoryColumn = countSubq.c.sex
+        productCategoryColumn = cartesionProduct.c.sex
+        allowedGroupings = ["MALE", "FEMALE"]
+        orderCase = case([
+            (productCategoryColumn == "MALE", 1),
+            (productCategoryColumn == "FEMALE", 2)
+        ])
+    elif _groupingColumn == ArrestRecord.timeOfDay:
+        countCategoryColumn = countSubq.c.timeOfDay
+        productCategoryColumn = cartesionProduct.c.timeOfDay
+        allowedGroupings = ["DAY", "NIGHT"]
+        orderCase = case([
+            (productCategoryColumn == "DAY", 1),
+            (productCategoryColumn == "NIGHT", 2)
+        ])
+
+    caseCountStatement = case([(countSubq.c.count > 0, countSubq.c.count)], else_=0)
+    
+    query = _s.query(caseCountStatement, cartesionProduct)\
+        .outerjoin(countSubq, and_(countCategoryColumn == productCategoryColumn,
             countColumn == productColumn))\
-        .order_by(productColumn, case([
-            (cartesionProduct.c.dayOfTheWeek == "Sunday", 1),
-            (cartesionProduct.c.dayOfTheWeek == "Monday", 2),
-            (cartesionProduct.c.dayOfTheWeek == "Tuesday", 3),
-            (cartesionProduct.c.dayOfTheWeek == "Wednesday", 4),
-            (cartesionProduct.c.dayOfTheWeek == "Thursday", 5),
-            (cartesionProduct.c.dayOfTheWeek == "Friday", 6),
-            (cartesionProduct.c.dayOfTheWeek == "Saturday", 7)
-        ]))\
+        .filter(productCategoryColumn.in_(allowedGroupings))\
+        .order_by(productColumn, orderCase)\
         .all()
+
+    print(query)
     
     return query
+
+def splitListInChunks(_list, _n):
+    return [_list[i * _n:(i + 1) * _n] for i in range((len(_list) + _n - 1) // _n)]
+
+def getNumbersFromQuery(_q):
+    queryAsList = list(map(list, zip(*_q)))
+    subListLength = len(set(queryAsList[2]))
+    return splitListInChunks(queryAsList[0], subListLength)
 
 def getDaysData(_data):
     active = _data['dataActive']
@@ -327,28 +482,19 @@ def getDaysData(_data):
     'Thursday', 'Friday', 'Saturday']
 
     with sessionManager() as s:
+        #getGroupingData(s, ArrestRecord.time, ArrestRecord.age, _joinTable=ArrestInfo)
+
+
         if queryType == 'distinct':
             if active == "groups":
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestInfo.group == label))\
-                    .distinct(ArrestRecord.recordID, ArrestRecord.dayOfTheWeek, ArrestInfo.group)\
-                    .group_by(ArrestRecord.recordID, ArrestRecord.dayOfTheWeek, ArrestInfo.group)\
-                    .count() for label in labels] for day in days]
+                query = getGroupingData(s, ArrestInfo.group, ArrestRecord.dayOfTheWeek)
+                dayCounts = getNumbersFromQuery(query)
             elif active == "tags":
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestInfo.tag == label))\
-                    .distinct(ArrestRecord.recordID, ArrestRecord.dayOfTheWeek, ArrestInfo.tag)\
-                    .group_by(ArrestRecord.recordID, ArrestRecord.dayOfTheWeek, ArrestInfo.tag)\
-                    .count() for label in labels] for day in days]
+                query = getGroupingData(s, ArrestInfo.tag, ArrestRecord.dayOfTheWeek)
+                dayCounts = getNumbersFromQuery(query)
             elif active == "arrests":
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestInfo.arrest == label))\
-                    .distinct(ArrestRecord.recordID, ArrestRecord.dayOfTheWeek, ArrestInfo.arrest)\
-                    .group_by(ArrestRecord.recordID, ArrestRecord.dayOfTheWeek, ArrestInfo.arrest)\
-                    .count() for label in labels] for day in days]
+                query = getGroupingData(s, ArrestInfo.arrest, ArrestRecord.dayOfTheWeek)
+                dayCounts = getNumbersFromQuery(query)
             elif active == "ages":
                 dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
                     .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestRecord.age == label))\

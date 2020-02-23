@@ -228,6 +228,7 @@ export default class BarGraph extends React.Component {
             sublabels = timeLabels
         }  else if (this.props.activedata.groupingActive == 'days') { 
             let dayData = this.props.data.dayData
+            console.log(this.props.data.testData.flat())
             let dayNumbers = [...dayData.sundayCounts, ...dayData.mondayCounts, 
                 ...dayData.tuesdayCounts, ...dayData.wednesdayCounts, ...dayData.thursdayCounts,
                 ...dayData.fridayCounts, ...dayData.saturdayCounts]

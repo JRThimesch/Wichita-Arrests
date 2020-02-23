@@ -56,7 +56,8 @@ export default class Stats extends React.Component {
                     thursdayCounts: null,
                     fridayCounts: null,
                     saturdayCounts: null
-                }
+                },
+                testData: [2, [2, 5]]
             },
             key: 0,
             inactiveLabels: [],
@@ -503,8 +504,8 @@ export default class Stats extends React.Component {
             onClick={this.toggleInactiveVisible}
             ><img src="static/images/addGraph.png"/>{inactiveLabels}</div> : null
         
-        let isChargeButtonActive = (this.state.activeData.barsActive != 'arrests' &&
-            this.state.activeData.barsActive != 'tags' &&
+        let isChargeButtonActive = (this.state.activeData.barsActive != 'arrests' ||
+            this.state.activeData.barsActive != 'tags' ||
             this.state.activeData.barsActive != 'groups')
 
         let queryTypeToSwitch = this.state.activeData.queryType == 'distinct' ? 'charges' : 'distinct'
