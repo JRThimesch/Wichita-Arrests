@@ -320,6 +320,8 @@ def getGroupingData(_s, _queryColumn, _groupingColumn, _joinTable=ArrestRecord, 
             distinctCountColumn = distinctCountSubq.c.date
         elif _queryColumn == ArrestRecord.time:
             distinctCountColumn = distinctCountSubq.c.time
+        elif _queryColumn == ArrestRecord.sex:
+            distinctCountColumn = distinctCountSubq.c.sex
 
         # IF/ELSE BLOCK FOR SELECTING GROUPING COLUMNS
         if _groupingColumn == ArrestRecord.dayOfTheWeek:
@@ -330,8 +332,8 @@ def getGroupingData(_s, _queryColumn, _groupingColumn, _joinTable=ArrestRecord, 
             distinctCategoryCountColumn = distinctCountSubq.c.timeOfDay
         elif _groupingColumn == ArrestRecord.age:
             distinctCategoryCountColumn = distinctCountSubq.c.age
-            query = _s.query(distinctCountColumn, 
-                cast(func.avg(distinctCategoryCountColumn), Integer).label('count'))\
+            query = _s.query(cast(func.avg(distinctCategoryCountColumn), Float).label('count'),
+                distinctCountColumn, literal(0).label('avg'))\
                 .group_by(distinctCountColumn)\
                 .all()
             return query
@@ -364,11 +366,10 @@ def getGroupingData(_s, _queryColumn, _groupingColumn, _joinTable=ArrestRecord, 
                 timeCategoryCountColumn = timeSplitSubq.c.timeOfDay
             elif _groupingColumn == ArrestRecord.age:
                 timeCategoryCountColumn = timeSplitSubq.c.age
-                query = _s.query(timeSplitSubq.c.time, 
-                    cast(func.avg(timeCategoryCountColumn), Integer).label('count'))\
+                query = _s.query(cast(func.avg(timeCategoryCountColumn), Float).label('count'),
+                    timeSplitSubq.c.time, literal(0).label('avg'))\
                     .group_by(timeSplitSubq.c.time)\
                     .all()
-                print(query)
                 return query
 
             countSubq = _s.query(timeSplitSubq.c.time, timeCategoryCountColumn, 
@@ -377,11 +378,10 @@ def getGroupingData(_s, _queryColumn, _groupingColumn, _joinTable=ArrestRecord, 
                 .subquery()
         elif _queryColumn != ArrestRecord.time:
             if _groupingColumn == ArrestRecord.age:
-                query = _s.query(_queryColumn, 
-                    cast(func.avg(_groupingColumn), Integer).label('count'))\
+                query = _s.query(cast(func.avg(_groupingColumn), Float).label('count'), 
+                    _queryColumn,  literal(0).label('avg'))\
                     .group_by(_queryColumn)\
                     .all()
-                print(query)
                 return query
             countSubq = _s.query(_queryColumn, _groupingColumn, 
                     func.count(_groupingColumn).label('count'))\
@@ -395,30 +395,48 @@ def getGroupingData(_s, _queryColumn, _groupingColumn, _joinTable=ArrestRecord, 
     if _queryColumn == ArrestInfo.arrest:
         countColumn = countSubq.c.arrest
         productColumn = cartesionProduct.c.arrest
+        sortCase = productColumn
     elif _queryColumn == ArrestInfo.tag:
         countColumn = countSubq.c.tag
         productColumn = cartesionProduct.c.tag
+        sortCase = productColumn
     elif _queryColumn == ArrestInfo.group:
         countColumn = countSubq.c.group
         productColumn = cartesionProduct.c.group
+        sortCase = productColumn
     elif _queryColumn == ArrestRecord.age:
         countColumn = countSubq.c.age
         productColumn = cartesionProduct.c.age
+        sortCase = productColumn
     elif _queryColumn == ArrestRecord.timeOfYear:
         countColumn = countSubq.c.timeOfYear
         productColumn = cartesionProduct.c.timeOfYear
+        # CHANGE
+        sortCase = cast(productColumn, Date)
     elif _queryColumn == ArrestRecord.dayOfTheWeek:
         countColumn = countSubq.c.dayOfTheWeek
         productColumn = cartesionProduct.c.dayOfTheWeek
+        sortCase = case([
+            (cartesionProduct.c.dayOfTheWeek == "Sunday", 1),
+            (cartesionProduct.c.dayOfTheWeek == "Monday", 2),
+            (cartesionProduct.c.dayOfTheWeek == "Tuesday", 3),
+            (cartesionProduct.c.dayOfTheWeek == "Wednesday", 4),
+            (cartesionProduct.c.dayOfTheWeek == "Thursday", 5),
+            (cartesionProduct.c.dayOfTheWeek == "Friday", 6),
+            (cartesionProduct.c.dayOfTheWeek == "Saturday", 7)
+        ])
     elif _queryColumn == ArrestRecord.date:
         countColumn = countSubq.c.date
         productColumn = cartesionProduct.c.date
+        sortCase = productColumn
     elif _queryColumn == ArrestRecord.time:
         countColumn = countSubq.c.time
         productColumn = cartesionProduct.c.time
+        sortCase = productColumn
     elif _queryColumn == ArrestRecord.sex:
         countColumn = countSubq.c.sex
         productColumn = cartesionProduct.c.sex
+        sortCase = productColumn
 
     # IF/ELSE BLOCK FOR DECLARING GROUPING COLUMNS
     if _groupingColumn == ArrestRecord.dayOfTheWeek:
@@ -458,113 +476,67 @@ def getGroupingData(_s, _queryColumn, _groupingColumn, _joinTable=ArrestRecord, 
         .outerjoin(countSubq, and_(countCategoryColumn == productCategoryColumn,
             countColumn == productColumn))\
         .filter(productCategoryColumn.in_(allowedGroupings))\
-        .order_by(productColumn, orderCase)\
+        .order_by(sortCase, orderCase)\
         .all()
 
-    print(query)
-    
     return query
 
 def splitListInChunks(_list, _n):
     return [_list[i * _n:(i + 1) * _n] for i in range((len(_list) + _n - 1) // _n)]
 
 def getNumbersFromQuery(_q):
+    print(_q)
     queryAsList = list(map(list, zip(*_q)))
     subListLength = len(set(queryAsList[2]))
     return splitListInChunks(queryAsList[0], subListLength)
 
-def getDaysData(_data):
+def getRespectiveQueryColumn(_string):
+    if _string == "groups":
+        return ArrestInfo.group
+    elif _string == "tags":
+        return ArrestInfo.tag
+    elif _string == "arrests":
+        return ArrestInfo.arrest
+    elif _string == "ages":
+        return ArrestRecord.age
+    elif _string == "dates":
+        return ArrestRecord.date
+    elif _string == "genders":
+        return ArrestRecord.sex
+    elif _string == "times":
+        return ArrestRecord.time
+    elif _string == "days":
+        return ArrestRecord.dayOfTheWeek
+    elif _string == "months":
+        return ArrestRecord.timeOfYear
+
+def getRespectiveGroupingColumn(_string):
+    if _string == "days":
+        return ArrestRecord.dayOfTheWeek
+    elif _string == "times":
+        return ArrestRecord.timeOfDay
+    elif _string == "genders":
+        return ArrestRecord.sex
+    elif _string == "ages":
+        return ArrestRecord.age
+
+def getCountsForGroupingData(_data):
     active = _data['dataActive']
     queryType = _data['queryType']
-    labels = _data['labels']
+    grouping = _data['groupingType']
     
-    days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
-    'Thursday', 'Friday', 'Saturday']
+    print(_data)
+
+    queriedColumn = getRespectiveQueryColumn(active)
+    groupingColumn = getRespectiveGroupingColumn(grouping)
 
     with sessionManager() as s:
-        #getGroupingData(s, ArrestRecord.time, ArrestRecord.age, _joinTable=ArrestInfo)
-
-
         if queryType == 'distinct':
-            if active == "groups":
-                query = getGroupingData(s, ArrestInfo.group, ArrestRecord.dayOfTheWeek)
-                dayCounts = getNumbersFromQuery(query)
-            elif active == "tags":
-                query = getGroupingData(s, ArrestInfo.tag, ArrestRecord.dayOfTheWeek)
-                dayCounts = getNumbersFromQuery(query)
-            elif active == "arrests":
-                query = getGroupingData(s, ArrestInfo.arrest, ArrestRecord.dayOfTheWeek)
-                dayCounts = getNumbersFromQuery(query)
-            elif active == "ages":
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestRecord.age == label))\
-                    .count() for label in labels] for day in days]
-            elif active == "dates":
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestRecord.date == label))\
-                    .count() for label in labels] for day in days]
-            elif active == "genders":
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestRecord.sex == label))\
-                    .count() for label in labels] for day in days]
-            elif active == "times":
-                hours = [int(label.partition(':')[0]) for label in labels]
-                labels = [str(x) + ':' if x >= 10 else '0' + str(x) + ':' for x in hours]
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestRecord.time.contains(label)))\
-                    .count() for label in labels] for day in days]
-            elif active == "days":
-                dayCounts = [[0, 0, 0] * 24] * 7
-            elif active == "months":
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestRecord.timeOfYear == label))\
-                    .count() for label in labels] for day in days]
+            query = getGroupingData(s, queriedColumn, groupingColumn, _joinTable=ArrestInfo)
         elif queryType == 'charges':
-            if active == "groups":
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestInfo.group == label))\
-                    .count() for label in labels] for day in days]
-            elif active == "tags":
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestInfo.tag == label))\
-                    .count() for label in labels] for day in days]
-            elif active == "arrests":
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestInfo.arrest == label))\
-                    .count() for label in labels] for day in days]
-            elif active == "ages":
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestRecord.age == label))\
-                    .count() for label in labels] for day in days]
-            elif active == "dates":
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestRecord.date == label))\
-                    .count() for label in labels] for day in days]
-            elif active == "genders":
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestRecord.sex == label))\
-                    .count() for label in labels] for day in days]
-            elif active == "times":
-                hours = [int(label.partition(':')[0]) for label in labels]
-                labels = [str(x) + ':' if x >= 10 else '0' + str(x) + ':' for x in hours]
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestRecord.time.contains(label)))\
-                    .count() for label in labels] for day in days]
-            elif active == "days":
-                dayCounts = [[0, 0, 0] * 24] * 7
-            elif active == "months":
-                dayCounts = [[s.query(ArrestRecord.dayOfTheWeek)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == day, ArrestRecord.timeOfYear == label))\
-                    .count() for label in labels] for day in days]
-    return dayCounts
+            query = getGroupingData(s, queriedColumn, groupingColumn, _joinTable=ArrestInfo, _queryType = 'charges')
+        counts = getNumbersFromQuery(query)
+    return counts
 
 def getTimesData(_data):
     active = _data['dataActive']
@@ -2060,7 +2032,6 @@ def getSingleLabelCountSubquery(s, _column, _label, _joinTable = ArrestInfo, _ch
                 .subquery()
 
 def getSingleLabelData(_data):
-    print(_data)
     activeBars = _data['dataActive']
     queryType = _data['queryType']
     label = _data['labels'][0]
@@ -2241,10 +2212,10 @@ def statsHoverData():
 def groupAgeData():
     data = request.get_json()
 
-    averages = getAgeData(data)
-
     data = { 
-            'averages': averages
+        'ageData' : {
+            'numbers': getCountsForGroupingData(data)
+        }
     }
 
     return jsonify(data)
@@ -2253,10 +2224,10 @@ def groupAgeData():
 def groupGenderData():
     data = request.get_json()
 
-    maleCounts, femaleCounts = getGenderData(data)
     data = { 
-            'maleCounts': maleCounts,
-            'femaleCounts': femaleCounts
+        'genderData' : {
+            'numbers': getCountsForGroupingData(data)
+        }
     }
 
     return jsonify(data)
@@ -2265,10 +2236,10 @@ def groupGenderData():
 def groupTimeData():
     data = request.get_json()
 
-    dayCounts, nightCounts = getTimesData(data)
     data = {
-        'dayCounts': dayCounts,
-        'nightCounts': nightCounts
+        'timeData' : {
+            'numbers': getCountsForGroupingData(data)
+        }
     }
 
     return jsonify(data)
@@ -2277,17 +2248,10 @@ def groupTimeData():
 def groupDayData():
     data = request.get_json()
 
-    sundayCounts, mondayCounts, tuesdayCounts, wednesdayCounts, \
-        thursdayCounts, fridayCounts, saturdayCounts = getDaysData(data)
-
     data = {
-        'sundayCounts': sundayCounts,
-        'mondayCounts': mondayCounts,
-        'tuesdayCounts': tuesdayCounts,
-        'wednesdayCounts': wednesdayCounts,
-        'thursdayCounts': thursdayCounts,
-        'fridayCounts': fridayCounts,
-        'saturdayCounts': saturdayCounts
+        'dayData' : {
+            'numbers': getCountsForGroupingData(data)
+        }
     }
 
     return jsonify(data)

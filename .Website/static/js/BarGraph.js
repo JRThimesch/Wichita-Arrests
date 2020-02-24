@@ -3,10 +3,10 @@ import RemoveButton from './RemoveButton'
 import InfoBox from "./InfoBox";
 import "./BarGraph.css"
 
-const genderLabels = ['MALE', 'FEMALE']
-const dayLabels = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
+const GENDER_LABELS = ['MALE', 'FEMALE']
+const DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
     'Thursday', 'Friday', 'Saturday']
-const timeLabels = ['DAY', 'NIGHT']
+const TIME_LABELS = ['DAY', 'NIGHT']
 
 
 export default class BarGraph extends React.Component {
@@ -187,59 +187,35 @@ export default class BarGraph extends React.Component {
 
     render = () => {
         let numbers = this.props.data.numbers
-        let widths = this.getWidths(numbers)
-        let labelHeight = 15
         let className = null
         let substyle = null
         let counts = numbers
         let sublabels = null
+        let numOfSubbars = 1
         
-        let lines = this.getIncrements(numbers).map((increment, i) => {
-            return <div key={i}><span>{increment}</span></div>
-        })
-
         if (this.props.activedata.groupingActive == 'genders') { 
-            let genderData = this.props.data.genderData
-            let genderNumbers = [...genderData.maleCounts, ...genderData.femaleCounts]
-            labelHeight = 15 * 2;
-            widths = this.getWidths(genderNumbers)
-            lines = this.getIncrements(genderNumbers).map((increment, i) => {
-                return <div key={i}><span>{increment}</span></div>
-            })
-            counts = [...this.props.data.genderData.maleCounts, ...this.props.data.genderData.femaleCounts]
-            sublabels = genderLabels
+            counts = this.props.data.genderData.numbers.flat()
+            numOfSubbars = this.props.data.genderData.numbers[0].length
+            sublabels = GENDER_LABELS
         } else if (this.props.activedata.groupingActive == 'ages') { 
-            let averages = this.props.data.ageData.averages
-            widths = this.getWidths(averages)
-            lines = this.getIncrements(averages).map((increment, i) => {
-                return <div key={i}><span>{increment}</span></div>
-            })
-            counts = averages
+            counts = this.props.data.ageData.numbers.flat()
+            numOfSubbars = this.props.data.ageData.numbers[0].length
             sublabels = ["AGES"]
         } else if (this.props.activedata.groupingActive == 'times') { 
-            let timeData = this.props.data.timeData
-            let timeNumbers = [...timeData.dayCounts, ...timeData.nightCounts]
-            labelHeight = 15 * 2;
-            widths = this.getWidths(timeNumbers)
-            lines = this.getIncrements(timeNumbers).map((increment, i) => {
-                return <div key={i}><span>{increment}</span></div>
-            })
-            counts = timeNumbers
-            sublabels = timeLabels
+            counts = this.props.data.timeData.numbers.flat()
+            numOfSubbars = this.props.data.timeData.numbers[0].length
+            sublabels = TIME_LABELS
         }  else if (this.props.activedata.groupingActive == 'days') { 
-            let dayData = this.props.data.dayData
-            console.log(this.props.data.testData.flat())
-            let dayNumbers = [...dayData.sundayCounts, ...dayData.mondayCounts, 
-                ...dayData.tuesdayCounts, ...dayData.wednesdayCounts, ...dayData.thursdayCounts,
-                ...dayData.fridayCounts, ...dayData.saturdayCounts]
-            labelHeight = 15 * 7;
-            widths = this.getWidths(dayNumbers)
-            lines = this.getIncrements(dayNumbers).map((increment, i) => {
-                return <div key={i}><span>{increment}</span></div>
-            })
-            counts = dayNumbers
-            sublabels = dayLabels
-        }
+            counts = this.props.data.dayData.numbers.flat()
+            numOfSubbars = this.props.data.dayData.numbers[0].length
+            sublabels = DAY_LABELS
+        } 
+
+        let labelHeight = 15 * numOfSubbars
+        let widths = this.getWidths(counts)
+        let lines = this.getIncrements(counts).map((increment, i) => {
+            return <div key={i}><span>{increment}</span></div>
+        })
 
         let buttons = this.props.data.labels.map((number, i) => {
             return <RemoveButton key={i} value={i} removebar={this.props.removebar}/>
@@ -281,6 +257,22 @@ export default class BarGraph extends React.Component {
             } else {
                 let substyles = colors.map((color, j) => {
                     return {
+                        width: widths[colors.length * i + j],
+                        backgroundColor: color
+                    }
+                    
+                })
+                return (
+                    <div key={i} className={className}>
+                        {substyles.map((substyle, k) => {
+                            return <div className="BarGraph-bar-subbar" key={k} label={sublabels[k]} count={counts[i + k * counts.length / substyles.length]} index={k} onMouseLeave={this.opacityReset} onMouseOver={this.opacityHover} onClick={this.getHoverData} style={substyle}/>
+                        })}
+                    </div>
+                ) 
+
+            } /*else {
+                let substyles = colors.map((color, j) => {
+                    return {
                         width: widths[i + j * widths.length / colors.length],
                         backgroundColor: color
                     }
@@ -293,8 +285,10 @@ export default class BarGraph extends React.Component {
                         })}
                     </div>
                 ) 
-            } 
+            } */
         }) : null
+
+        
 
         return (
             <div className="BarGraph-main-container">

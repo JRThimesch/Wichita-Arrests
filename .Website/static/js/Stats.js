@@ -38,26 +38,17 @@ export default class Stats extends React.Component {
                 labels: [],
                 colors: null,
                 genderData: {
-                    maleCounts: null,
-                    femaleCounts: null
+                    numbers: null
                 },
                 ageData : {
-                    averages: null
+                    numbers: null
                 },
                 timeData: {
-                    dayCounts: null,
-                    nightCounts: null,
+                    numbers: null
                 },
                 dayData: {
-                    sundayCounts: null,
-                    mondayCounts: null,
-                    tuesdayCounts: null,
-                    wednesdayCounts: null,
-                    thursdayCounts: null,
-                    fridayCounts: null,
-                    saturdayCounts: null
+                    numbers: null
                 },
-                testData: [2, [2, 5]]
             },
             key: 0,
             inactiveLabels: [],
@@ -73,24 +64,16 @@ export default class Stats extends React.Component {
                     labels: [],
                     colors: [],
                     genderData: {
-                        maleCounts: [],
-                        femaleCounts: []
+                        numbers: []
                     },
                     ageData : {
-                        averages: []
+                        numbers: []
                     },
                     timeData: {
-                        dayCounts: [],
-                        nightCounts: [],
+                        numbers: []
                     },
                     dayData: {
-                        sundayCounts: [],
-                        mondayCounts: [],
-                        tuesdayCounts: [],
-                        wednesdayCounts: [],
-                        thursdayCounts: [],
-                        fridayCounts: [],
-                        saturdayCounts: []
+                        numbers: []
                     },
                 },
                 inactiveLabels: [...prevState.data.labels, ...prevState.inactiveLabels],
@@ -104,24 +87,16 @@ export default class Stats extends React.Component {
                     labels: [],
                     colors: [],
                     genderData: {
-                        maleCounts: [],
-                        femaleCounts: []
+                        numbers: []
                     },
                     ageData : {
-                        averages: []
+                        numbers: []
                     },
                     timeData: {
-                        dayCounts: [],
-                        nightCounts: [],
+                        numbers: []
                     },
                     dayData: {
-                        sundayCounts: [],
-                        mondayCounts: [],
-                        tuesdayCounts: [],
-                        wednesdayCounts: [],
-                        thursdayCounts: [],
-                        fridayCounts: [],
-                        saturdayCounts: []
+                        numbers: []
                     },
                 },
                 inactiveLabels: [...prevState.data.labels, ...prevState.inactiveLabels],
@@ -141,10 +116,10 @@ export default class Stats extends React.Component {
             data: passedData,
             key : Math.random() * 10000
         }))
-        this.groupGenders(passedData, active)
-        this.groupAges(passedData, active)
-        this.groupTimes(passedData, active)
-        this.groupDays(passedData, active)
+        this.groupData(passedData, active, "genders")
+        this.groupData(passedData, active, "ages")
+        this.groupData(passedData, active, "times")
+        this.groupData(passedData, active, "days")
     }
 
     groupGenders = (passedData, active) => {
@@ -188,7 +163,7 @@ export default class Stats extends React.Component {
                 ready: true,
                 data: {
                     ...prevState.data,
-                    dayData: data,
+                    dayData: data
                 }
         })))
     }
@@ -239,7 +214,7 @@ export default class Stats extends React.Component {
         })))
     }
 
-    groupData = (passedData, groupType, ) => {
+    groupData = (passedData, groupType, type) => {
         fetch(`api/stats/grouping/${type}`, {
             method: 'POST',
             headers: {
@@ -249,14 +224,15 @@ export default class Stats extends React.Component {
             body: JSON.stringify({
                 labels: passedData.labels,
                 dataActive: groupType,
-                queryType: this.state.activeData.queryType
+                queryType: this.state.activeData.queryType,
+                groupingType: type
             })
         })
             .then(response => response.json())
             .then(data => this.setState(prevState => ({
                 data: {
                     ...prevState.data,
-                    data
+                    ...data
                 }
         })))
     }
@@ -324,10 +300,10 @@ export default class Stats extends React.Component {
         fetch(`/api/stats/${currentData}/${currentQuery}`)
         .then(response => response.json())
         .then(data => {
-            this.groupGenders(data, currentData)
-            this.groupAges(data, currentData)
-            this.groupTimes(data, currentData)
-            this.groupDays(data, currentData)
+            this.groupData(data, currentData, "genders")
+            this.groupData(data, currentData, "ages")
+            this.groupData(data, currentData, "times")
+            this.groupData(data, currentData, "days")
             this.setState(prevState => ({
                 data, 
                 activeData: {
@@ -373,24 +349,16 @@ export default class Stats extends React.Component {
                 labels: prevState.data.labels.filter((_, i) => i !== key),
                 colors: prevState.data.colors.filter((_, i) => i !== key),
                 genderData: {
-                    maleCounts: prevState.data.genderData.maleCounts.filter((_, i) => i !== key),
-                    femaleCounts: prevState.data.genderData.femaleCounts.filter((_, i) => i !== key)
+                    numbers: prevState.data.genderData.numbers.filter((_, i) => i !== key),
                 },
                 ageData: {
-                    averages: prevState.data.ageData.averages.filter((_, i) => i !== key)
+                    numbers: prevState.data.ageData.numbers.filter((_, i) => i !== key)
                 },
                 timeData: {
-                    dayCounts: prevState.data.timeData.dayCounts.filter((_, i) => i !== key),
-                    nightCounts: prevState.data.timeData.nightCounts.filter((_, i) => i !== key)
+                    numbers: prevState.data.timeData.numbers.filter((_, i) => i !== key),
                 },
                 dayData: {
-                    sundayCounts: prevState.data.dayData.sundayCounts.filter((_, i) => i !== key),
-                    mondayCounts: prevState.data.dayData.mondayCounts.filter((_, i) => i !== key),
-                    tuesdayCounts: prevState.data.dayData.tuesdayCounts.filter((_, i) => i !== key),
-                    wednesdayCounts: prevState.data.dayData.wednesdayCounts.filter((_, i) => i !== key),
-                    thursdayCounts: prevState.data.dayData.thursdayCounts.filter((_, i) => i !== key),
-                    fridayCounts: prevState.data.dayData.fridayCounts.filter((_, i) => i !== key),
-                    saturdayCounts: prevState.data.dayData.saturdayCounts.filter((_, i) => i !== key)
+                    numbers: prevState.data.dayData.numbers.filter((_, i) => i !== key),
                 },
             },
             inactiveLabels: [...prevState.inactiveLabels, prevState.data.labels[key]],
@@ -429,24 +397,16 @@ export default class Stats extends React.Component {
                 labels: [...prevState.data.labels, label],
                 colors: [...prevState.data.colors, ...data.colors],
                 genderData: {
-                    maleCounts: [...prevState.data.genderData.maleCounts, ...data.genderData.maleCounts],
-                    femaleCounts: [...prevState.data.genderData.femaleCounts, ...data.genderData.femaleCounts]
+                    numbers: [...prevState.data.genderData.numbers, ...data.genderData.numbers],
                 },
                 ageData: {
-                    averages: [...prevState.data.ageData.averages, ...data.ageData.averages]
+                    numbers: [...prevState.data.ageData.numbers, ...data.ageData.numbers]
                 },
                 timeData: {
-                    dayCounts: [...prevState.data.timeData.dayCounts, ...data.timeData.dayCounts],
-                    nightCounts: [...prevState.data.timeData.nightCounts, ...data.timeData.nightCounts]
+                    numbers: [...prevState.data.timeData.numbers, ...data.timeData.numbers],
                 },
                 dayData: {
-                    sundayCounts: [...prevState.data.dayData.sundayCounts, ...data.dayData.sundayCounts],
-                    mondayCounts: [...prevState.data.dayData.mondayCounts, ...data.dayData.mondayCounts],
-                    tuesdayCounts: [...prevState.data.dayData.tuesdayCounts, ...data.dayData.tuesdayCounts],
-                    wednesdayCounts: [...prevState.data.dayData.wednesdayCounts, ...data.dayData.wednesdayCounts],
-                    thursdayCounts: [...prevState.data.dayData.thursdayCounts, ...data.dayData.thursdayCounts],
-                    fridayCounts: [...prevState.data.dayData.fridayCounts, ...data.dayData.fridayCounts],
-                    saturdayCounts: [...prevState.data.dayData.saturdayCounts, ...data.dayData.saturdayCounts]
+                    numbers: [...prevState.data.dayData.numbers, ...data.dayData.numbers],
                 }
             },
             inactiveLabels: prevState.inactiveLabels.filter((item, _) => item != label),
@@ -460,10 +420,10 @@ export default class Stats extends React.Component {
         fetch(`/api/stats/${currentData}/${queryType}`)
         .then(response => response.json())
         .then(data => {
-            this.groupGenders(data, currentData)
-            this.groupAges(data, currentData)
-            this.groupTimes(data, currentData)
-            this.groupDays(data, currentData)
+            this.groupData(data, currentData, "genders")
+            this.groupData(data, currentData, "ages")
+            this.groupData(data, currentData, "times")
+            this.groupData(data, currentData, "days")
             this.setState(prevState => ({
                 data, 
                 activeData: {
