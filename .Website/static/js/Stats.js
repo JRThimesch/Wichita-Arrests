@@ -105,136 +105,43 @@ export default class Stats extends React.Component {
         }
     }
 
-    getInfoBoxData = (passedData, active) => {
+    getInfoBoxData = (data, currentData) => {
         this.setState(prevState => ({
             level: prevState.level + 1,
             activeData: {
-                barsActive: active,
+                barsActive: currentData,
                 groupingActive: 'default',
                 queryType: prevState.activeData.queryType
             },
-            data: passedData,
+            data: data,
             key : Math.random() * 10000
         }))
-        this.groupData(passedData, active, "genders")
-        this.groupData(passedData, active, "ages")
-        this.groupData(passedData, active, "times")
-        this.groupData(passedData, active, "days")
+        this.groupData(data, currentData, ["genders", "ages", "times", "days"])
     }
 
-    groupGenders = (passedData, active) => {
-        fetch("api/stats/grouping/genders", {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                labels: passedData.labels,
-                dataActive: active,
-                queryType: this.state.activeData.queryType
+    groupData = (passedData, groupType, queries) => {
+        queries.forEach(query => {
+            fetch(`api/stats/grouping/${query}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    labels: passedData.labels,
+                    dataActive: groupType,
+                    queryType: this.state.activeData.queryType,
+                    groupingType: query
+                })
             })
+                .then(response => response.json())
+                .then(data => this.setState(prevState => ({
+                    data: {
+                        ...prevState.data,
+                        ...data
+                    }
+            })))
         })
-            .then(response => response.json())
-            .then(data => this.setState(prevState => ({
-                ready: true,
-                data: {
-                    ...prevState.data,
-                    genderData: data,
-                }
-        })))
-    }
-
-    groupDays = (passedData, active) => {
-        fetch("api/stats/grouping/days", {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                labels: passedData.labels,
-                dataActive: active,
-                queryType: this.state.activeData.queryType
-            })
-        })
-            .then(response => response.json())
-            .then(data => this.setState(prevState => ({
-                ready: true,
-                data: {
-                    ...prevState.data,
-                    dayData: data
-                }
-        })))
-    }
-
-    groupAges = (passedData, active) => {
-        fetch("api/stats/grouping/ages", {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                labels: passedData.labels,
-                dataActive: active,
-                queryType: this.state.activeData.queryType
-            })
-        })
-            .then(response => response.json())
-            .then(data => this.setState(prevState => ({
-                ready: true,
-                data: {
-                    ...prevState.data,
-                    ageData: data
-                }
-        })))
-    }
-
-    groupTimes = (passedData, active) => {
-        fetch("api/stats/grouping/times", {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                labels: passedData.labels,
-                dataActive: active,
-                queryType: this.state.activeData.queryType
-            })
-        })
-            .then(response => response.json())
-            .then(data => this.setState(prevState => ({
-                ready: true,
-                data: {
-                    ...prevState.data,
-                    timeData: data
-                }
-        })))
-    }
-
-    groupData = (passedData, groupType, type) => {
-        fetch(`api/stats/grouping/${type}`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                labels: passedData.labels,
-                dataActive: groupType,
-                queryType: this.state.activeData.queryType,
-                groupingType: type
-            })
-        })
-            .then(response => response.json())
-            .then(data => this.setState(prevState => ({
-                data: {
-                    ...prevState.data,
-                    ...data
-                }
-        })))
     }
 
     toggleGrouping = (e) => {
@@ -300,10 +207,7 @@ export default class Stats extends React.Component {
         fetch(`/api/stats/${currentData}/${currentQuery}`)
         .then(response => response.json())
         .then(data => {
-            this.groupData(data, currentData, "genders")
-            this.groupData(data, currentData, "ages")
-            this.groupData(data, currentData, "times")
-            this.groupData(data, currentData, "days")
+            this.groupData(data, currentData, ["genders", "ages", "times", "days"])
             this.setState(prevState => ({
                 data, 
                 activeData: {
@@ -420,10 +324,7 @@ export default class Stats extends React.Component {
         fetch(`/api/stats/${currentData}/${queryType}`)
         .then(response => response.json())
         .then(data => {
-            this.groupData(data, currentData, "genders")
-            this.groupData(data, currentData, "ages")
-            this.groupData(data, currentData, "times")
-            this.groupData(data, currentData, "days")
+            this.groupData(data, currentData, ["genders", "ages", "times", "days"])
             this.setState(prevState => ({
                 data, 
                 activeData: {

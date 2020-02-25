@@ -250,7 +250,7 @@ export default class BarGraph extends React.Component {
 
                 return (
                     <div key={i} className={className}>
-                        <div className="BarGraph-bar-subbar" index={0} onMouseLeave={this.opacityReset} onMouseOver={this.opacityHover} count={counts[i]} onClick={this.getHoverData} style={substyle}/>
+                        <div className="BarGraph-bar-subbar" count={counts[i]} index={0} onMouseLeave={this.opacityReset} onMouseOver={this.opacityHover} onClick={this.getHoverData} style={substyle}/>
                     </div>
                 ) 
 
@@ -265,7 +265,7 @@ export default class BarGraph extends React.Component {
                 return (
                     <div key={i} className={className}>
                         {substyles.map((substyle, k) => {
-                            return <div className="BarGraph-bar-subbar" key={k} label={sublabels[k]} count={counts[i + k * counts.length / substyles.length]} index={k} onMouseLeave={this.opacityReset} onMouseOver={this.opacityHover} onClick={this.getHoverData} style={substyle}/>
+                            return <div className="BarGraph-bar-subbar" count={counts[substyles.length * i + k]} key={k} label={sublabels[k]} index={k} onMouseLeave={this.opacityReset} onMouseOver={this.opacityHover} onClick={this.getHoverData} style={substyle}/>
                         })}
                     </div>
                 ) 

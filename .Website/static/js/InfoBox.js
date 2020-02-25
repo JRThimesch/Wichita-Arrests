@@ -72,8 +72,8 @@ export default class InfoBox extends React.PureComponent {
 
         let warningIcon = this.props.graphlevel > 0 ? 
             <>
-            <hr className="InfoBox-line-large"/>
-            <p style={{fontSize: '50px', fontWeight: 900, color: 'red'}}>!</p>
+                <hr className="InfoBox-line-large"/>
+                <p style={{fontSize: '50px', fontWeight: 900, color: 'red'}}>!</p>
             </> : null
 
         let count = this.isInt(parseFloat(this.props.currentcount)) ? this.props.currentcount : parseFloat(this.props.currentcount).toFixed(2)

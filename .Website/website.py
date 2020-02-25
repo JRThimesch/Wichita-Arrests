@@ -263,7 +263,7 @@ def getGenderData(_data):
                     .count() for label in labels] for sex in sexes]
     return genderCounts
 
-def getGroupingData(_s, _queryColumn, _groupingColumn, _joinTable=ArrestRecord, _queryType = 'distinct'):
+def getGroupingData(_s, _queryColumn, _groupingColumn, _labels, _joinTable=ArrestRecord, _queryType = 'distinct'):
     # QUERY METHOD NEEDS TO BE DIFFERENT FOR TIME
     # TIMES ARE EXACT AND WOULD MAKE ANALYSIS AWFUL IF DONE UNIQUELY
     if _queryColumn == ArrestRecord.time:
@@ -275,7 +275,7 @@ def getGroupingData(_s, _queryColumn, _groupingColumn, _joinTable=ArrestRecord, 
     elif _queryColumn != ArrestRecord.time:
         dataSubq = _s.query(_queryColumn)\
             .distinct(_queryColumn)\
-            .filter(_queryColumn != None)\
+            .filter(and_(_queryColumn != None, _queryColumn.in_(_labels)))\
             .subquery()
 
     categorySubq = _s.query(_groupingColumn)\
@@ -490,7 +490,6 @@ def splitListInChunks(_list, _n):
     return [_list[i * _n:(i + 1) * _n] for i in range((len(_list) + _n - 1) // _n)]
 
 def getNumbersFromQuery(_q):
-    print(_q)
     queryAsList = list(map(list, zip(*_q)))
     subListLength = len(set(queryAsList[2]))
     return splitListInChunks(queryAsList[0], subListLength)
@@ -529,17 +528,16 @@ def getCountsForGroupingData(_data):
     active = _data['dataActive']
     queryType = _data['queryType']
     grouping = _data['groupingType']
+    labels = _data['labels']
     
-    print(_data)
-
     queriedColumn = getRespectiveQueryColumn(active)
     groupingColumn = getRespectiveGroupingColumn(grouping)
 
     with sessionManager() as s:
         if queryType == 'distinct':
-            query = getGroupingData(s, queriedColumn, groupingColumn, _joinTable=ArrestInfo)
+            query = getGroupingData(s, queriedColumn, groupingColumn, labels, _joinTable=ArrestInfo)
         elif queryType == 'charges':
-            query = getGroupingData(s, queriedColumn, groupingColumn, _joinTable=ArrestInfo, _queryType = 'charges')
+            query = getGroupingData(s, queriedColumn, groupingColumn, labels, _joinTable=ArrestInfo, _queryType = 'charges')
         counts = getNumbersFromQuery(query)
     return counts
 
