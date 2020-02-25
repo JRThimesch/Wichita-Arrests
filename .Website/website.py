@@ -335,6 +335,7 @@ def getGroupingData(_s, _queryColumn, _groupingColumn, _joinTable=ArrestRecord, 
             query = _s.query(cast(func.avg(distinctCategoryCountColumn), Float).label('count'),
                 distinctCountColumn, literal(0).label('avg'))\
                 .group_by(distinctCountColumn)\
+                .order_by(distinctCountColumn)\
                 .all()
             return query
 
@@ -379,8 +380,9 @@ def getGroupingData(_s, _queryColumn, _groupingColumn, _joinTable=ArrestRecord, 
         elif _queryColumn != ArrestRecord.time:
             if _groupingColumn == ArrestRecord.age:
                 query = _s.query(cast(func.avg(_groupingColumn), Float).label('count'), 
-                    _queryColumn,  literal(0).label('avg'))\
+                    _queryColumn, literal(0).label('avg'))\
                     .group_by(_queryColumn)\
+                    .order_by(_queryColumn)\
                     .all()
                 return query
             countSubq = _s.query(_queryColumn, _groupingColumn, 
@@ -411,8 +413,7 @@ def getGroupingData(_s, _queryColumn, _groupingColumn, _joinTable=ArrestRecord, 
     elif _queryColumn == ArrestRecord.timeOfYear:
         countColumn = countSubq.c.timeOfYear
         productColumn = cartesionProduct.c.timeOfYear
-        # CHANGE
-        sortCase = cast(productColumn, Date)
+        sortCase = productColumn
     elif _queryColumn == ArrestRecord.dayOfTheWeek:
         countColumn = countSubq.c.dayOfTheWeek
         productColumn = cartesionProduct.c.dayOfTheWeek
@@ -478,6 +479,10 @@ def getGroupingData(_s, _queryColumn, _groupingColumn, _joinTable=ArrestRecord, 
         .filter(productCategoryColumn.in_(allowedGroupings))\
         .order_by(sortCase, orderCase)\
         .all()
+
+    # Not sorted correctly by ORDER BY statements, easier to do it in python
+    if _queryColumn == ArrestRecord.timeOfYear:
+        query = sorted(query, key=lambda x: datetime.strptime(x[1], '%B %Y'))
 
     return query
 
