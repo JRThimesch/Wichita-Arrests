@@ -52,217 +52,6 @@ def getListQuery(_query):
 def getSingleQuery(_query):
     return list(zip(*_query))[0]
 
-def getAgeData(_data):
-    active = _data['dataActive']
-    queryType = _data['queryType']
-    labels = _data['labels']
-
-    with sessionManager() as s:
-        if queryType == "distinct":
-            if active == "groups":
-                subquery = s.query(ArrestInfo.group, ArrestRecord.age)\
-                    .join(ArrestInfo)\
-                    .distinct(ArrestRecord.recordID, ArrestInfo.group)\
-                    .group_by(ArrestRecord.recordID, ArrestInfo.group)\
-                    .subquery()
-
-                ageCounts = [s.query(cast(func.avg(subquery.c.age), Float))\
-                    .filter(subquery.c.group == label)\
-                    .all()[0][0] for label in labels]
-            elif active == "tags":
-                subquery = s.query(ArrestInfo.tag, ArrestRecord.age)\
-                    .join(ArrestInfo)\
-                    .distinct(ArrestRecord.recordID, ArrestInfo.tag)\
-                    .group_by(ArrestRecord.recordID, ArrestInfo.tag)\
-                    .subquery()
-
-                ageCounts = [s.query(cast(func.avg(subquery.c.age), Float))\
-                    .filter(subquery.c.tag == label)\
-                    .all()[0][0] for label in labels]
-            elif active == "arrests":
-                subquery = s.query(ArrestInfo.arrest, ArrestRecord.age)\
-                    .join(ArrestInfo)\
-                    .subquery()
-
-                ageCounts = [s.query(cast(func.avg(subquery.c.age), Float))\
-                    .filter(subquery.c.arrest == label)\
-                    .all()[0][0] for label in labels]
-            elif active == "ages":
-                ageCounts = [int(i) for i in labels]
-            elif active == "dates":
-                ageCounts = [s.query(cast(func.avg(ArrestRecord.age), Float))\
-                    .filter(ArrestRecord.date == label)\
-                    .all()[0][0] for label in labels]
-            elif active == "genders":
-                ageCounts = [s.query(cast(func.avg(ArrestRecord.age), Float))\
-                    .filter(ArrestRecord.sex == label)\
-                    .all()[0][0] for label in labels]
-            elif active == "times":
-                hours = [int(label.partition(':')[0]) for label in labels]
-                labels = [str(x) + ':' if x >= 10 else '0' + str(x) + ':' for x in hours]
-                ageCounts = [s.query(cast(func.avg(ArrestRecord.age), Float))\
-                    .filter(ArrestRecord.time.contains(label))\
-                    .all()[0][0] for label in labels]
-            elif active == "days":
-                ageCounts = [s.query(cast(func.avg(ArrestRecord.age), Float))\
-                    .filter(ArrestRecord.dayOfTheWeek == label)\
-                    .all()[0][0] for label in labels]
-            elif active == "months":
-                ageCounts = [s.query(cast(func.avg(ArrestRecord.age), Float))\
-                    .filter(ArrestRecord.timeOfYear == label)\
-                    .all()[0][0] for label in labels]
-        elif queryType == "charges":
-            if active == "groups":
-                ageCounts = [float(s.query(func.avg(ArrestRecord.age))\
-                    .join(ArrestInfo)\
-                    .filter(ArrestInfo.group == label)\
-                    .all()[0][0]) for label in labels]
-            elif active == "tags":
-                ageCounts = [float(s.query(func.avg(ArrestRecord.age))\
-                    .join(ArrestInfo)\
-                    .filter(ArrestInfo.tag == label)\
-                    .all()[0][0]) for label in labels]
-            elif active == "arrests":
-                ageCounts = [float(s.query(func.avg(ArrestRecord.age))\
-                    .join(ArrestInfo)\
-                    .filter(ArrestInfo.arrest == label)\
-                    .all()[0][0]) for label in labels]
-            elif active == "ages":
-                ageCounts = [int(i) for i in labels]
-            elif active == "dates":
-                ageCounts = [s.query(cast(func.avg(ArrestRecord.age), Float))\
-                    .join(ArrestInfo)\
-                    .filter(ArrestRecord.date == label)\
-                    .all()[0][0] for label in labels]
-            elif active == "genders":
-                ageCounts = [float(s.query(func.avg(ArrestRecord.age))\
-                    .join(ArrestInfo)\
-                    .filter(ArrestRecord.sex == label)\
-                    .all()[0][0]) for label in labels]
-            elif active == "times":
-                hours = [int(label.partition(':')[0]) for label in labels]
-                labels = [str(x) + ':' if x >= 10 else '0' + str(x) + ':' for x in hours]
-                ageCounts = [float(s.query(func.avg(ArrestRecord.age))\
-                    .join(ArrestInfo)\
-                    .filter(ArrestRecord.time.contains(label))\
-                    .all()[0][0]) for label in labels]
-            elif active == "days":
-                ageCounts = [float(s.query(func.avg(ArrestRecord.age))\
-                    .join(ArrestInfo)\
-                    .filter(ArrestRecord.dayOfTheWeek == label)\
-                    .all()[0][0]) for label in labels]
-            elif active == "months":
-                ageCounts = [float(s.query(func.avg(ArrestRecord.age))\
-                    .join(ArrestInfo)\
-                    .filter(ArrestRecord.timeOfYear == label)\
-                    .all()[0][0]) for label in labels]
-
-    return ageCounts
-
-# DISTINCT. IDEA IS THAT THE GROUP LIES WITHIN THE CHARGE. DUPLICATES ARE NOT COUNTED
-#genderCounts = [[s.query(ArrestRecord.recordID, ArrestInfo.group)\
-    #.join(ArrestInfo)\
-    #.distinct(ArrestRecord.recordID, ArrestInfo.group)\
-    #.filter(and_(ArrestRecord.sex == sex, ArrestInfo.group == label))\
-    #.count() for label in labels] for sex in sexes]
-
-def getGenderData(_data):
-    active = _data['dataActive']
-    queryType = _data['queryType']
-    labels = _data['labels']
-    sexes = ["MALE", "FEMALE"]
-
-    with sessionManager() as s:
-        if queryType == "distinct":
-            if active == "groups":
-                genderCounts = [[s.query(ArrestRecord.recordID, ArrestInfo.group)\
-                    .join(ArrestInfo)\
-                    .distinct(ArrestRecord.recordID, ArrestInfo.group)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestInfo.group == label))\
-                    .count() for label in labels] for sex in sexes]
-            elif active == "tags":
-                genderCounts = [[s.query(ArrestRecord.recordID, ArrestInfo.tag)\
-                    .join(ArrestInfo)\
-                    .distinct(ArrestRecord.recordID, ArrestInfo.tag)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestInfo.tag == label))\
-                    .count() for label in labels] for sex in sexes]
-            elif active == "arrests":
-                genderCounts = [[s.query(ArrestRecord.recordID, ArrestInfo.arrest)\
-                    .join(ArrestInfo)\
-                    .distinct(ArrestRecord.recordID, ArrestInfo.arrest)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestInfo.arrest == label))\
-                    .count() for label in labels] for sex in sexes]
-            elif active == "ages":
-                genderCounts = [[s.query(ArrestRecord.recordID, ArrestRecord.age)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestRecord.age == label))\
-                    .count() for label in labels] for sex in sexes]
-            elif active == "dates":
-                genderCounts = [[s.query(ArrestRecord.recordID, ArrestRecord.date)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestRecord.date == label))\
-                    .count() for label in labels] for sex in sexes]
-            elif active == "genders":
-                genderCounts = [[0, 0], [0, 0]]
-            elif active == "times":
-                hours = [int(label.partition(':')[0]) for label in labels]
-                labels = [str(x) + ':' if x >= 10 else '0' + str(x) + ':' for x in hours]
-                genderCounts = [[s.query(ArrestRecord.recordID, ArrestRecord.time)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestRecord.time.contains(label)))\
-                    .count() for label in labels] for sex in sexes]
-            elif active == "days":
-                genderCounts = [[s.query(ArrestRecord.recordID, ArrestRecord.dayOfTheWeek)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestRecord.dayOfTheWeek == label))\
-                    .count() for label in labels] for sex in sexes]
-            elif active == "months":
-                genderCounts = [[s.query(ArrestRecord.recordID, ArrestRecord.timeOfYear)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestRecord.timeOfYear == label))\
-                    .count() for label in labels] for sex in sexes]
-        elif queryType == "charges":
-            if active == "groups":
-                genderCounts = [[s.query(ArrestRecord)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestInfo.group == label))\
-                    .count() for label in labels] for sex in sexes]
-            elif active == "tags":
-                genderCounts = [[s.query(ArrestRecord)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestInfo.tag == label))\
-                    .count() for label in labels] for sex in sexes]
-            elif active == "arrests":
-                genderCounts = [[s.query(ArrestRecord)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestInfo.arrest == label))\
-                    .count() for label in labels] for sex in sexes]
-            elif active == "ages":
-                genderCounts = [[s.query(ArrestRecord)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestRecord.age == label))\
-                    .count() for label in labels] for sex in sexes]
-            elif active == "dates":
-                genderCounts = [[s.query(ArrestRecord)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestRecord.date == label))\
-                    .count() for label in labels] for sex in sexes]
-            elif active == "genders":
-                genderCounts = [[0, 0], [0, 0]]
-            elif active == "times":
-                hours = [int(label.partition(':')[0]) for label in labels]
-                labels = [str(x) + ':' if x >= 10 else '0' + str(x) + ':' for x in hours]
-                genderCounts = [[s.query(ArrestRecord)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestRecord.time.contains(label)))\
-                    .count() for label in labels] for sex in sexes]
-            elif active == "days":
-                genderCounts = [[s.query(ArrestRecord)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestRecord.dayOfTheWeek == label))\
-                    .count() for label in labels] for sex in sexes]
-            elif active == "months":
-                genderCounts = [[s.query(ArrestRecord)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.sex == sex, ArrestRecord.timeOfYear == label))\
-                    .count() for label in labels] for sex in sexes]
-    return genderCounts
-
 def getGroupingData(_s, _queryColumn, _groupingColumn, _labels, _joinTable=ArrestRecord, _queryType = 'distinct'):
     # QUERY METHOD NEEDS TO BE DIFFERENT FOR TIME
     # TIMES ARE EXACT AND WOULD MAKE ANALYSIS AWFUL IF DONE UNIQUELY
@@ -540,102 +329,6 @@ def getCountsForGroupingData(_data):
             query = getGroupingData(s, queriedColumn, groupingColumn, labels, _joinTable=ArrestInfo, _queryType = 'charges')
         counts = getNumbersFromQuery(query)
     return counts
-
-def getTimesData(_data):
-    active = _data['dataActive']
-    queryType = _data['queryType']
-    labels = _data['labels']
-    times = ['DAY', 'NIGHT']
-
-    with sessionManager() as s:
-        if queryType == 'distinct':
-            if active == "groups":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestInfo.group == label))\
-                    .distinct(ArrestRecord.recordID, ArrestRecord.timeOfDay, ArrestInfo.group)\
-                    .group_by(ArrestRecord.recordID, ArrestRecord.timeOfDay, ArrestInfo.group)\
-                    .count() for label in labels] for time in times]
-            elif active == "tags":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestInfo.tag == label))\
-                    .distinct(ArrestRecord.recordID, ArrestRecord.timeOfDay, ArrestInfo.tag)\
-                    .group_by(ArrestRecord.recordID, ArrestRecord.timeOfDay, ArrestInfo.tag)\
-                    .count() for label in labels] for time in times]
-            elif active == "arrests":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestInfo.arrest == label))\
-                    .distinct(ArrestRecord.recordID, ArrestRecord.timeOfDay, ArrestInfo.arrest)\
-                    .group_by(ArrestRecord.recordID, ArrestRecord.timeOfDay, ArrestInfo.arrest)\
-                    .count() for label in labels] for time in times]
-            elif active == "ages":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestRecord.age == label))\
-                    .count() for label in labels] for time in times]
-            elif active == "dates":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestRecord.date == label))\
-                    .count() for label in labels] for time in times]
-            elif active == "genders":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestRecord.sex == label))\
-                    .count() for label in labels] for time in times]
-            elif active == "times":
-                timeCounts = [[0, 0] * 24] * 2
-            elif active == "days":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestRecord.dayOfTheWeek == label))\
-                    .count() for label in labels] for time in times]
-            elif active == "months":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestRecord.timeOfYear == label))\
-                    .count() for label in labels] for time in times]
-        elif queryType == 'charges':
-            if active == "groups":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestInfo.group == label))\
-                    .count() for label in labels] for time in times]
-            elif active == "tags":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestInfo.tag == label))\
-                    .count() for label in labels] for time in times]
-            elif active == "arrests":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestInfo.arrest == label))\
-                    .count() for label in labels] for time in times]
-            elif active == "ages":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestRecord.age == label))\
-                    .count() for label in labels] for time in times]
-            elif active == "dates":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestRecord.date == label))\
-                    .count() for label in labels] for time in times]
-            elif active == "genders":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestRecord.sex == label))\
-                    .count() for label in labels] for time in times]
-            elif active == "times":
-                timeCounts = [[0, 0] * 24] * 2
-            elif active == "days":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestRecord.dayOfTheWeek == label))\
-                    .count() for label in labels] for time in times]
-            elif active == "months":
-                timeCounts = [[s.query(ArrestRecord.timeOfDay)\
-                    .join(ArrestInfo)\
-                    .filter(and_(ArrestRecord.timeOfDay == time, ArrestRecord.timeOfYear == label))\
-                    .count() for label in labels] for time in times]
-    return timeCounts
 
 def getArrests():
     colorsDict = loadJSON("./static/js/Filters.json")   
@@ -1829,21 +1522,12 @@ def sortData(sortMethod=None):
     numbers = data['data']['numbers']
     labels = data['data']['labels']
     colors = data['data']['colors']
-    maleCounts = data['data']['genderData']['maleCounts']
-    femaleCounts = data['data']['genderData']['femaleCounts']
-    dayCounts = data['data']['timeData']['dayCounts']
-    nightCounts = data['data']['timeData']['nightCounts']
-    femaleCounts = data['data']['genderData']['femaleCounts']
-    averageAges = data['data']['ageData']['averages']
     barsActive = data['activeData']['barsActive']
     groupingActive = data['activeData']['groupingActive']
-    sundayCounts = data['data']['dayData']['sundayCounts']
-    mondayCounts = data['data']['dayData']['mondayCounts']
-    tuesdayCounts = data['data']['dayData']['tuesdayCounts']
-    wednesdayCounts = data['data']['dayData']['wednesdayCounts']
-    thursdayCounts = data['data']['dayData']['thursdayCounts']
-    fridayCounts = data['data']['dayData']['fridayCounts']
-    saturdayCounts = data['data']['dayData']['saturdayCounts']
+    dayDataNumbers = data['data']['dayData']['numbers']
+    timeDataNumbers = data['data']['timeData']['numbers']
+    genderDataNumbers = data['data']['genderData']['numbers']
+    ageDataNumbers = data['data']['ageData']['numbers']
 
     if sortType == 'alpha' and barsActive == 'ages':
         labels = [int(i) for i in labels]
@@ -1852,22 +1536,17 @@ def sortData(sortMethod=None):
     
     if sortType == 'numeric':
         if groupingActive == "ages":
-            sortedZip = sorted(zip(numbers, labels, colors, maleCounts, femaleCounts, 
-                averageAges, dayCounts, nightCounts, sundayCounts, mondayCounts, 
-                tuesdayCounts, wednesdayCounts, thursdayCounts, fridayCounts, saturdayCounts), key=itemgetter(5), reverse=ascending)
+            sortedZip = sorted(zip(numbers, labels, colors, dayDataNumbers,
+                timeDataNumbers, genderDataNumbers, ageDataNumbers), key=itemgetter(6), reverse=ascending)
         else:
-            sortedZip = sorted(zip(numbers, labels, colors, maleCounts, femaleCounts, 
-                averageAges, dayCounts, nightCounts, sundayCounts, mondayCounts, 
-                tuesdayCounts, wednesdayCounts, thursdayCounts, fridayCounts, saturdayCounts), reverse=ascending)
+            sortedZip = sorted(zip(numbers, labels, colors, dayDataNumbers,
+                timeDataNumbers, genderDataNumbers, ageDataNumbers), reverse=ascending)
     elif sortType == 'alpha':
-        sortedZip = sorted(zip(numbers, labels, colors, maleCounts, femaleCounts, 
-            averageAges, dayCounts, nightCounts, sundayCounts, mondayCounts, 
-            tuesdayCounts, wednesdayCounts, thursdayCounts, fridayCounts, saturdayCounts), key=itemgetter(1), reverse=ascending)
+        sortedZip = sorted(zip(numbers, labels, colors, dayDataNumbers,
+                timeDataNumbers, genderDataNumbers, ageDataNumbers), key=itemgetter(1), reverse=ascending)
     
-    numbers, labels, colors, maleCounts, femaleCounts, \
-        averageAges, dayCounts, nightCounts, \
-        sundayCounts, mondayCounts, tuesdayCounts, wednesdayCounts, \
-        thursdayCounts, fridayCounts, saturdayCounts = zip(*sortedZip)
+    numbers, labels, colors, dayDataNumbers, \
+        timeDataNumbers, genderDataNumbers, ageDataNumbers = zip(*sortedZip)
 
     if sortType == 'alpha' and barsActive == 'dates':
         labels = [datetime.strftime(date, '%m/%d/%Y') for date in labels]
@@ -1877,24 +1556,16 @@ def sortData(sortMethod=None):
         'labels': labels,
         'colors' : colors,
         'genderData': {
-            'maleCounts': maleCounts,
-            'femaleCounts': femaleCounts
+            'numbers': genderDataNumbers
         },
         'ageData': {
-            'averages' : averageAges
+            'numbers' : ageDataNumbers
         },
         'timeData': {
-            'dayCounts': dayCounts,
-            'nightCounts': nightCounts
+            'numbers': timeDataNumbers
         },
         'dayData': {
-            'sundayCounts': sundayCounts,
-            'mondayCounts': mondayCounts,
-            'tuesdayCounts': tuesdayCounts,
-            'wednesdayCounts': wednesdayCounts,
-            'thursdayCounts': thursdayCounts,
-            'fridayCounts': fridayCounts,
-            'saturdayCounts': saturdayCounts
+            'numbers': dayDataNumbers
         }
     }
     return jsonify(data)
