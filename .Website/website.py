@@ -381,7 +381,21 @@ def getTags(_queryType):
     colors = [next(i['color'] for i in colorsDict if i['tag'] == tag) for tag in tags]
 
     return tags, counts, colors
-    
+
+def getQueryData(_data):
+    queryColumn = getRespectiveQueryColumn(_data['barsActive']) #might need changed
+    queryType = _data['queryType']
+
+    if queryColumn == ArrestInfo.arrest or queryColumn == ArrestInfo.tag:
+        queryTuple = (queryColumn, func.count(queryColumn), ArrestInfo.group)
+    else:
+        queryTuple = (queryColumn, func.count(queryColumn))
+
+    with sessionManager() as s:
+        if _data['queryType'] == 'charges':
+            pass
+        elif _data['queryType'] == 'distinct':
+            pass
 
 def getGroups(_queryType):
     colorsDict = loadJSON("./static/js/Filters.json")
