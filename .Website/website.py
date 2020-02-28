@@ -278,8 +278,11 @@ def getGroupingData(_s, _queryColumn, _groupingColumn, _labels, _joinTable=Arres
 def splitListInChunks(_list, _n):
     return [_list[i * _n:(i + 1) * _n] for i in range((len(_list) + _n - 1) // _n)]
 
+def unzipToList(_zipList):
+    return list(map(list, zip(*_zipList)))
+
 def getNumbersFromQuery(_q):
-    queryAsList = list(map(list, zip(*_q)))
+    queryAsList = unzipToList(_q)
     subListLength = len(set(queryAsList[2]))
     return splitListInChunks(queryAsList[0], subListLength)
 
@@ -515,10 +518,8 @@ def getRespectiveColors(_string, _labels, _supportList = None):
 def getQueryData(_data):
     print(_data)
     queryString = _data['dataActive']
-    queryString = 'dates'
     queryColumn = getRespectiveQueryColumn(queryString)
     queryType = _data['queryType']
-    queryType = 'charges'
 
     if isGroupColorQuery(queryColumn):
         joinTable = ArrestRecord
@@ -570,13 +571,17 @@ def getQueryData(_data):
                     .order_by(sortingCase)\
                     .all()
 
+    # THIS SHOULD NOT BE WORKING FOR TIMES
+    # HAVE NOT TESTED THOUGH
     try:
-        labels, counts = zip(*query)
+        labels, counts = unzipToList(query)
         if queryString == 'dates':
             labels = [date.strftime(i[0], "%m/%d/%Y") for i in query]
+        elif queryString == 'times':
+            labels = [hour[0] + '00 - ' + hour[0] + '59' for hour in query]
         colors = getRespectiveColors(queryString, labels)
     except ValueError:
-        labels, counts, supportGroups = zip(*query)
+        labels, counts, supportGroups = unzipToList(query)
         colors = getRespectiveColors(queryString, labels, _supportList=supportGroups)
         
     return labels, counts, colors
@@ -2017,6 +2022,17 @@ def getSingleLabelData(_data):
             
     return count, color
 
+@app.route('/api/stats/queriedData', methods=['GET', 'POST'])
+def statsQueriedData():
+    data = request.get_json()
+    labels, counts, colors = getQueryData(data)
+    data = { 
+        'labels': labels,
+        'numbers': counts,
+        'colors' : colors
+    }
+    return data
+
 @app.route('/api/stats/label', methods=['GET', 'POST'])
 def statsSingleLabelData():
     data = request.get_json()
@@ -2095,7 +2111,6 @@ def groupAgeData():
 @app.route('/api/stats/grouping/genders', methods=['GET', 'POST'])
 def groupGenderData():
     data = request.get_json()
-    getQueryData(data)
 
     data = { 
         'genderData' : {
