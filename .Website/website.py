@@ -312,6 +312,26 @@ def getRespectiveGroupingColumn(_string):
         return ArrestRecord.sex
     elif _string == "ages":
         return ArrestRecord.age
+    
+def getRespectiveSubqueryColumn(_string, _table):
+    if _string == "groups":
+        return _table.c.group
+    elif _string == "tags":
+        return _table.c.tag
+    elif _string == "arrests":
+        return _table.c.arrest
+    elif _string == "ages":
+        return _table.c.age
+    elif _string == "dates":
+        return _table.c.date
+    elif _string == "genders":
+        return _table.c.sex
+    elif _string == "times":
+        return _table.c.time
+    elif _string == "days":
+        return _table.c.dayOfTheWeek
+    elif _string == "months":
+        return _table.c.timeOfYear
 
 def getCountsForGroupingData(_data):
     active = _data['dataActive']
@@ -382,20 +402,184 @@ def getTags(_queryType):
 
     return tags, counts, colors
 
-def getQueryData(_data):
-    queryColumn = getRespectiveQueryColumn(_data['barsActive']) #might need changed
-    queryType = _data['queryType']
+def isGroupColorQuery(_queryColumn):
+    return _queryColumn == ArrestInfo.arrest or _queryColumn == ArrestInfo.tag or _queryColumn == ArrestInfo.group
 
-    if queryColumn == ArrestInfo.arrest or queryColumn == ArrestInfo.tag:
-        queryTuple = (queryColumn, func.count(queryColumn), ArrestInfo.group)
+def getRespectiveSortingCase(_string, _column):
+    if _string == "groups":
+        return _column
+    elif _string == "tags":
+        return _column
+    elif _string == "arrests":
+        return _column
+    elif _string == "ages":
+        return _column
+    elif _string == "dates":
+        return _column
+    elif _string == "genders":
+        return case([
+            (_column == "MALE", 1),
+            (_column == "FEMALE", 2),
+        ])
+    elif _string == "times":
+        return _column
+    elif _string == "days":
+        return case([
+            (_column == "Sunday", 1),
+            (_column == "Monday", 2),
+            (_column == "Tuesday", 3),
+            (_column == "Wednesday", 4),
+            (_column == "Thursday", 5),
+            (_column == "Friday", 6),
+            (_column == "Saturday", 7)
+        ])
+    elif _string == "months":
+        return _column
+
+def getRespectiveFilter(_string, _column):
+    if _string == "groups":
+        return (_column != None)
+    elif _string == "tags":
+        return (_column != None)
+    elif _string == "arrests":
+        return and_(_column != None, _column != 'No arrests listed.')
+    elif _string == "ages":
+        return (_column != None)
+    elif _string == "dates":
+        return (_column != None)
+    elif _string == "genders":
+        return (_column != None)
+    elif _string == "times":
+        return (_column != None)
+    elif _string == "days":
+        return (_column != None)
+    elif _string == "months":
+        return (_column != None)
+
+def getRespectiveColors(_string, _labels, _supportList = None):
+    colorsDict = loadJSON("./static/js/FiltersImproved.json")
+    monthDict = {
+        "January": "#0095FF",
+        "February": "#10A4CC",
+        "March": "#20B39A",
+        "April": "#30C268",
+        "May": "#40D136",
+        "June": "#6FC628",
+        "July": "#9FBB1B",
+        "August": "#CFB00D",
+        "September": "#FFA600",
+        "October": "#B19B45",
+        "November": "#64918B",
+        "December": "#1787D1"
+    }
+    dateDict = {
+        "01": "#0095FF",
+        "02": "#10A4CC",
+        "03": "#20B39A",
+        "04": "#30C268",
+        "05": "#40D136",
+        "06": "#6FC628",
+        "07": "#9FBB1B",
+        "08": "#CFB00D",
+        "09": "#FFA600",
+        "10": "#B19B45",
+        "11": "#64918B",
+        "12": "#1787D1"
+    }
+
+    if _string == "groups":
+        return [next(i['color'] for i in colorsDict if i['group'] == group) for group in _supportList]
+    elif _string == "tags":
+        return [next(i['color'] for i in colorsDict if i['group'] == group) for group in _supportList]
+    elif _string == "arrests":
+        return [next(i['color'] for i in colorsDict if i['group'] == group) for group in _supportList]
+    elif _string == "ages":
+        return ['#def123'] * len(_labels)
+    elif _string == "dates":
+        return [dateDict[i.partition('/')[0]] for i in _labels]
+    elif _string == "genders":
+        return ['#80d8f2', '#eb88d4']
+    elif _string == "times":
+        return ["#00044A", "#051553", "#0A275C", "#0F3866", 
+            "#144A6F", "#195B78", "#1E6D82", "#237E8B", 
+            "#289094", "#2DA19E", "#32B3A7", "#37C4B0", 
+            "#3CD6BA", "#36C2AF", "#31AFA5", "#2B9C9B", 
+            "#268991", "#207687", "#1B637C", "#155072", 
+            "#103D68", "#0A2A5E", "#051754", "#00044A"]
+    elif _string == "days":
+        return ["#FF5500", "#FF6D00", "#FF8500", 
+            "#FF9D00", "#FFBC22", "#FFDB44", "#FFFA66"]
+    elif _string == "months":
+        return [monthDict[i.partition(' ')[0]] for i in _labels]
+
+def getQueryData(_data):
+    print(_data)
+    queryString = _data['dataActive']
+    queryString = 'dates'
+    queryColumn = getRespectiveQueryColumn(queryString)
+    queryType = _data['queryType']
+    queryType = 'charges'
+
+    if isGroupColorQuery(queryColumn):
+        joinTable = ArrestRecord
     else:
-        queryTuple = (queryColumn, func.count(queryColumn))
+        joinTable = ArrestInfo
+
+    filterQuery = getRespectiveFilter(queryString, queryColumn)
+    sortingCase = getRespectiveSortingCase(queryString, queryColumn)
 
     with sessionManager() as s:
-        if _data['queryType'] == 'charges':
-            pass
-        elif _data['queryType'] == 'distinct':
-            pass
+        if queryType == 'charges':
+            if isGroupColorQuery(queryColumn):
+                query = s.query(queryColumn, func.count(queryColumn).label('count'),
+                        ArrestInfo.group)\
+                    .join(joinTable)\
+                    .filter(filterQuery)\
+                    .order_by(sortingCase)\
+                    .group_by(queryColumn, ArrestInfo.group)\
+                    .all()
+            else:
+                query = s.query(queryColumn, func.count(queryColumn).label('count'))\
+                    .join(joinTable)\
+                    .filter(filterQuery)\
+                    .order_by(sortingCase)\
+                    .group_by(queryColumn)\
+                    .all()
+        elif queryType == 'distinct':
+            distinctQuerySubq = s.query(queryColumn, ArrestInfo.group)\
+                .join(joinTable)\
+                .distinct(ArrestRecord.recordID, queryColumn)\
+                .filter(filterQuery)\
+                .group_by(ArrestRecord.recordID, queryColumn, ArrestInfo.group)\
+                .subquery()
+
+            subqColumn = getRespectiveSubqueryColumn(queryString, distinctQuerySubq)
+            sortingCase = getRespectiveSortingCase(queryString, subqColumn)
+
+            if isGroupColorQuery(queryColumn):
+                # Tags/Arrests/Groups need an extra query on the group column
+                # Facilitates color selection
+                query = s.query(subqColumn, func.count(subqColumn).label('count'), 
+                        distinctQuerySubq.c.group)\
+                    .group_by(subqColumn, distinctQuerySubq.c.group)\
+                    .order_by(subqColumn)\
+                    .all()
+            else:
+                query = s.query(subqColumn, func.count(subqColumn).label('count'))\
+                    .group_by(subqColumn)\
+                    .order_by(sortingCase)\
+                    .all()
+
+    try:
+        labels, counts = zip(*query)
+        if queryString == 'dates':
+            labels = [date.strftime(i[0], "%m/%d/%Y") for i in query]
+        colors = getRespectiveColors(queryString, labels)
+    except ValueError:
+        labels, counts, supportGroups = zip(*query)
+        colors = getRespectiveColors(queryString, labels, _supportList=supportGroups)
+        
+    return labels, counts, colors
 
 def getGroups(_queryType):
     colorsDict = loadJSON("./static/js/Filters.json")
@@ -1911,6 +2095,7 @@ def groupAgeData():
 @app.route('/api/stats/grouping/genders', methods=['GET', 'POST'])
 def groupGenderData():
     data = request.get_json()
+    getQueryData(data)
 
     data = { 
         'genderData' : {
