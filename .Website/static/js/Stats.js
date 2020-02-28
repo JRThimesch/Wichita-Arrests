@@ -191,7 +191,7 @@ export default class Stats extends React.Component {
         }
     }
 
-    getDataUpdated = (e, queryType) => {
+    getData = (e, queryType) => {
         let selectedData = null
         if (e) {
             selectedData = e.currentTarget.getAttribute('type')
@@ -231,37 +231,6 @@ export default class Stats extends React.Component {
                     level: 0,
                     inactiveLabels: []
                 }))
-        })
-    }
-
-    getData = (e, queryType) => {
-        let currentData = null
-        if (e) {
-            currentData = e.currentTarget.getAttribute('type')
-        } else {
-            currentData = this.state.activeData.barsActive
-        }
-        let currentQuery = null
-        if (queryType) {
-            currentQuery = queryType
-        } else {
-            currentQuery = this.state.activeData.queryType
-        }
-        fetch(`/api/stats/${currentData}/${currentQuery}`)
-        .then(response => response.json())
-        .then(data => {
-            this.groupData(data, currentData, ["genders", "ages", "times", "days"])
-            this.setState(prevState => ({
-                data, 
-                activeData: {
-                    barsActive: currentData,
-                    groupingActive: 'default',
-                    queryType: prevState.activeData.queryType
-                },
-                key : Math.random() * 10000,
-                level: 0,
-                inactiveLabels: []
-            }))
         })
     }
 
@@ -454,39 +423,39 @@ export default class Stats extends React.Component {
                             <hr className="Stats-button-container-line"/>
                             <div className="Stats-button-container-group">
                                 <GraphButton
-                                    handleclick={this.getDataUpdated}
+                                    handleclick={this.getData}
                                     type="groups"
                                     ><img src="static/images/groupsIcon.png"/></GraphButton>
                                 <GraphButton 
-                                    handleclick={this.getDataUpdated}
+                                    handleclick={this.getData}
                                     type="tags"
                                     ><img src="static/images/tagsIcon.png"/></GraphButton>
                                 <GraphButton
-                                    handleclick={this.getDataUpdated}
+                                    handleclick={this.getData}
                                     type="arrests"
                                     ><img src="static/images/arrestsIcon.png"/></GraphButton>
                                 <GraphButton
-                                    handleclick={this.getDataUpdated}
+                                    handleclick={this.getData}
                                     type="ages"
                                     ><img src="static/images/agesIcon.png"/></GraphButton>
                                 <GraphButton
-                                    handleclick={this.getDataUpdated}
+                                    handleclick={this.getData}
                                     type="genders"
                                     ><img src="static/images/gendersIcon.png"/></GraphButton>
                                 <GraphButton
-                                    handleclick={this.getDataUpdated}
+                                    handleclick={this.getData}
                                     type="dates"
                                     ><img src="static/images/datesIcon.png"/></GraphButton>
                                 <GraphButton
-                                    handleclick={this.getDataUpdated}
+                                    handleclick={this.getData}
                                     type="times"
                                     ><img src="static/images/timesIcon.png"/></GraphButton>
                                 <GraphButton
-                                    handleclick={this.getDataUpdated}
+                                    handleclick={this.getData}
                                     type="days"
                                     ><img src="static/images/daysIcon.png"/></GraphButton>
                                 <GraphButton
-                                    handleclick={this.getDataUpdated}
+                                    handleclick={this.getData}
                                     type="months"
                                     ><img src="static/images/monthsIcon.png"/></GraphButton>
                             </div>

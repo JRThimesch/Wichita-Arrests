@@ -336,78 +336,6 @@ def getRespectiveSubqueryColumn(_string, _table):
     elif _string == "months":
         return _table.c.timeOfYear
 
-def getCountsForGroupingData(_data):
-    active = _data['dataActive']
-    queryType = _data['queryType']
-    grouping = _data['groupingType']
-    labels = _data['labels']
-    
-    queriedColumn = getRespectiveQueryColumn(active)
-    groupingColumn = getRespectiveGroupingColumn(grouping)
-
-    with sessionManager() as s:
-        if queryType == 'distinct':
-            query = getGroupingData(s, queriedColumn, groupingColumn, labels, _joinTable=ArrestInfo)
-        elif queryType == 'charges':
-            query = getGroupingData(s, queriedColumn, groupingColumn, labels, _joinTable=ArrestInfo, _queryType = 'charges')
-        counts = getNumbersFromQuery(query)
-    return counts
-
-def getArrests():
-    colorsDict = loadJSON("./static/js/Filters.json")   
-    with sessionManager() as s:
-        # QUERY TYPE DOES NOT MATTER HERE, ARRESTS ARE UNIQUE AND NO DUPLICATES APPEAR IN A RECORD
-        # YOU CANNOT BE CHARGED FOR THE SAME ARREST TWICE
-        query = s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
-            .filter(and_(ArrestInfo.arrest != "No arrests listed.", ArrestInfo.arrest != None)) \
-            .group_by(ArrestInfo.group, ArrestInfo.arrest) \
-            .all()
-
-    arrests = [i[0] for i in query]
-    counts = [i[1] for i in query]
-    groups = [i[2] for i in query]
-
-    sortedZip = sorted(zip(arrests, counts, groups))
-    arrests, counts, groups = zip(*sortedZip)
-
-    colors = [next(i['color'] for i in colorsDict if i['identifier'] == group) for group in groups]
-
-    print([[i['tag'] for i in colorsDict if i['identifier'] == group] for group in list(set([i['identifier'] for i in colorsDict]))])
-
-    return arrests, counts, colors
-
-def getTags(_queryType):
-    colorsDict = loadJSON("./static/js/Filters.json")
-
-    with sessionManager() as s:
-        if _queryType == 'charges':
-            query = s.query(ArrestInfo.tag, func.count(ArrestInfo.tag))\
-                .filter(ArrestInfo.tag != None)\
-                .group_by(ArrestInfo.tag) \
-                .all()
-        elif _queryType == 'distinct':
-            subquery = s.query(ArrestRecord.recordID, ArrestInfo.tag)\
-                .join(ArrestInfo)\
-                .filter(ArrestInfo.tag != None)\
-                .distinct(ArrestRecord.recordID, ArrestInfo.tag)\
-                .subquery()
-            query = s.query(subquery.c.tag, func.count(subquery.c.tag))\
-                .group_by(subquery.c.tag)\
-                .all()
-
-    tags = [i[0] for i in query]
-    counts = [i[1] for i in query]
-
-    sortedZip = sorted(zip(tags, counts))
-    tags, counts = zip(*sortedZip)
-
-    colors = [next(i['color'] for i in colorsDict if i['tag'] == tag) for tag in tags]
-
-    return tags, counts, colors
-
-def isGroupColorQuery(_queryColumn):
-    return _queryColumn == ArrestInfo.arrest or _queryColumn == ArrestInfo.tag or _queryColumn == ArrestInfo.group
-
 def getRespectiveSortingCase(_string, _column):
     if _string == "groups":
         return _column
@@ -458,6 +386,23 @@ def getRespectiveFilter(_string, _column):
         return (_column != None)
     elif _string == "months":
         return (_column != None)
+
+def getCountsForGroupingData(_data):
+    active = _data['dataActive']
+    queryType = _data['queryType']
+    grouping = _data['groupingType']
+    labels = _data['labels']
+    
+    queriedColumn = getRespectiveQueryColumn(active)
+    groupingColumn = getRespectiveGroupingColumn(grouping)
+
+    with sessionManager() as s:
+        if queryType == 'distinct':
+            query = getGroupingData(s, queriedColumn, groupingColumn, labels, _joinTable=ArrestInfo)
+        elif queryType == 'charges':
+            query = getGroupingData(s, queriedColumn, groupingColumn, labels, _joinTable=ArrestInfo, _queryType = 'charges')
+        counts = getNumbersFromQuery(query)
+    return counts
 
 def getRespectiveColors(_string, _labels, _supportList = None):
     colorsDict = loadJSON("./static/js/FiltersImproved.json")
@@ -515,6 +460,9 @@ def getRespectiveColors(_string, _labels, _supportList = None):
     elif _string == "months":
         return [monthDict[i.partition(' ')[0]] for i in _labels]
 
+def isGroupColorQuery(_queryColumn):
+    return _queryColumn == ArrestInfo.arrest or _queryColumn == ArrestInfo.tag or _queryColumn == ArrestInfo.group
+
 def getQueryData(_data):
     print(_data)
     queryString = _data['dataActive']
@@ -539,6 +487,15 @@ def getQueryData(_data):
                     .order_by(sortingCase)\
                     .group_by(queryColumn, ArrestInfo.group)\
                     .all()
+            elif queryString == "times":
+                trimmedTimeColumn = func.substr(queryColumn, 0, 4)
+                query = s.query(trimmedTimeColumn, 
+                    func.count(trimmedTimeColumn).label('count'))\
+                    .join(joinTable)\
+                    .filter(filterQuery)\
+                    .order_by(trimmedTimeColumn)\
+                    .group_by(trimmedTimeColumn)\
+                    .all()
             else:
                 query = s.query(queryColumn, func.count(queryColumn).label('count'))\
                     .join(joinTable)\
@@ -547,12 +504,20 @@ def getQueryData(_data):
                     .group_by(queryColumn)\
                     .all()
         elif queryType == 'distinct':
-            distinctQuerySubq = s.query(queryColumn, ArrestInfo.group)\
-                .join(joinTable)\
-                .distinct(ArrestRecord.recordID, queryColumn)\
-                .filter(filterQuery)\
-                .group_by(ArrestRecord.recordID, queryColumn, ArrestInfo.group)\
-                .subquery()
+            if queryString == "times":
+                distinctQuerySubq = s.query(func.substr(queryColumn, 0, 4).label('time'), ArrestInfo.group)\
+                    .join(joinTable)\
+                    .distinct(ArrestRecord.recordID, func.substr(queryColumn, 0, 4))\
+                    .filter(filterQuery)\
+                    .group_by(ArrestRecord.recordID, func.substr(queryColumn, 0, 4), ArrestInfo.group)\
+                    .subquery()
+            else:
+                distinctQuerySubq = s.query(queryColumn, ArrestInfo.group)\
+                    .join(joinTable)\
+                    .distinct(ArrestRecord.recordID, queryColumn)\
+                    .filter(filterQuery)\
+                    .group_by(ArrestRecord.recordID, queryColumn, ArrestInfo.group)\
+                    .subquery()
 
             subqColumn = getRespectiveSubqueryColumn(queryString, distinctQuerySubq)
             sortingCase = getRespectiveSortingCase(queryString, subqColumn)
@@ -571,8 +536,9 @@ def getQueryData(_data):
                     .order_by(sortingCase)\
                     .all()
 
-    # THIS SHOULD NOT BE WORKING FOR TIMES
-    # HAVE NOT TESTED THOUGH
+    if queryColumn == ArrestRecord.timeOfYear:
+        query = sorted(query, key=lambda x: datetime.strptime(x[0], '%B %Y'))
+
     try:
         labels, counts = unzipToList(query)
         if queryString == 'dates':
@@ -585,208 +551,6 @@ def getQueryData(_data):
         colors = getRespectiveColors(queryString, labels, _supportList=supportGroups)
         
     return labels, counts, colors
-
-def getGroups(_queryType):
-    colorsDict = loadJSON("./static/js/Filters.json")
-
-    with sessionManager() as s:
-        groups = getSingleQuery(s.query(ArrestInfo.group)\
-        .filter(ArrestInfo.group != None)\
-        .group_by(ArrestInfo.group)\
-        .distinct())
-        if _queryType == 'charges':
-            counts = [s.query(ArrestInfo.group)
-                .filter(ArrestInfo.group == group)
-                .count() for group in groups]
-        elif _queryType == 'distinct':
-            # dont need to join? just use the foreign key instead of recordid
-            counts =  [s.query(ArrestRecord.recordID, ArrestInfo.group)\
-                .join(ArrestInfo)\
-                .distinct(ArrestRecord.recordID, ArrestInfo.group)\
-                .filter(ArrestInfo.group == group)\
-                .count() for group in groups]
-
-    colors = [next(i['color'] for i in colorsDict if i['identifier'] == group) for group in groups]
-    return groups, counts, colors
-
-def getDatesData(_queryType):
-    with sessionManager() as s:
-        if _queryType == 'charges':
-            query = s.query(ArrestRecord.date, func.count(ArrestRecord.date))\
-                .join(ArrestInfo)\
-                .group_by(ArrestRecord.date) \
-                .all()
-        elif _queryType == 'distinct':
-            query = s.query(ArrestRecord.date, func.count(ArrestRecord.date))\
-                .group_by(ArrestRecord.date) \
-                .all()
-
-    initialSortedQuery = sorted(query)
-    queriedDates = [i[0] for i in initialSortedQuery]
-    
-    startDate = initialSortedQuery[0][0]
-    endDate = initialSortedQuery[-1][0]
-
-    generatedDates = [startDate + timedelta(days=i) 
-        for i in range(0, (endDate - startDate + timedelta(days=1)).days)]
-
-    missingDates = list(set(generatedDates).difference(queriedDates))
-    missingTuples = [(date, 0) for date in missingDates]
-
-    initialSortedQuery.extend(missingTuples)
-    finalSortedQuery = sorted(initialSortedQuery)
-
-    dates = [date.strftime(i[0], "%m/%d/%Y") for i in finalSortedQuery]
-
-    counts = [i[1] for i in finalSortedQuery]
-
-
-    colorDict = {
-        "01": "#0095FF",
-        "02": "#10A4CC",
-        "03": "#20B39A",
-        "04": "#30C268",
-        "05": "#40D136",
-        "06": "#6FC628",
-        "07": "#9FBB1B",
-        "08": "#CFB00D",
-        "09": "#FFA600",
-        "10": "#B19B45",
-        "11": "#64918B",
-        "12": "#1787D1"
-    }
-
-    colors = [colorDict[date.partition('/')[0]] for date in dates]
-
-    return dates, counts, colors
-
-def getTimes(_queryType):
-    hours = [str(x) + ':' if x >= 10 else '0' + str(x) + ':' for x in range(0, 24)]
-
-    with sessionManager() as s:
-        if _queryType == 'charges':
-            counts = [s.query(ArrestRecord.time)\
-                .join(ArrestInfo)\
-                .filter(ArrestRecord.time.contains(hour))\
-                .count() for hour in hours]
-        elif _queryType == 'distinct':
-            counts = [s.query(ArrestRecord.time)\
-                .filter(ArrestRecord.time.contains(hour))\
-                .count() for hour in hours]
-
-    times = [hour + '00 - ' + hour + '59' for hour in hours]
-
-    colors = ["#00044A", "#051553", "#0A275C", "#0F3866", 
-    "#144A6F", "#195B78", "#1E6D82", "#237E8B", 
-    "#289094", "#2DA19E", "#32B3A7", "#37C4B0", 
-    "#3CD6BA", "#36C2AF", "#31AFA5", "#2B9C9B", 
-    "#268991", "#207687", "#1B637C", "#155072", 
-    "#103D68", "#0A2A5E", "#051754", "#00044A"]
-
-    return times, counts, colors
-
-def getDays(_queryType):
-    days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
-        'Thursday', 'Friday', 'Saturday']
-
-    with sessionManager() as s:
-        if _queryType == 'charges':
-            query = s.query(ArrestRecord.dayOfTheWeek, func.count(ArrestRecord.dayOfTheWeek))\
-                .group_by(ArrestRecord.dayOfTheWeek) \
-                .all()
-        elif _queryType == 'distinct':
-            subquery = s.query(ArrestRecord.recordID, ArrestRecord.dayOfTheWeek)\
-                .join(ArrestInfo)\
-                .distinct(ArrestRecord.recordID, ArrestRecord.dayOfTheWeek)\
-                .subquery()
-            query = s.query(subquery.c.dayOfTheWeek, func.count(subquery.c.dayOfTheWeek))\
-                .group_by(subquery.c.dayOfTheWeek)\
-                .all()
-
-    queryDict = dict(query)
-    counts = [queryDict[day] for day in days]
-    
-    colors = ["#FF5500", "#FF6D00", "#FF8500", "#FF9D00", "#FFBC22", "#FFDB44", "#FFFA66"]
-
-    return days, counts, colors
-
-def getMonths(_queryType):
-    with sessionManager() as s:
-        if _queryType == 'charges':
-            query = s.query(ArrestRecord.timeOfYear, func.count(ArrestRecord.timeOfYear))\
-                .group_by(ArrestRecord.timeOfYear) \
-                .all()
-        elif _queryType == 'distinct':
-            subquery = s.query(ArrestRecord.recordID, ArrestRecord.timeOfYear)\
-                .join(ArrestInfo)\
-                .distinct(ArrestRecord.recordID, ArrestRecord.timeOfYear)\
-                .subquery()
-            query = s.query(subquery.c.timeOfYear, func.count(subquery.c.timeOfYear))\
-                .group_by(subquery.c.timeOfYear)\
-                .all()
-    months = [i[0] for i in query]
-    counts = [i[1] for i in query]
-
-    sortedZip = sorted(zip(months, counts), key=lambda x: datetime.strptime(x[0], '%B %Y'))
-    months, counts = zip(*sortedZip)
-
-    colorDict = {
-        "January": "#0095FF",
-        "February": "#10A4CC",
-        "March": "#20B39A",
-        "April": "#30C268",
-        "May": "#40D136",
-        "June": "#6FC628",
-        "July": "#9FBB1B",
-        "August": "#CFB00D",
-        "September": "#FFA600",
-        "October": "#B19B45",
-        "November": "#64918B",
-        "December": "#1787D1"
-    }
-
-    colors = [colorDict[month.partition(' ')[0]] for month in months]
-
-    return months, counts, colors
-
-def getAges(_queryType):
-    with sessionManager() as s:
-        if _queryType == 'charges':
-            query = s.query(ArrestRecord.age, func.count(ArrestRecord.age))\
-                .join(ArrestInfo)\
-                .group_by(ArrestRecord.age) \
-                .filter(ArrestRecord.age != None) \
-                .all()
-        elif _queryType == 'distinct':
-            query = s.query(ArrestRecord.age, func.count(ArrestRecord.age))\
-                .group_by(ArrestRecord.age) \
-                .filter(ArrestRecord.age != None) \
-                .all()
-
-    ages = [i[0] for i in query]
-    counts = [i[1] for i in query]
-
-    sortedZip = sorted(zip(ages, counts))
-    ages, counts = zip(*sortedZip)
-
-    return ages, counts, ['#333333'] * len(counts)
-
-def getGenders(_queryType):
-    with sessionManager() as s:
-        if _queryType == 'charges':
-            query = s.query(ArrestRecord.sex, func.count(ArrestRecord.sex))\
-                .join(ArrestInfo) \
-                .group_by(ArrestRecord.sex) \
-                .all()
-        elif _queryType == 'distinct':
-            query = s.query(ArrestRecord.sex, func.count(ArrestRecord.sex))\
-                .group_by(ArrestRecord.sex) \
-                .all()
-
-    genders = [i[0] for i in query]
-    counts = [i[1] for i in query]
-
-    return genders, counts, ['#80d8f2', '#eb88d4']
 
 def getAverageAge(s, _column, _label, _activeDays, _activeGenders, _activeTimes, _joinTable = ArrestInfo, _charges = False):
     if _charges:
@@ -2026,6 +1790,7 @@ def getSingleLabelData(_data):
 def statsQueriedData():
     data = request.get_json()
     labels, counts, colors = getQueryData(data)
+    print('called')
     data = { 
         'labels': labels,
         'numbers': counts,
