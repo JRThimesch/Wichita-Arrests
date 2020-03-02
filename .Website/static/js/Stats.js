@@ -294,14 +294,14 @@ export default class Stats extends React.Component {
     addBar = (e) => {
         e.stopPropagation()
         let label = e.currentTarget.getAttribute('title')
-        fetch(`/api/stats/label`, {
+        fetch("/api/stats/label", {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                labels: [label],
+                label: label,
                 queryType: this.state.activeData.queryType,
                 dataActive: this.state.activeData.barsActive
             })
@@ -310,7 +310,7 @@ export default class Stats extends React.Component {
         .then(data => this.setState(prevState => ({
             data: {
                 numbers: [...prevState.data.numbers, ...data.numbers],
-                labels: [...prevState.data.labels, label],
+                labels: [...prevState.data.labels, ...[label]],
                 colors: [...prevState.data.colors, ...data.colors],
                 genderData: {
                     numbers: [...prevState.data.genderData.numbers, ...data.genderData.numbers],
@@ -331,22 +331,8 @@ export default class Stats extends React.Component {
     }
 
     componentDidMount = () => {
-        let currentData = 'groups'
         let queryType = this.state.activeData.queryType
-        fetch(`/api/stats/${currentData}/${queryType}`)
-        .then(response => response.json())
-        .then(data => {
-            this.groupData(data, currentData, ["genders", "ages", "times", "days"])
-            this.setState(prevState => ({
-                data, 
-                activeData: {
-                    barsActive: currentData,
-                    groupingActive: 'default',
-                    queryType: prevState.activeData.queryType
-                },
-                key : Math.random() * 10000
-            }))
-        })
+        this.getData(null, queryType)
     }
 
     render = () => {

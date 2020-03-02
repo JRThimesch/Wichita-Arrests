@@ -469,6 +469,11 @@ def getQueryData(_data):
     queryColumn = getRespectiveQueryColumn(queryString)
     queryType = _data['queryType']
 
+    try:
+        label = _data['label']
+    except:
+        label = None
+
     if isGroupColorQuery(queryColumn):
         joinTable = ArrestRecord
     else:
@@ -477,13 +482,18 @@ def getQueryData(_data):
     filterQuery = getRespectiveFilter(queryString, queryColumn)
     sortingCase = getRespectiveSortingCase(queryString, queryColumn)
 
+    if label:
+        labelQuery = (queryColumn == label)
+    else:
+        labelQuery = (queryColumn != '')
+
     with sessionManager() as s:
         if queryType == 'charges':
             if isGroupColorQuery(queryColumn):
                 query = s.query(queryColumn, func.count(queryColumn).label('count'),
                         ArrestInfo.group)\
                     .join(joinTable)\
-                    .filter(filterQuery)\
+                    .filter(and_(filterQuery, labelQuery))\
                     .order_by(sortingCase)\
                     .group_by(queryColumn, ArrestInfo.group)\
                     .all()
@@ -492,14 +502,14 @@ def getQueryData(_data):
                 query = s.query(trimmedTimeColumn, 
                     func.count(trimmedTimeColumn).label('count'))\
                     .join(joinTable)\
-                    .filter(filterQuery)\
+                    .filter(and_(filterQuery, labelQuery))\
                     .order_by(trimmedTimeColumn)\
                     .group_by(trimmedTimeColumn)\
                     .all()
             else:
                 query = s.query(queryColumn, func.count(queryColumn).label('count'))\
                     .join(joinTable)\
-                    .filter(filterQuery)\
+                    .filter(and_(filterQuery, labelQuery))\
                     .order_by(sortingCase)\
                     .group_by(queryColumn)\
                     .all()
@@ -508,14 +518,14 @@ def getQueryData(_data):
                 distinctQuerySubq = s.query(func.substr(queryColumn, 0, 4).label('time'), ArrestInfo.group)\
                     .join(joinTable)\
                     .distinct(ArrestRecord.recordID, func.substr(queryColumn, 0, 4))\
-                    .filter(filterQuery)\
+                    .filter(and_(filterQuery, labelQuery))\
                     .group_by(ArrestRecord.recordID, func.substr(queryColumn, 0, 4), ArrestInfo.group)\
                     .subquery()
             else:
                 distinctQuerySubq = s.query(queryColumn, ArrestInfo.group)\
                     .join(joinTable)\
                     .distinct(ArrestRecord.recordID, queryColumn)\
-                    .filter(filterQuery)\
+                    .filter(and_(filterQuery, labelQuery))\
                     .group_by(ArrestRecord.recordID, queryColumn, ArrestInfo.group)\
                     .subquery()
 
@@ -1537,111 +1547,6 @@ def sortData(sortMethod=None):
     }
     return jsonify(data)
 
-@app.route('/api/stats/genders/<queryType>')
-def statsGenderData(queryType=None):    
-    ages, counts, colors = getGenders(queryType)
-    data = { 
-        'numbers': counts,
-        'labels': ages,
-        'colors' : colors
-    }
-
-    return jsonify(data)
-
-@app.route('/api/stats/months/<queryType>')
-def statsMonthsData(queryType=None):    
-    ages, counts, colors = getMonths(queryType)
-    data = { 
-        'numbers': counts,
-        'labels': ages,
-        'colors' : colors
-    }
-
-    return jsonify(data)
-
-@app.route('/api/stats/days/<queryType>')
-def statsDaysData(queryType=None):    
-    days, counts, colors = getDays(queryType)
-    data = { 
-        'numbers': counts,
-        'labels': days,
-        'colors' : colors
-    }
-
-    return jsonify(data)
-
-@app.route('/api/stats/times/<queryType>')
-def statsTimesData(queryType=None):    
-    ages, counts, colors = getTimes(queryType)
-    data = { 
-        'numbers': counts,
-        'labels': ages,
-        'colors' : colors
-    }
-
-    return jsonify(data)
-
-@app.route('/api/stats/ages/<queryType>')
-def statsAgesData(queryType=None):
-    ages, counts, colors = getAges(queryType)
-    data = { 
-        'numbers': counts,
-        'labels': ages,
-        'colors' : colors
-    }
-    return jsonify(data)
-
-@app.route('/api/stats/arrests/<queryType>')
-def statsArrestsData(queryType=None):
-    arrests, counts, colors = getArrests()
-    data = { 
-        'numbers': counts,
-        'labels': arrests,
-        'colors' : colors
-    }
-    return jsonify(data)
-
-@app.route('/api/stats/tags/<queryType>')
-def statsTagsData(queryType=None):
-    tags, counts, colors = getTags(queryType)
-
-    data = { 
-        'numbers': counts,
-        'labels': tags,
-        'colors' : colors
-    }
-    return jsonify(data)
-
-@app.route('/api/stats/dates/<queryType>')
-def statsDatesData(queryType=None):
-    dates, counts, colors = getDatesData(queryType)
-    data = { 
-        'numbers': counts,
-        'labels': dates,
-        'colors' : colors
-    }
-    return jsonify(data)
-
-@app.route('/api/stats/groups/<queryType>')
-def statsGroupsData(queryType=None):
-    groups, counts, colors = getGroups(queryType)
-    data = { 
-        'numbers': counts,
-        'labels': groups,
-        'colors' : colors
-    }
-    return jsonify(data)
-
-@app.route('/api/stats')
-def statsDefaultData():
-    tags, counts, colors = getTags()
-    data = { 
-        'numbers': counts,
-        'labels': tags,
-        'colors' : colors
-    }
-    return jsonify(data)
-
 def getSingleLabelCountSubquery(s, _column, _label, _joinTable = ArrestInfo, _charges = False):
     if not _charges:
         if _column != ArrestRecord.time:
@@ -1801,37 +1706,22 @@ def statsQueriedData():
 @app.route('/api/stats/label', methods=['GET', 'POST'])
 def statsSingleLabelData():
     data = request.get_json()
-
-    count, color = getSingleLabelData(data)
-
-    genderCounts = getGenderData(data)
-    averageAgeCounts = getAgeData(data)
-    timesCounts = getTimesData(data) 
-    daysCounts = getDaysData(data)
-
+    label, count, color = getQueryData(data)
+    
     data = {
-        'numbers': [count],
-        'labels': data['labels'],
-        'colors' : [color],
+        'numbers': count,
+        'colors' : color,
         'genderData': {
-            'maleCounts': genderCounts[0],
-            'femaleCounts': genderCounts[1]
+            'numbers' : [0] * 2
         },
         'ageData': {
-            'averages' : averageAgeCounts
+            'numbers' : [0]
         },
         'timeData': {
-            'dayCounts': timesCounts[0],
-            'nightCounts': timesCounts[1]
+            'numbers' : [0] * 2
         },
         'dayData': {
-            'sundayCounts': daysCounts[0],
-            'mondayCounts': daysCounts[1],
-            'tuesdayCounts': daysCounts[2],
-            'wednesdayCounts': daysCounts[3],
-            'thursdayCounts': daysCounts[4],
-            'fridayCounts': daysCounts[5],
-            'saturdayCounts': daysCounts[6]
+            'numbers' : [0] * 7
         }
     }
 

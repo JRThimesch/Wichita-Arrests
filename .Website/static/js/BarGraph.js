@@ -76,6 +76,7 @@ export default class BarGraph extends React.Component {
         let currentCount = e.currentTarget.getAttribute('count')
         let sublabel = e.currentTarget.getAttribute('label')
         let barNumber = null
+        console.log(this.props.activeData)
         if (parentIndex != this.state.activeBar || sublabel != this.state.activeSubBar) {
             barNumber = parentIndex
             fetch(`api/stats/hover`, {
@@ -270,22 +271,7 @@ export default class BarGraph extends React.Component {
                     </div>
                 ) 
 
-            } /*else {
-                let substyles = colors.map((color, j) => {
-                    return {
-                        width: widths[i + j * widths.length / colors.length],
-                        backgroundColor: color
-                    }
-                })
-
-                return (
-                    <div key={i} className={className}>
-                        {substyles.map((substyle, k) => {
-                            return <div className="BarGraph-bar-subbar" key={k} label={sublabels[k]} count={counts[i + k * counts.length / substyles.length]} index={k} onMouseLeave={this.opacityReset} onMouseOver={this.opacityHover} onClick={this.getHoverData} style={substyle}/>
-                        })}
-                    </div>
-                ) 
-            } */
+            } 
         }) : null
 
         
