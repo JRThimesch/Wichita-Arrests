@@ -121,7 +121,7 @@ export default class Stats extends React.Component {
 
     groupData = (passedData, groupType, queries) => {
         queries.forEach(query => {
-            fetch(`api/stats/grouping/${query}`, {
+            fetch(`api/stats/grouping`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -310,7 +310,7 @@ export default class Stats extends React.Component {
         .then(data => this.setState(prevState => ({
             data: {
                 numbers: [...prevState.data.numbers, ...data.numbers],
-                labels: [...prevState.data.labels, ...[label]],
+                labels: [...prevState.data.labels, label],
                 colors: [...prevState.data.colors, ...data.colors],
                 genderData: {
                     numbers: [...prevState.data.genderData.numbers, ...data.genderData.numbers],

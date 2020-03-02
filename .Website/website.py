@@ -52,9 +52,14 @@ def getListQuery(_query):
 def getSingleQuery(_query):
     return list(zip(*_query))[0]
 
-def getGroupingData(_s, _queryColumn, _groupingColumn, _labels, _joinTable=ArrestRecord, _queryType = 'distinct'):
+def getGroupingData(_s, _queryColumn, _groupingColumn, _label, _joinTable=ArrestRecord, _queryType = 'distinct'):
     # QUERY METHOD NEEDS TO BE DIFFERENT FOR TIME
     # TIMES ARE EXACT AND WOULD MAKE ANALYSIS AWFUL IF DONE UNIQUELY
+    if _label:
+        initialFilterQuery = and_(_queryColumn != None, _queryColumn == _label)
+    else:
+        initialFilterQuery = (_queryColumn != None)
+
     if _queryColumn == ArrestRecord.time:
         dataSubq = _s.query(func.substr(_queryColumn, 0, 4).label('time'))\
             .distinct(func.substr(_queryColumn, 0, 4))\
@@ -64,7 +69,7 @@ def getGroupingData(_s, _queryColumn, _groupingColumn, _labels, _joinTable=Arres
     elif _queryColumn != ArrestRecord.time:
         dataSubq = _s.query(_queryColumn)\
             .distinct(_queryColumn)\
-            .filter(and_(_queryColumn != None, _queryColumn.in_(_labels)))\
+            .filter(initialFilterQuery)\
             .subquery()
 
     categorySubq = _s.query(_groupingColumn)\
@@ -391,16 +396,20 @@ def getCountsForGroupingData(_data):
     active = _data['dataActive']
     queryType = _data['queryType']
     grouping = _data['groupingType']
-    labels = _data['labels']
+
+    try:
+        label = _data['label']
+    except:
+        label = None
     
     queriedColumn = getRespectiveQueryColumn(active)
     groupingColumn = getRespectiveGroupingColumn(grouping)
 
     with sessionManager() as s:
         if queryType == 'distinct':
-            query = getGroupingData(s, queriedColumn, groupingColumn, labels, _joinTable=ArrestInfo)
+            query = getGroupingData(s, queriedColumn, groupingColumn, label, _joinTable=ArrestInfo)
         elif queryType == 'charges':
-            query = getGroupingData(s, queriedColumn, groupingColumn, labels, _joinTable=ArrestInfo, _queryType = 'charges')
+            query = getGroupingData(s, queriedColumn, groupingColumn, label, _joinTable=ArrestInfo, _queryType = 'charges')
         counts = getNumbersFromQuery(query)
     return counts
 
@@ -1547,155 +1556,11 @@ def sortData(sortMethod=None):
     }
     return jsonify(data)
 
-def getSingleLabelCountSubquery(s, _column, _label, _joinTable = ArrestInfo, _charges = False):
-    if not _charges:
-        if _column != ArrestRecord.time:
-            return s.query(_column)\
-                .join(_joinTable)\
-                .distinct(ArrestInfo.arrestRecordFKey)\
-                .group_by(ArrestInfo.arrestRecordFKey, _column)\
-                .filter(_column == _label)\
-                .subquery()
-        else:
-            return s.query(_column)\
-                .join(_joinTable)\
-                .distinct(ArrestInfo.arrestRecordFKey)\
-                .group_by(ArrestInfo.arrestRecordFKey, _column)\
-                .filter(_column.contains(_label))\
-                .subquery()
-    else:
-        if _column != ArrestRecord.time:
-            return s.query(_column)\
-                .join(_joinTable)\
-                .group_by(_column)\
-                .filter(_column == _label)\
-                .subquery()
-        else:
-            return s.query(_column)\
-                .join(_joinTable)\
-                .group_by(_column)\
-                .filter(_column.contains(_label))\
-                .subquery()
-
-def getSingleLabelData(_data):
-    activeBars = _data['dataActive']
-    queryType = _data['queryType']
-    label = _data['labels'][0]
-
-    colorDict = {
-        'genders': {
-            'MALE': '#80d8f2', 
-            'FEMALE': '#eb88d4'
-        },
-        'days': {
-            'Sunday': '#FF5500',
-            'Monday': '#FF6D00',
-            'Tuesday': '#FF8500',
-            'Wednesday': '#FF9D00',
-            'Thursday': '#FFBC22',
-            'Friday': '#FFDB44',
-            'Saturday': '#FFFA66'
-        },
-        'months': {
-            "January": "#0095FF",
-            "February": "#10A4CC",
-            "March": "#20B39A",
-            "April": "#30C268",
-            "May": "#40D136",
-            "June": "#6FC628",
-            "July": "#9FBB1B",
-            "August": "#CFB00D",
-            "September": "#FFA600",
-            "October": "#B19B45",
-            "November": "#64918B",
-            "December": "#1787D1"
-        },
-        'dates': {
-            "01": "#0095FF",
-            "02": "#10A4CC",
-            "03": "#20B39A",
-            "04": "#30C268",
-            "05": "#40D136",
-            "06": "#6FC628",
-            "07": "#9FBB1B",
-            "08": "#CFB00D",
-            "09": "#FFA600",
-            "10": "#B19B45",
-            "11": "#64918B",
-            "12": "#1787D1"
-        }
-    }
-
-    timeColors = ["#00044A", "#051553", "#0A275C", "#0F3866", 
-        "#144A6F", "#195B78", "#1E6D82", "#237E8B", 
-        "#289094", "#2DA19E", "#32B3A7", "#37C4B0", 
-        "#3CD6BA", "#36C2AF", "#31AFA5", "#2B9C9B", 
-        "#268991", "#207687", "#1B637C", "#155072", 
-        "#103D68", "#0A2A5E", "#051754", "#00044A"]
-
-    filtersDict = loadJSON("./static/js/FiltersImproved.json")
-
-    with sessionManager() as s:
-        if queryType == 'distinct':
-            if activeBars == 'groups':
-                subq = getSingleLabelCountSubquery(s, ArrestInfo.group, label, _joinTable=ArrestRecord)
-                count = s.query(func.count(subq.c.group))\
-                    .all()[0][0]
-                color = [i['color'] for i in filtersDict if label == i['group']][0]
-            elif activeBars == 'tags':
-                subq = getSingleLabelCountSubquery(s, ArrestInfo.tag, label, _joinTable=ArrestRecord)
-                count = s.query(func.count(subq.c.tag))\
-                    .all()[0][0]
-                color = [i['color'] for i in filtersDict if label in i['tags']][0]
-            elif activeBars == 'arrests':
-                subq = getSingleLabelCountSubquery(s, ArrestInfo.arrest, label, _joinTable=ArrestRecord)
-                tag = s.query(ArrestInfo.tag).filter(ArrestInfo.arrest == label).limit(1).all()[0][0]
-                count = s.query(func.count(subq.c.arrest))\
-                    .all()[0][0]
-                color = [i['color'] for i in filtersDict if tag in i['tags']][0]
-            elif activeBars == 'ages':
-                subq = getSingleLabelCountSubquery(s, ArrestRecord.age, label)
-                count = s.query(func.count(subq.c.age))\
-                    .all()[0][0]
-                color = '#123123'
-            elif activeBars == "dates":
-                subq = getSingleLabelCountSubquery(s, ArrestRecord.date, label)
-                count = s.query(func.count(subq.c.date))\
-                    .all()[0][0]
-                color = colorDict['dates'][label.partition(' ')[0]]
-            elif activeBars == "genders":
-                subq = getSingleLabelCountSubquery(s, ArrestRecord.sex, label)
-                count = s.query(func.count(subq.c.sex))\
-                    .all()[0][0]
-                color = colorDict['genders'][label]
-            elif activeBars == "times":
-                hour = label.partition(':')[0] + ':'
-                subq = getSingleLabelCountSubquery(s, ArrestRecord.time, hour)
-                count = s.query(func.count(subq.c.time))\
-                    .all()[0][0]
-                color = timeColors[int(hour[:-1])]
-            elif activeBars == "days":
-                subq = getSingleLabelCountSubquery(s, ArrestRecord.dayOfTheWeek, label)
-                count = s.query(func.count(subq.c.dayOfTheWeek))\
-                    .all()[0][0]
-                color = colorDict['days'][label]
-            elif activeBars == "months":
-                subq = getSingleLabelCountSubquery(s, ArrestRecord.timeOfYear, label)
-                count = s.query(func.count(subq.c.timeOfYear))\
-                    .all()[0][0]
-                color = colorDict['months'][label.partition(' ')[0]]
-
-        elif queryType == 'charges':
-            # NEED CHARGES
-            pass
-            
-    return count, color
-
 @app.route('/api/stats/queriedData', methods=['GET', 'POST'])
 def statsQueriedData():
     data = request.get_json()
     labels, counts, colors = getQueryData(data)
-    print('called')
+    print('DEBUG: QUERY CALLED')
     data = { 
         'labels': labels,
         'numbers': counts,
@@ -1708,24 +1573,31 @@ def statsSingleLabelData():
     data = request.get_json()
     label, count, color = getQueryData(data)
     
+    # Not happy with using a loop here, but it works and saves tons of lines
+    # Might be able to shoehorn a solution into the frontend?
+    groupings = ['genders', 'ages', 'times', 'days']
+    groupingData = []
+    for i in groupings:
+        data['groupingType'] = i
+        groupingData.append(getCountsForGroupingData(data))
+    
     data = {
         'numbers': count,
         'colors' : color,
         'genderData': {
-            'numbers' : [0] * 2
+            'numbers' : groupingData[0]
         },
         'ageData': {
-            'numbers' : [0]
+            'numbers' : groupingData[1]
         },
         'timeData': {
-            'numbers' : [0] * 2
+            'numbers' : groupingData[2]
         },
         'dayData': {
-            'numbers' : [0] * 7
+            'numbers' : groupingData[3]
         }
     }
 
-    print(data)
     return jsonify(data)
 
 @app.route('/api/stats/hover', methods=['GET', 'POST'])
@@ -1747,58 +1619,30 @@ def statsHoverData():
         'actives' : actives
     }
 
-    print(data)
-
     return jsonify(data)
 
-@app.route('/api/stats/grouping/ages', methods=['GET', 'POST'])
-def groupAgeData():
+def getRespectiveDataTypeForJSON(_string):
+    if _string == "ages":
+        return "ageData"
+    elif _string == "genders":
+        return "genderData"
+    elif _string == "days":
+        return "dayData"
+    elif _string == "times":
+        return "timeData"
+
+@app.route('/api/stats/grouping', methods=['GET', 'POST'])
+def groupData():
     data = request.get_json()
+    dataType = getRespectiveDataTypeForJSON(data['groupingType'])
 
     data = { 
-        'ageData' : {
+        dataType : {
             'numbers': getCountsForGroupingData(data)
         }
     }
 
     return jsonify(data)
-
-@app.route('/api/stats/grouping/genders', methods=['GET', 'POST'])
-def groupGenderData():
-    data = request.get_json()
-
-    data = { 
-        'genderData' : {
-            'numbers': getCountsForGroupingData(data)
-        }
-    }
-
-    return jsonify(data)
-
-@app.route('/api/stats/grouping/times', methods=['GET', 'POST'])
-def groupTimeData():
-    data = request.get_json()
-
-    data = {
-        'timeData' : {
-            'numbers': getCountsForGroupingData(data)
-        }
-    }
-
-    return jsonify(data)
-
-@app.route('/api/stats/grouping/days', methods=['GET', 'POST'])
-def groupDayData():
-    data = request.get_json()
-
-    data = {
-        'dayData' : {
-            'numbers': getCountsForGroupingData(data)
-        }
-    }
-
-    return jsonify(data)
-
     
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)
