@@ -65,7 +65,6 @@ def getGroupingData(_s, _queryColumn, _groupingColumn, _label, _joinTable=Arrest
             .distinct(func.substr(_queryColumn, 0, 4))\
             .filter(_queryColumn != None)\
             .subquery()
-        #print(_s.query(dataSubq).all())
     elif _queryColumn != ArrestRecord.time:
         dataSubq = _s.query(_queryColumn)\
             .distinct(_queryColumn)\
@@ -311,6 +310,26 @@ def getRespectiveQueryColumn(_string):
     elif _string == "months":
         return ArrestRecord.timeOfYear
 
+def getRespectiveColumnString(_column):
+    if _column == ArrestInfo.group:
+        return "groups"
+    elif _column == ArrestInfo.tag:
+        return "tags"
+    elif _column == ArrestInfo.arrest:
+        return "arrests"
+    elif _column == ArrestRecord.age:
+        return "ages"
+    elif _column == ArrestRecord.date:
+        return "dates"
+    elif _column == ArrestRecord.sex:
+        return "genders"
+    elif _column == ArrestRecord.time:
+        return "times"
+    elif _column == ArrestRecord.dayOfTheWeek:
+        return "days"
+    elif _column == ArrestRecord.timeOfYear:
+        return "months"
+
 def getRespectiveGroupingColumn(_string):
     if _string == "days":
         return ArrestRecord.dayOfTheWeek
@@ -414,7 +433,7 @@ def getCountsForGroupingData(_data):
     return counts
 
 def getRespectiveColors(_string, _labels, _supportList = None):
-    colorsDict = loadJSON("./static/js/FiltersImproved.json")
+    groupColorsDict = loadJSON("./static/js/FiltersImproved.json")
     monthDict = {
         "January": "#0095FF",
         "February": "#10A4CC",
@@ -443,19 +462,28 @@ def getRespectiveColors(_string, _labels, _supportList = None):
         "11": "#64918B",
         "12": "#1787D1"
     }
+    genderDict = {
+        "MALE" : '#80d8f2',
+        "FEMALE" :'#eb88d4'
+    }
+    daysDict = {
+        'Sunday': '#FF5500',
+        'Monday': '#FF6D00',
+        'Tuesday': '#FF8500',
+        'Wednesday': '#FF9D00',
+        'Thursday': '#FFBC22',
+        'Friday': '#FFDB44',
+        'Saturday': '#FFFA66'
+    }
 
-    if _string == "groups":
-        return [next(i['color'] for i in colorsDict if i['group'] == group) for group in _supportList]
-    elif _string == "tags":
-        return [next(i['color'] for i in colorsDict if i['group'] == group) for group in _supportList]
-    elif _string == "arrests":
-        return [next(i['color'] for i in colorsDict if i['group'] == group) for group in _supportList]
+    if _string == "groups" or _string == 'tags' or _string == 'arrests':
+        return [next(i['color'] for i in groupColorsDict if i['group'] == group) for group in _supportList]
     elif _string == "ages":
         return ['#def123'] * len(_labels)
     elif _string == "dates":
         return [dateDict[i.partition('/')[0]] for i in _labels]
     elif _string == "genders":
-        return ['#80d8f2', '#eb88d4']
+        return [genderDict[i] for i in _labels]
     elif _string == "times":
         return ["#00044A", "#051553", "#0A275C", "#0F3866", 
             "#144A6F", "#195B78", "#1E6D82", "#237E8B", 
@@ -464,8 +492,7 @@ def getRespectiveColors(_string, _labels, _supportList = None):
             "#268991", "#207687", "#1B637C", "#155072", 
             "#103D68", "#0A2A5E", "#051754", "#00044A"]
     elif _string == "days":
-        return ["#FF5500", "#FF6D00", "#FF8500", 
-            "#FF9D00", "#FFBC22", "#FFDB44", "#FFFA66"]
+        return [daysDict[i] for i in _labels]
     elif _string == "months":
         return [monthDict[i.partition(' ')[0]] for i in _labels]
 
@@ -570,836 +597,6 @@ def getQueryData(_data):
         colors = getRespectiveColors(queryString, labels, _supportList=supportGroups)
         
     return labels, counts, colors
-
-def getAverageAge(s, _column, _label, _activeDays, _activeGenders, _activeTimes, _joinTable = ArrestInfo, _charges = False):
-    if _charges:
-        if _column == ArrestRecord.time:
-            averageAgeSubq = s.query(ArrestRecord.age)\
-                .join(_joinTable)\
-                .group_by(ArrestInfo.arrestRecordFKey, ArrestRecord.age)\
-                .filter(and_(_column.contains(_label),
-                ArrestRecord.age != None,
-                ArrestRecord.sex.in_(_activeGenders),
-                ArrestRecord.timeOfDay.in_(_activeTimes),
-                ArrestRecord.dayOfTheWeek.in_(_activeDays)))\
-                .subquery()
-        else:
-            averageAgeSubq = s.query(ArrestRecord.age)\
-                .join(_joinTable)\
-                .group_by(ArrestInfo.arrestRecordFKey, ArrestRecord.age)\
-                .filter(and_(_column == _label,
-                ArrestRecord.age != None,
-                ArrestRecord.sex.in_(_activeGenders),
-                ArrestRecord.timeOfDay.in_(_activeTimes),
-                ArrestRecord.dayOfTheWeek.in_(_activeDays)))\
-                .subquery()
-    else:
-        if _column == ArrestRecord.time:
-            averageAgeSubq = s.query(ArrestRecord.age)\
-                .join(_joinTable)\
-                .distinct(ArrestInfo.arrestRecordFKey)\
-                .group_by(ArrestInfo.arrestRecordFKey, ArrestRecord.age)\
-                .filter(and_(_column.contains(_label),
-                ArrestRecord.age != None,
-                ArrestRecord.sex.in_(_activeGenders),
-                ArrestRecord.timeOfDay.in_(_activeTimes),
-                ArrestRecord.dayOfTheWeek.in_(_activeDays)))\
-                .subquery()
-        else:
-            averageAgeSubq = s.query(ArrestRecord.age)\
-                .join(_joinTable)\
-                .distinct(ArrestInfo.arrestRecordFKey)\
-                .group_by(ArrestInfo.arrestRecordFKey, ArrestRecord.age)\
-                .filter(and_(_column == _label,
-                ArrestRecord.age != None,
-                ArrestRecord.sex.in_(_activeGenders),
-                ArrestRecord.timeOfDay.in_(_activeTimes),
-                ArrestRecord.dayOfTheWeek.in_(_activeDays)))\
-                .subquery()
-
-    return s.query(cast(func.avg(averageAgeSubq.c.age), Integer)).all()[0][0]
-
-def getGenderSubQuery(s, _column, _label, _activeDays, _activeGenders, _activeTimes, _charges = False):
-    if _charges:
-        if _column == ArrestRecord.time:
-            return s.query(_column, ArrestRecord.sex)\
-                .join(ArrestInfo)\
-                .filter(and_(_column.contains(_label),
-                ArrestRecord.sex.in_(_activeGenders),
-                ArrestRecord.timeOfDay.in_(_activeTimes),
-                ArrestRecord.dayOfTheWeek.in_(_activeDays)))\
-                .subquery()
-        else:
-            return s.query(_column, ArrestRecord.sex)\
-                .join(ArrestInfo)\
-                .filter(and_(_column == _label,
-                ArrestRecord.sex.in_(_activeGenders),
-                ArrestRecord.timeOfDay.in_(_activeTimes),
-                ArrestRecord.dayOfTheWeek.in_(_activeDays)))\
-                .subquery()
-    else:
-        if _column == ArrestRecord.time:
-            return s.query(_column, ArrestRecord.sex)\
-                .join(ArrestInfo)\
-                .distinct(ArrestInfo.arrestRecordFKey)\
-                .filter(and_(_column.contains(_label),
-                ArrestRecord.sex.in_(_activeGenders),
-                ArrestRecord.timeOfDay.in_(_activeTimes),
-                ArrestRecord.dayOfTheWeek.in_(_activeDays)))\
-                .subquery()
-        else:
-            return s.query(_column, ArrestRecord.sex)\
-                .join(ArrestInfo)\
-                .distinct(ArrestInfo.arrestRecordFKey)\
-                .filter(and_(_column == _label,
-                ArrestRecord.sex.in_(_activeGenders),
-                ArrestRecord.timeOfDay.in_(_activeTimes),
-                ArrestRecord.dayOfTheWeek.in_(_activeDays)))\
-                .subquery()
-
-def getDaysSubQuery(s, _column, _label, _activeDays, _activeGenders, _activeTimes, _charges = False):
-    if _charges:
-        if _column == ArrestRecord.time:
-            return s.query(_column, ArrestRecord.dayOfTheWeek)\
-                .join(ArrestInfo)\
-                .filter(and_(_column.contains(_label),
-                ArrestRecord.sex.in_(_activeGenders),
-                ArrestRecord.timeOfDay.in_(_activeTimes),
-                ArrestRecord.dayOfTheWeek.in_(_activeDays)))\
-                .subquery()
-        else:
-            return s.query(_column, ArrestRecord.dayOfTheWeek)\
-                .join(ArrestInfo)\
-                .filter(and_(_column == _label,
-                ArrestRecord.sex.in_(_activeGenders),
-                ArrestRecord.timeOfDay.in_(_activeTimes),
-                ArrestRecord.dayOfTheWeek.in_(_activeDays)))\
-                .subquery()
-    else:
-        if _column == ArrestRecord.time:
-            return s.query(_column, ArrestRecord.dayOfTheWeek)\
-                .join(ArrestInfo)\
-                .distinct(ArrestInfo.arrestRecordFKey)\
-                .filter(and_(_column.contains(_label),
-                ArrestRecord.sex.in_(_activeGenders),
-                ArrestRecord.timeOfDay.in_(_activeTimes),
-                ArrestRecord.dayOfTheWeek.in_(_activeDays)))\
-                .subquery()
-        else:
-            return s.query(_column, ArrestRecord.dayOfTheWeek)\
-                .join(ArrestInfo)\
-                .distinct(ArrestInfo.arrestRecordFKey)\
-                .filter(and_(_column == _label,
-                ArrestRecord.sex.in_(_activeGenders),
-                ArrestRecord.timeOfDay.in_(_activeTimes),
-                ArrestRecord.dayOfTheWeek.in_(_activeDays)))\
-                .subquery()
-
-def getHoverData(_data):
-    activeBars = _data['activeData']['barsActive']
-    label = _data['label']
-    sublabel = _data['sublabel']
-    activeGrouping = _data['activeData']['groupingActive']
-    queryType = _data['activeData']['queryType']
-    activeGenders = ('MALE', 'FEMALE')
-    activeTimes = ('DAY', 'NIGHT')
-    activeDays = ('Sunday', 'Monday', 'Tuesday', 'Wednesday',
-        'Thursday', 'Friday', 'Saturday')
-    if activeGrouping == 'genders':
-        activeGenders = (sublabel, )
-    elif activeGrouping == 'times':
-        activeTimes = (sublabel, )
-    elif activeGrouping == 'days':
-        activeDays = (sublabel, )
-    group = None
-    tag = None
-    averageAge = None
-    actives = None
-    colors = None
-    print(_data)
-    print(activeGenders, activeTimes, activeDays)
-    colorDict = {
-        'genders': {
-            'MALE': '#80d8f2', 
-            'FEMALE': '#eb88d4'
-        },
-        'days': {
-            'Sunday': '#FF5500',
-            'Monday': '#FF6D00',
-            'Tuesday': '#FF8500',
-            'Wednesday': '#FF9D00',
-            'Thursday': '#FFBC22',
-            'Friday': '#FFDB44',
-            'Saturday': '#FFFA66'
-        }
-    }
-    filtersDict = loadJSON("./static/js/FiltersImproved.json")
-
-    with sessionManager() as s:
-        if queryType == 'distinct':
-            if activeBars == 'groups':
-                # subq exists to get the joined table in distinct IDs
-                subq = s.query(ArrestInfo.group, ArrestInfo.tag)\
-                    .join(ArrestRecord)\
-                    .distinct(ArrestInfo.arrestRecordFKey)\
-                    .filter(and_(ArrestInfo.group == label,
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .subquery()
-            
-                query = s.query(subq.c.tag, func.count(subq.c.group))\
-                    .group_by(subq.c.tag)\
-                    .order_by(desc(func.count(subq.c.group)))\
-                    .all()
-
-                averageAge = getAverageAge(s, ArrestInfo.group, label, activeDays, activeGenders, activeTimes)
-                
-                genderSubQuery = getGenderSubQuery(s, ArrestInfo.group, label, activeDays, activeGenders, activeTimes)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.group))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.group)))\
-                    .all()
-
-                daysSubQuery = getDaysSubQuery(s, ArrestInfo.group, label, activeDays, activeGenders, activeTimes)
-                
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Relevant Tags', 'Gender Data', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
-                actives = ['tags', 'genders', 'days']
-                tagColors = [i['color'] for j in query for i in filtersDict if label == i['group']]
-                colors = [tagColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
-            elif activeBars == 'tags':
-                subq = s.query(ArrestInfo.tag, ArrestInfo.arrest, ArrestInfo.group)\
-                    .join(ArrestRecord)\
-                    .distinct(ArrestInfo.arrestRecordFKey)\
-                    .filter(and_(ArrestInfo.tag == label,
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .subquery()
-                query = s.query(subq.c.arrest, func.count(subq.c.tag), subq.c.group)\
-                    .group_by(subq.c.arrest, subq.c.tag, subq.c.group)\
-                    .order_by(desc(func.count(subq.c.tag)))\
-                    .limit(10)\
-                    .all()
-
-                group = s.query(ArrestInfo.group)\
-                    .filter(ArrestInfo.tag == label)\
-                    .limit(1)\
-                    .all()[0][0]
-
-                averageAge = getAverageAge(s, ArrestInfo.tag, label, activeDays, activeGenders, activeTimes)
-
-                genderSubQuery = getGenderSubQuery(s, ArrestInfo.tag, label, activeDays, activeGenders, activeTimes)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.tag))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.tag)))\
-                    .all()
-
-                daysSubQuery = getDaysSubQuery(s, ArrestInfo.tag, label, activeDays, activeGenders, activeTimes)
-                
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = [f'Top {len(query)} Arrests Belonging to {label}', 'Gender Data', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
-                actives = ['arrests', 'genders', 'days']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                colors = [arrestColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
-            elif activeBars == 'arrests':
-                subqForJoin = s.query(ArrestInfo.arrestRecordFKey)\
-                    .filter(ArrestInfo.arrest == label)\
-                    .subquery()
-
-                subq = s.query(ArrestInfo.arrest, ArrestInfo.group)\
-                    .join(subqForJoin, ArrestInfo.arrestRecordFKey == subqForJoin.c.arrestRecordFKey)\
-                    .join(ArrestRecord)\
-                    .filter(and_(ArrestInfo.arrest != label, ArrestInfo.arrest != 'No arrests listed.',
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .subquery()
-
-                query = s.query(subq.c.arrest, func.count(subq.c.arrest), subq.c.group)\
-                    .group_by(subq.c.arrest, subq.c.group)\
-                    .order_by(desc(func.count(subq.c.arrest)))\
-                    .limit(5)\
-                    .all()
-
-                tag = s.query(ArrestInfo.tag)\
-                    .filter(ArrestInfo.arrest == label)\
-                    .limit(1)\
-                    .all()[0][0]
-
-                group = s.query(ArrestInfo.group)\
-                    .filter(ArrestInfo.arrest == label)\
-                    .limit(1)\
-                    .all()[0][0]
-
-                averageAge = getAverageAge(s, ArrestInfo.arrest, label, activeDays, activeGenders, activeTimes)
-
-                genderSubQuery = getGenderSubQuery(s, ArrestInfo.arrest, label, activeDays, activeGenders, activeTimes)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.arrest))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.arrest)))\
-                    .all()
-
-                daysSubQuery = getDaysSubQuery(s, ArrestInfo.arrest, label, activeDays, activeGenders, activeTimes)
-                
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Top 5 Associated Arrests', 'Gender Data', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
-                actives = ['arrests', 'genders', 'days']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                print(arrestColors)
-                colors = [arrestColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
-            elif activeBars == 'ages':
-                query = s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
-                    .join(ArrestRecord)\
-                    .group_by(ArrestInfo.arrest, ArrestInfo.group)\
-                    .order_by(desc(func.count(ArrestInfo.arrest)))\
-                    .filter(and_(ArrestRecord.age == label, ArrestInfo.arrest != 'No arrests listed.',
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .limit(10)\
-                    .all()
-
-                genderSubQuery = getGenderSubQuery(s, ArrestRecord.age, label, activeDays, activeGenders, activeTimes)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.age))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.age)))\
-                    .all()
-
-                daysSubQuery = getDaysSubQuery(s, ArrestRecord.age, label, activeDays, activeGenders, activeTimes)
-                
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Top 5 Relevant Arrests', 'Gender Data', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
-                actives = ['arrests', 'genders', 'days']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                colors = [arrestColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
-            elif activeBars == "dates":
-                query = s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
-                    .join(ArrestRecord)\
-                    .group_by(ArrestInfo.arrest, ArrestInfo.group)\
-                    .order_by(desc(func.count(ArrestInfo.arrest)))\
-                    .filter(and_(ArrestRecord.date == label, ArrestInfo.arrest != 'No arrests listed.',
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .limit(5)\
-                    .all()
-
-                averageAge = getAverageAge(s, ArrestRecord.date, label, activeDays, activeGenders, activeTimes, _joinTable=ArrestInfo)
-                
-                genderSubQuery = getGenderSubQuery(s, ArrestRecord.date, label, activeDays, activeGenders, activeTimes)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.date))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.date)))\
-                    .all()
-
-                daysSubQuery = getDaysSubQuery(s, ArrestRecord.date, label, activeDays, activeGenders, activeTimes)
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Top 5 Relevant Arrests', 'Gender Data', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
-                actives = ['arrests', 'genders', 'days']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                colors = [arrestColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
-            elif activeBars == "genders":
-                query = s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
-                    .join(ArrestRecord)\
-                    .group_by(ArrestInfo.arrest, ArrestInfo.group)\
-                    .order_by(desc(func.count(ArrestInfo.arrest)))\
-                    .filter(and_(ArrestRecord.sex == label, ArrestInfo.arrest != 'No arrests listed.',
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .limit(10)\
-                    .all()
-
-                averageAge = getAverageAge(s, ArrestRecord.sex, label, activeDays, activeGenders, activeTimes, _joinTable=ArrestInfo)
-                
-                daysSubQuery = getDaysSubQuery(s, ArrestRecord.sex, label, activeDays, activeGenders, activeTimes)
-                
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Top 5 Relevant Arrests', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in daysQuery]]
-                actives = ['arrests', 'days']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                colors = [arrestColors, [colorDict['days'][i[0]] for i in daysQuery]]
-            elif activeBars == "times":
-                hour = label.partition(':')[0] + ':'
-                query = s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
-                    .join(ArrestRecord)\
-                    .group_by(ArrestInfo.arrest, ArrestInfo.group)\
-                    .order_by(desc(func.count(ArrestInfo.arrest)))\
-                    .filter(and_(ArrestRecord.time.contains(hour), ArrestInfo.arrest != 'No arrests listed.',
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .limit(5)\
-                    .all()
-                print(query)
-
-                averageAge = getAverageAge(s, ArrestRecord.time, hour, activeDays, activeGenders, activeTimes, _joinTable=ArrestInfo)
-
-                genderSubQuery = getGenderSubQuery(s, ArrestRecord.time, hour, activeDays, activeGenders, activeTimes)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.sex))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.sex)))\
-                    .all()
-
-                daysSubQuery = getDaysSubQuery(s, ArrestRecord.time, hour, activeDays, activeGenders, activeTimes)
-                
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Top 5 Relevant Arrests', 'Gender Data', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
-                actives = ['arrests', 'genders', 'days']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                colors = [arrestColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
-            elif activeBars == "days":
-                query = s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
-                    .join(ArrestRecord)\
-                    .group_by(ArrestInfo.arrest, ArrestInfo.group)\
-                    .order_by(desc(func.count(ArrestInfo.arrest)))\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == label, ArrestInfo.arrest != 'No arrests listed.',
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .limit(10)\
-                    .all()
-
-                averageAge = getAverageAge(s, ArrestRecord.dayOfTheWeek, label, activeDays, activeGenders, activeTimes, _joinTable=ArrestInfo)
-                
-                genderSubQuery = getGenderSubQuery(s, ArrestRecord.dayOfTheWeek, label, activeDays, activeGenders, activeTimes)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.dayOfTheWeek))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Top 10 Relevant Arrests', 'Gender Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery]]
-                actives = ['arrests', 'genders']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                colors = [arrestColors, [colorDict['genders'][i[0]] for i in genderQuery]]
-            elif activeBars == "months":
-                query = s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
-                    .join(ArrestRecord)\
-                    .group_by(ArrestInfo.arrest, ArrestInfo.group)\
-                    .order_by(desc(func.count(ArrestInfo.arrest)))\
-                    .filter(and_(ArrestRecord.timeOfYear == label, ArrestInfo.arrest != 'No arrests listed.',
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .limit(10)\
-                    .all()
-
-                averageAge = getAverageAge(s, ArrestRecord.timeOfYear, label, activeDays, activeGenders, activeTimes, _joinTable=ArrestInfo)
-                
-                genderSubQuery = getGenderSubQuery(s, ArrestRecord.timeOfYear, label, activeDays, activeGenders, activeTimes)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.timeOfYear))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.timeOfYear)))\
-                    .all()
-
-                daysSubQuery = getDaysSubQuery(s, ArrestRecord.timeOfYear, label, activeDays, activeGenders, activeTimes)
-                
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Top 5 Relevant Arrests', 'Gender Data', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
-                actives = ['arrests', 'genders', 'days']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                colors = [arrestColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
-
-        elif queryType == 'charges':
-            if activeBars == 'groups':
-                subq = s.query(ArrestInfo.group, ArrestInfo.tag)\
-                    .join(ArrestRecord)\
-                    .filter(and_(ArrestInfo.group == label,
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .subquery()
-            
-                query = s.query(subq.c.tag, func.count(subq.c.group))\
-                    .group_by(subq.c.tag)\
-                    .order_by(desc(func.count(subq.c.group)))\
-                    .all()
-
-                averageAge = getAverageAge(s, ArrestInfo.group, label, activeDays, activeGenders, activeTimes, _charges = True)
-                
-                genderSubQuery = getGenderSubQuery(s, ArrestInfo.group, label, activeDays, activeGenders, activeTimes, _charges = True)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.group))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.group)))\
-                    .all()
-
-                daysSubQuery = getDaysSubQuery(s, ArrestInfo.group, label, activeDays, activeGenders, activeTimes, _charges=True)
-                
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Relevant Tags', 'Gender Data', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
-                actives = ['tags', 'genders', 'days']
-                tagColors = [i['color'] for j in query for i in filtersDict if label == i['group']]
-                colors = [tagColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
-            elif activeBars == 'tags':
-                subq = s.query(ArrestInfo.tag, ArrestInfo.arrest, ArrestInfo.group)\
-                    .join(ArrestRecord)\
-                    .filter(and_(ArrestInfo.tag == label,
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .subquery()
-
-                query = s.query(subq.c.arrest, func.count(subq.c.tag), subq.c.group)\
-                    .group_by(subq.c.arrest, subq.c.tag, subq.c.group)\
-                    .order_by(desc(func.count(subq.c.tag)))\
-                    .limit(10)\
-                    .all()
-
-                group = s.query(ArrestInfo.group)\
-                    .filter(ArrestInfo.tag == label)\
-                    .limit(1)\
-                    .all()[0][0]
-
-                averageAge = getAverageAge(s, ArrestInfo.tag, label, activeDays, activeGenders, activeTimes, _charges = True)
-
-                genderSubQuery = getGenderSubQuery(s, ArrestInfo.tag, label, activeDays, activeGenders, activeTimes, _charges = True)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.tag))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.tag)))\
-                    .all()
-
-                daysSubQuery = getDaysSubQuery(s, ArrestInfo.tag, label, activeDays, activeGenders, activeTimes, _charges = True)
-                
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = [f'Top {len(query)} Arrests Belonging to {label}', 'Gender Data', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
-                actives = ['arrests', 'genders', 'days']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                colors = [arrestColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
-            elif activeBars == 'arrests':
-                subqForJoin = s.query(ArrestInfo.arrestRecordFKey)\
-                    .filter(ArrestInfo.arrest == label)\
-                    .subquery()
-
-                subq = s.query(ArrestInfo.arrest, ArrestInfo.group)\
-                    .join(subqForJoin, ArrestInfo.arrestRecordFKey == subqForJoin.c.arrestRecordFKey)\
-                    .join(ArrestRecord)\
-                    .filter(and_(ArrestInfo.arrest != label, ArrestInfo.arrest != 'No arrests listed.',
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .subquery()
-
-                query = s.query(subq.c.arrest, func.count(subq.c.arrest), subq.c.group)\
-                    .group_by(subq.c.arrest, subq.c.group)\
-                    .order_by(desc(func.count(subq.c.arrest)))\
-                    .limit(5)\
-                    .all()
-
-                tag = s.query(ArrestInfo.tag)\
-                    .filter(ArrestInfo.arrest == label)\
-                    .limit(1)\
-                    .all()[0][0]
-
-                group = s.query(ArrestInfo.group)\
-                    .filter(ArrestInfo.arrest == label)\
-                    .limit(1)\
-                    .all()[0][0]
-
-                averageAge = getAverageAge(s, ArrestInfo.arrest, label, activeDays, activeGenders, activeTimes, _charges = True)
-
-                genderSubQuery = getGenderSubQuery(s, ArrestInfo.arrest, label, activeDays, activeGenders, activeTimes, _charges = True)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.arrest))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.arrest)))\
-                    .all()
-
-                daysSubQuery = getDaysSubQuery(s, ArrestInfo.arrest, label, activeDays, activeGenders, activeTimes, _charges = True)
-                
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Top 5 Associated Arrests', 'Gender Data', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
-                actives = ['arrests', 'genders', 'days']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                print(arrestColors)
-                colors = [arrestColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
-            elif activeBars == 'ages':
-                query = s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
-                    .join(ArrestRecord)\
-                    .group_by(ArrestInfo.arrest, ArrestInfo.group)\
-                    .order_by(desc(func.count(ArrestInfo.arrest)))\
-                    .filter(and_(ArrestRecord.age == label, ArrestInfo.arrest != 'No arrests listed.',
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .limit(10)\
-                    .all()
-
-                genderSubQuery = getGenderSubQuery(s, ArrestRecord.age, label, activeDays, activeGenders, activeTimes, _charges = True)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.age))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.age)))\
-                    .all()
-
-                daysSubQuery = getDaysSubQuery(s, ArrestRecord.age, label, activeDays, activeGenders, activeTimes, _charges = True)
-                
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Top 5 Relevant Arrests', 'Gender Data', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
-                actives = ['arrests', 'genders', 'days']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                colors = [arrestColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
-            elif activeBars == "dates":
-                query = s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
-                    .join(ArrestRecord)\
-                    .group_by(ArrestInfo.arrest, ArrestInfo.group)\
-                    .order_by(desc(func.count(ArrestInfo.arrest)))\
-                    .filter(and_(ArrestRecord.date == label, ArrestInfo.arrest != 'No arrests listed.',
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .limit(5)\
-                    .all()
-
-                averageAge = getAverageAge(s, ArrestRecord.date, label, activeDays, activeGenders, activeTimes, _joinTable=ArrestInfo, _charges = True)
-                
-                genderSubQuery = getGenderSubQuery(s, ArrestRecord.date, label, activeDays, activeGenders, activeTimes, _charges = True)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.date))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.date)))\
-                    .all()
-
-                daysSubQuery = getDaysSubQuery(s, ArrestRecord.date, label, activeDays, activeGenders, activeTimes, _charges = True)
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Top 5 Relevant Arrests', 'Gender Data', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
-                actives = ['arrests', 'genders', 'days']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                colors = [arrestColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
-            elif activeBars == "genders":
-                query = s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
-                    .join(ArrestRecord)\
-                    .group_by(ArrestInfo.arrest, ArrestInfo.group)\
-                    .order_by(desc(func.count(ArrestInfo.arrest)))\
-                    .filter(and_(ArrestRecord.sex == label, ArrestInfo.arrest != 'No arrests listed.',
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .limit(10)\
-                    .all()
-
-                averageAge = getAverageAge(s, ArrestRecord.sex, label, activeDays, activeGenders, activeTimes, _joinTable=ArrestInfo, _charges = True)
-                
-                daysSubQuery = getDaysSubQuery(s, ArrestRecord.sex, label, activeDays, activeGenders, activeTimes, _charges = True)
-                
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Top 5 Relevant Arrests', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in daysQuery]]
-                actives = ['arrests', 'days']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                colors = [arrestColors, [colorDict['days'][i[0]] for i in daysQuery]]
-            elif activeBars == "times":
-                hour = label.partition(':')[0] + ':'
-                query = s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
-                    .join(ArrestRecord)\
-                    .group_by(ArrestInfo.arrest, ArrestInfo.group)\
-                    .order_by(desc(func.count(ArrestInfo.arrest)))\
-                    .filter(and_(ArrestRecord.time.contains(hour), ArrestInfo.arrest != 'No arrests listed.',
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .limit(5)\
-                    .all()
-                print(query)
-
-                averageAge = getAverageAge(s, ArrestRecord.time, hour, activeDays, activeGenders, activeTimes, _joinTable=ArrestInfo, _charges = True)
-
-                genderSubQuery = getGenderSubQuery(s, ArrestRecord.time, hour, activeDays, activeGenders, activeTimes, _charges = True)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.sex))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.sex)))\
-                    .all()
-
-                daysSubQuery = getDaysSubQuery(s, ArrestRecord.time, hour, activeDays, activeGenders, activeTimes, _charges = True)
-                
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Top 5 Relevant Arrests', 'Gender Data', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
-                actives = ['arrests', 'genders', 'days']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                colors = [arrestColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
-            elif activeBars == "days":
-                query = s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
-                    .join(ArrestRecord)\
-                    .group_by(ArrestInfo.arrest, ArrestInfo.group)\
-                    .order_by(desc(func.count(ArrestInfo.arrest)))\
-                    .filter(and_(ArrestRecord.dayOfTheWeek == label, ArrestInfo.arrest != 'No arrests listed.',
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .limit(10)\
-                    .all()
-
-                averageAge = getAverageAge(s, ArrestRecord.dayOfTheWeek, label, activeDays, activeGenders, activeTimes, _joinTable=ArrestInfo, _charges = True)
-                
-                genderSubQuery = getGenderSubQuery(s, ArrestRecord.dayOfTheWeek, label, activeDays, activeGenders, activeTimes, _charges = True)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.dayOfTheWeek))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Top 10 Relevant Arrests', 'Gender Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery]]
-                actives = ['arrests', 'genders']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                colors = [arrestColors, [colorDict['genders'][i[0]] for i in genderQuery]]
-            elif activeBars == "months":
-                query = s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
-                    .join(ArrestRecord)\
-                    .group_by(ArrestInfo.arrest, ArrestInfo.group)\
-                    .order_by(desc(func.count(ArrestInfo.arrest)))\
-                    .filter(and_(ArrestRecord.timeOfYear == label, ArrestInfo.arrest != 'No arrests listed.',
-                    ArrestRecord.sex.in_(activeGenders),
-                    ArrestRecord.timeOfDay.in_(activeTimes),
-                    ArrestRecord.dayOfTheWeek.in_(activeDays)))\
-                    .limit(10)\
-                    .all()
-
-                averageAge = getAverageAge(s, ArrestRecord.timeOfYear, label, activeDays, activeGenders, activeTimes, _joinTable=ArrestInfo, _charges = True)
-                
-                genderSubQuery = getGenderSubQuery(s, ArrestRecord.timeOfYear, label, activeDays, activeGenders, activeTimes, _charges = True)
-
-                genderQuery = s.query(genderSubQuery.c.sex, func.count(genderSubQuery.c.timeOfYear))\
-                    .group_by(genderSubQuery.c.sex)\
-                    .order_by(desc(func.count(genderSubQuery.c.timeOfYear)))\
-                    .all()
-
-                daysSubQuery = getDaysSubQuery(s, ArrestRecord.timeOfYear, label, activeDays, activeGenders, activeTimes, _charges = True)
-                
-                daysQuery = s.query(daysSubQuery.c.dayOfTheWeek, func.count(daysSubQuery.c.dayOfTheWeek))\
-                    .group_by(daysSubQuery.c.dayOfTheWeek)\
-                    .order_by(desc(func.count(daysSubQuery.c.dayOfTheWeek)))\
-                    .all()
-
-                print(query)
-                titles = ['Top 5 Relevant Arrests', 'Gender Data', 'Week Data']
-                labels = [[i[0] for i in query], [i[0] for i in genderQuery], [i[0] for i in daysQuery]]
-                counts = [[i[1] for i in query], [i[1] for i in genderQuery], [i[1] for i in daysQuery]]
-                actives = ['arrests', 'genders', 'days']
-                arrestColors = [i['color'] for j in query for i in filtersDict if j[2] == i['group']]
-                colors = [arrestColors, [colorDict['genders'][i[0]] for i in genderQuery], [colorDict['days'][i[0]] for i in daysQuery]]
-    return titles, labels, counts, colors, group, tag, averageAge, actives
 
 @app.route('/')
 def home():
@@ -1554,6 +751,7 @@ def sortData(sortMethod=None):
             'numbers': dayDataNumbers
         }
     }
+
     return jsonify(data)
 
 @app.route('/api/stats/queriedData', methods=['GET', 'POST'])
@@ -1600,12 +798,167 @@ def statsSingleLabelData():
 
     return jsonify(data)
 
+def getSelectedArrests(_s, _queryColumn, _queryFilter, _queryType, n=10):
+    if _queryType == 'distinct':
+        subq = _s.query(_queryColumn, ArrestInfo.arrest, ArrestInfo.group)\
+            .join(ArrestRecord)\
+            .distinct(ArrestRecord.recordID, _queryColumn)\
+            .filter(_queryFilter)\
+            .group_by(ArrestRecord.recordID, _queryColumn, ArrestInfo.arrest, ArrestInfo.group)\
+            .subquery()
+
+        columnString = getRespectiveColumnString(_queryColumn)
+        subqQueryColumn = getRespectiveSubqueryColumn(columnString, subq)
+
+        return _s.query(subqQueryColumn, subq.c.arrest, func.count(subq.c.arrest), subq.c.group)\
+                .group_by(subq.c.arrest, subqQueryColumn, subq.c.group)\
+                .order_by(desc(func.count(subq.c.arrest)))\
+                .limit(n)\
+                .all()
+    else:
+        return _s.query(_queryColumn, ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
+            .join(ArrestRecord)\
+            .group_by(ArrestInfo.arrest, _queryColumn, ArrestInfo.group)\
+            .order_by(desc(func.count(ArrestInfo.arrest)))\
+            .filter(_queryFilter)\
+            .limit(n)\
+            .all()
+
+def getRelatedArrests(_s, _label, n=5):
+    # don't need to have a distinct here, as arrests are inherently distinct
+    subq = _s.query(ArrestInfo.arrestRecordFKey.label("ID"))\
+            .filter(ArrestInfo.arrest == _label)\
+            .subquery()
+    return _s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
+            .join(subq, subq.c.ID == ArrestInfo.arrestRecordFKey)\
+            .filter(and_(ArrestInfo.arrest != _label, 
+                ArrestInfo.arrest != None, 
+                ArrestInfo != 'No arrests listed.'))\
+            .group_by(ArrestInfo.arrest, ArrestInfo.group)\
+            .order_by(desc(func.count(ArrestInfo.arrest)))\
+            .limit(n)\
+            .all()
+
+def getSelectedGrouping(_s, _queryColumn, _groupingColumn, _queryFilter, _queryType):
+    if _queryType == 'distinct':
+        subq = _s.query(_queryColumn, _groupingColumn)\
+                .join(ArrestInfo)\
+                .distinct(ArrestInfo.arrestRecordFKey, _queryColumn)\
+                .filter(_queryFilter)\
+                .group_by(ArrestInfo.arrestRecordFKey, _queryColumn, _groupingColumn)\
+                .subquery()
+
+        columnString = getRespectiveColumnString(_queryColumn)
+        groupingString = getRespectiveColumnString(_groupingColumn)
+        subqQueryColumn = getRespectiveSubqueryColumn(columnString, subq)
+        subqGroupingStringColumn = getRespectiveSubqueryColumn(groupingString, subq)
+
+        if _groupingColumn == ArrestRecord.age:
+            return _s.query(subqQueryColumn, cast(func.avg(subqGroupingStringColumn), Float))\
+                .group_by(subqQueryColumn)\
+                .all()
+        else:
+            return _s.query(subqQueryColumn, subqGroupingStringColumn, func.count(subqGroupingStringColumn))\
+                .group_by(subqGroupingStringColumn, subqQueryColumn)\
+                .order_by(desc(func.count(subqGroupingStringColumn)))\
+                .all()
+    else:
+        if _groupingColumn == ArrestRecord.age:
+            return _s.query(_queryColumn, cast(func.avg(_groupingColumn), Float))\
+                .join(ArrestInfo)\
+                .group_by(_queryColumn)\
+                .filter(and_(_queryFilter, _groupingColumn != None))\
+                .all()
+        else:
+            return _s.query(_queryColumn, _groupingColumn, func.count(_groupingColumn))\
+                .join(ArrestInfo)\
+                .group_by(_groupingColumn, _queryColumn)\
+                .order_by(desc(func.count(_groupingColumn)))\
+                .filter(and_(_queryFilter, _groupingColumn != None))\
+                .all()
+
+def getRespectiveSelectedActives(_string):
+    # don't actually want to filter out arrests so it is kept out
+    subactives = ['genders', 'days']
+    return ['arrests'] + list(filter(lambda x: x != _string, subactives))
+
+def getRespectiveTitles(_string, _lengthOfArrests):
+    if _string == 'arrests':
+        return f'Top {_lengthOfArrests} arrests'
+    elif _string == 'genders':
+        return 'Gender Data'
+    elif _string == 'days':
+        return 'Age Data'
+
+def removeDeadInfo(_actives, _list):
+    if "genders" not in _actives:
+        del _list[1]
+    elif "days" not in _actives:
+        del _list[2]
+    return _list
+
+def getSelectedLabelData(_data):
+    group = None
+    tag = None
+
+    print(_data)
+    queryString = _data['activeData']['barsActive']
+    queryColumn = getRespectiveQueryColumn(queryString)
+    groupingString = _data['activeData']['groupingActive']
+    groupingColumn = getRespectiveGroupingColumn(groupingString)
+
+    queryType = _data['activeData']['queryType']
+    label = _data['label']
+    sublabel = _data['sublabel']
+
+    labelFilter = (queryColumn == label)
+
+    if groupingColumn:
+        groupingFilter = (groupingColumn.in_((sublabel, )))
+        queryFilter = and_(labelFilter, groupingFilter)
+    else:
+        queryFilter = labelFilter
+
+    with sessionManager() as s:
+        if queryString in ['arrests', 'tags']:
+            group = s.query(ArrestInfo.group)\
+                .filter(queryFilter)\
+                .limit(1)\
+                .all()[0][0]
+
+        if queryColumn == ArrestInfo.arrest:
+            arrestGrouping = getRelatedArrests(s, label)
+            groupColors = [i[2] for i in arrestGrouping]
+            tag = s.query(ArrestInfo.tag)\
+                .filter(queryFilter)\
+                .limit(1)\
+                .all()[0][0]
+        else:
+            arrestGrouping = getSelectedArrests(s, queryColumn, queryFilter, queryType)
+            groupColors = [i[3] for i in arrestGrouping]
+
+        genderGrouping = getSelectedGrouping(s, queryColumn, ArrestRecord.sex, queryFilter, queryType)
+        dayGrouping = getSelectedGrouping(s, queryColumn, ArrestRecord.dayOfTheWeek, queryFilter, queryType)
+        ageGrouping = getSelectedGrouping(s, queryColumn, ArrestRecord.age, queryFilter, queryType)
+
+    averageAge = ageGrouping[0][1]
+    actives = getRespectiveSelectedActives(queryString)
+    titles = [getRespectiveTitles(i, len(arrestGrouping)) for i in actives]
+    
+    initialLabels = [[i[1] for i in arrestGrouping], [i[1] for i in genderGrouping], [i[1] for i in dayGrouping]]
+    initialCounts = [[i[2] for i in arrestGrouping], [i[2] for i in genderGrouping], [i[2] for i in dayGrouping]]
+    labels = removeDeadInfo(actives, initialLabels)
+    counts = removeDeadInfo(actives, initialCounts)
+
+    colors = [getRespectiveColors(e, labels[i], groupColors) for i, e in enumerate(actives)]
+    return titles, labels, counts, colors, group, tag, averageAge, actives
+
 @app.route('/api/stats/hover', methods=['GET', 'POST'])
 def statsHoverData():
     data = request.get_json()
 
     subtitles, sublabels, subnumbers, subcolors, \
-        groupInfo, tagInfo, averageAge, actives = getHoverData(data)
+        groupInfo, tagInfo, averageAge, actives = getSelectedLabelData(data)
 
     data = {
         'subtitles': subtitles,
