@@ -519,9 +519,13 @@ def getQueryData(_data):
     sortingCase = getRespectiveSortingCase(queryString, queryColumn)
 
     if label:
+        # if there is a label, limit it to that label
         labelQuery = (queryColumn == label)
     else:
-        labelQuery = (queryColumn != '')
+        # if there is no label, query as normal
+        # this is essentially a duplicate of the filterQuery
+        # duplicating keeps this function modular
+        labelQuery = (queryColumn != None)
 
     with sessionManager() as s:
         if queryType == 'charges':
@@ -798,27 +802,24 @@ def statsSingleLabelData():
 
     return jsonify(data)
 
-def getSelectedArrests(_s, _queryColumn, _queryFilter, _queryType, n=10):
+def getSelectedArrests(_s, _queryColumn, _queryFilter, _queryType, _label, n=10):
     if _queryType == 'distinct':
-        subq = _s.query(_queryColumn, ArrestInfo.arrest, ArrestInfo.group)\
+        subq = _s.query(ArrestInfo.arrest, ArrestInfo.group)\
             .join(ArrestRecord)\
-            .distinct(ArrestRecord.recordID, _queryColumn)\
+            .distinct(ArrestRecord.recordID)\
             .filter(_queryFilter)\
-            .group_by(ArrestRecord.recordID, _queryColumn, ArrestInfo.arrest, ArrestInfo.group)\
+            .group_by(ArrestRecord.recordID, ArrestInfo.arrest, ArrestInfo.group)\
             .subquery()
 
-        columnString = getRespectiveColumnString(_queryColumn)
-        subqQueryColumn = getRespectiveSubqueryColumn(columnString, subq)
-
-        return _s.query(subqQueryColumn, subq.c.arrest, func.count(subq.c.arrest), subq.c.group)\
-                .group_by(subq.c.arrest, subqQueryColumn, subq.c.group)\
+        return _s.query(subq.c.arrest, func.count(subq.c.arrest), subq.c.group)\
+                .group_by(subq.c.arrest, subq.c.group)\
                 .order_by(desc(func.count(subq.c.arrest)))\
                 .limit(n)\
                 .all()
     else:
-        return _s.query(_queryColumn, ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
+        return _s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
             .join(ArrestRecord)\
-            .group_by(ArrestInfo.arrest, _queryColumn, ArrestInfo.group)\
+            .group_by(ArrestInfo.arrest, ArrestInfo.group)\
             .order_by(desc(func.count(ArrestInfo.arrest)))\
             .filter(_queryFilter)\
             .limit(n)\
@@ -829,6 +830,7 @@ def getRelatedArrests(_s, _label, n=5):
     subq = _s.query(ArrestInfo.arrestRecordFKey.label("ID"))\
             .filter(ArrestInfo.arrest == _label)\
             .subquery()
+    # literal is needed here to align with getSelectedArrests query format
     return _s.query(ArrestInfo.arrest, func.count(ArrestInfo.arrest), ArrestInfo.group)\
             .join(subq, subq.c.ID == ArrestInfo.arrestRecordFKey)\
             .filter(and_(ArrestInfo.arrest != _label, 
@@ -841,38 +843,35 @@ def getRelatedArrests(_s, _label, n=5):
 
 def getSelectedGrouping(_s, _queryColumn, _groupingColumn, _queryFilter, _queryType):
     if _queryType == 'distinct':
-        subq = _s.query(_queryColumn, _groupingColumn)\
+        subq = _s.query(_groupingColumn)\
                 .join(ArrestInfo)\
-                .distinct(ArrestInfo.arrestRecordFKey, _queryColumn)\
+                .distinct(ArrestInfo.arrestRecordFKey)\
                 .filter(_queryFilter)\
-                .group_by(ArrestInfo.arrestRecordFKey, _queryColumn, _groupingColumn)\
+                .group_by(ArrestInfo.arrestRecordFKey, _groupingColumn)\
                 .subquery()
 
-        columnString = getRespectiveColumnString(_queryColumn)
         groupingString = getRespectiveColumnString(_groupingColumn)
-        subqQueryColumn = getRespectiveSubqueryColumn(columnString, subq)
         subqGroupingStringColumn = getRespectiveSubqueryColumn(groupingString, subq)
 
         if _groupingColumn == ArrestRecord.age:
-            return _s.query(subqQueryColumn, cast(func.avg(subqGroupingStringColumn), Float))\
-                .group_by(subqQueryColumn)\
+            return _s.query(cast(func.avg(subqGroupingStringColumn), Float))\
                 .all()
         else:
-            return _s.query(subqQueryColumn, subqGroupingStringColumn, func.count(subqGroupingStringColumn))\
-                .group_by(subqGroupingStringColumn, subqQueryColumn)\
+            return _s.query(subqGroupingStringColumn, func.count(subqGroupingStringColumn))\
+                .group_by(subqGroupingStringColumn)\
                 .order_by(desc(func.count(subqGroupingStringColumn)))\
                 .all()
     else:
         if _groupingColumn == ArrestRecord.age:
-            return _s.query(_queryColumn, cast(func.avg(_groupingColumn), Float))\
+            return _s.query(cast(func.avg(_groupingColumn), Float))\
                 .join(ArrestInfo)\
                 .group_by(_queryColumn)\
                 .filter(and_(_queryFilter, _groupingColumn != None))\
                 .all()
         else:
-            return _s.query(_queryColumn, _groupingColumn, func.count(_groupingColumn))\
+            return _s.query(_groupingColumn, func.count(_groupingColumn))\
                 .join(ArrestInfo)\
-                .group_by(_groupingColumn, _queryColumn)\
+                .group_by(_groupingColumn)\
                 .order_by(desc(func.count(_groupingColumn)))\
                 .filter(and_(_queryFilter, _groupingColumn != None))\
                 .all()
@@ -911,7 +910,12 @@ def getSelectedLabelData(_data):
     label = _data['label']
     sublabel = _data['sublabel']
 
-    labelFilter = (queryColumn == label)
+    if queryString == 'times':
+        label = label.partition(':')[0] + ":"
+        likeString = '{}%'.format(label)
+        labelFilter = (queryColumn.like(likeString))
+    else:
+        labelFilter = (queryColumn == label)
 
     if groupingColumn:
         groupingFilter = (groupingColumn.in_((sublabel, )))
@@ -928,29 +932,38 @@ def getSelectedLabelData(_data):
 
         if queryColumn == ArrestInfo.arrest:
             arrestGrouping = getRelatedArrests(s, label)
-            groupColors = [i[2] for i in arrestGrouping]
             tag = s.query(ArrestInfo.tag)\
                 .filter(queryFilter)\
                 .limit(1)\
                 .all()[0][0]
         else:
-            arrestGrouping = getSelectedArrests(s, queryColumn, queryFilter, queryType)
-            groupColors = [i[3] for i in arrestGrouping]
-
+            arrestGrouping = getSelectedArrests(s, queryColumn, queryFilter, queryType, label)
+        groupColors = [i[2] for i in arrestGrouping]
         genderGrouping = getSelectedGrouping(s, queryColumn, ArrestRecord.sex, queryFilter, queryType)
         dayGrouping = getSelectedGrouping(s, queryColumn, ArrestRecord.dayOfTheWeek, queryFilter, queryType)
         ageGrouping = getSelectedGrouping(s, queryColumn, ArrestRecord.age, queryFilter, queryType)
 
-    averageAge = ageGrouping[0][1]
+    averageAge = round(ageGrouping[0][0], 2)
     actives = getRespectiveSelectedActives(queryString)
     titles = [getRespectiveTitles(i, len(arrestGrouping)) for i in actives]
+
+    if queryColumn == ArrestInfo.arrest:
+        titles[0] = f'Top {len(arrestGrouping)} Associated Arrests'
     
-    initialLabels = [[i[1] for i in arrestGrouping], [i[1] for i in genderGrouping], [i[1] for i in dayGrouping]]
-    initialCounts = [[i[2] for i in arrestGrouping], [i[2] for i in genderGrouping], [i[2] for i in dayGrouping]]
+    initialLabels = [[i[0] for i in arrestGrouping], [i[0] for i in genderGrouping], [i[0] for i in dayGrouping]]
+    initialCounts = [[i[1] for i in arrestGrouping], [i[1] for i in genderGrouping], [i[1] for i in dayGrouping]]
     labels = removeDeadInfo(actives, initialLabels)
     counts = removeDeadInfo(actives, initialCounts)
-
     colors = [getRespectiveColors(e, labels[i], groupColors) for i, e in enumerate(actives)]
+    
+    # Warrants are viewed differently in the database
+    if label == 'Warrants':
+        del titles[0]
+        del labels[0]
+        del counts[0]
+        del colors[0]
+        del actives[0]
+    
     return titles, labels, counts, colors, group, tag, averageAge, actives
 
 @app.route('/api/stats/hover', methods=['GET', 'POST'])
