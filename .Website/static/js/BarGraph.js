@@ -76,7 +76,6 @@ export default class BarGraph extends React.Component {
         let currentCount = e.currentTarget.getAttribute('count')
         let sublabel = e.currentTarget.getAttribute('label')
         let barNumber = null
-        console.log(this.props.activeData)
         if (parentIndex != this.state.activeBar || sublabel != this.state.activeSubBar) {
             barNumber = parentIndex
             fetch(`api/stats/hover`, {
@@ -212,7 +211,7 @@ export default class BarGraph extends React.Component {
             sublabels = DAY_LABELS
         } 
 
-        let labelHeight = 15 * numOfSubbars
+        let labelHeight = 25 * numOfSubbars
         let widths = this.getWidths(counts)
         let lines = this.getIncrements(counts).map((increment, i) => {
             return <div key={i}><span>{increment}</span></div>
@@ -279,12 +278,12 @@ export default class BarGraph extends React.Component {
         return (
             <div className="BarGraph-main-container">
                 {this.state.activeBar ? <InfoBox graphlevel={this.props.graphlevel} closeinfo={this.closeInfo} getinfoboxdata={this.props.getinfoboxdata} currentcount={this.state.currentCount} data={this.state.extendedData}/> : null}
-                <div className="BarGraph-title-container">
+                {false ? <div className="BarGraph-title-container">
                     <span className="BarGraph-title-main">Number of Arrests</span>
                     <span className="BarGraph-title-subtext">(by {this.props.activedata.barsActive})</span>
                     {this.props.activedata.groupingActive != "default" ? <span className="BarGraph-title-subtext">(grouped by {this.props.activedata.groupingActive})</span>
                     : null}
-                </div>
+                </div> : null }
 
                 <div className="BarGraph-background">
                     <div className="BarGraph-background-color"/>
@@ -292,10 +291,9 @@ export default class BarGraph extends React.Component {
                 </div>
 
                 <div className="BarGraph-scroll-wrapper">
-                    <div className="BarGraph-y-axis">
+                    {false ? <div className="BarGraph-y-axis">
                         {labels}
-                        
-                    </div>
+                    </div> : null }
                     <div className="BarGraph-bar-container">
                         {bars}
                     </div>

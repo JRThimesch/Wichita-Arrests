@@ -416,6 +416,9 @@ def getCountsForGroupingData(_data):
     queryType = _data['queryType']
     grouping = _data['groupingType']
 
+    if active == grouping:
+        return []
+
     try:
         label = _data['label']
     except:
@@ -590,6 +593,7 @@ def getQueryData(_data):
         query = sorted(query, key=lambda x: datetime.strptime(x[0], '%B %Y'))
 
     try:
+        # If too many to unpack, then exception
         labels, counts = unzipToList(query)
         if queryString == 'dates':
             labels = [date.strftime(i[0], "%m/%d/%Y") for i in query]
@@ -597,6 +601,7 @@ def getQueryData(_data):
             labels = [hour[0] + '00 - ' + hour[0] + '59' for hour in query]
         colors = getRespectiveColors(queryString, labels)
     except ValueError:
+        # Catch exception and unpack
         labels, counts, supportGroups = unzipToList(query)
         colors = getRespectiveColors(queryString, labels, _supportList=supportGroups)
         
@@ -774,6 +779,8 @@ def statsQueriedData():
 def statsSingleLabelData():
     data = request.get_json()
     label, count, color = getQueryData(data)
+
+    print(data)
     
     # Not happy with using a loop here, but it works and saves tons of lines
     # Might be able to shoehorn a solution into the frontend?
@@ -917,7 +924,7 @@ def getSelectedLabelData(_data):
     else:
         labelFilter = (queryColumn == label)
 
-    if groupingColumn:
+    if groupingColumn and sublabel != 'AGES':
         groupingFilter = (groupingColumn.in_((sublabel, )))
         queryFilter = and_(labelFilter, groupingFilter)
     else:
@@ -1002,12 +1009,13 @@ def groupData():
     data = request.get_json()
     dataType = getRespectiveDataTypeForJSON(data['groupingType'])
 
+    counts = getCountsForGroupingData(data)
     data = { 
         dataType : {
-            'numbers': getCountsForGroupingData(data)
+            'numbers': counts
         }
     }
-
+    
     return jsonify(data)
     
 if __name__ == "__main__":

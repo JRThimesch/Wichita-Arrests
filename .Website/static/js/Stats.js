@@ -114,7 +114,8 @@ export default class Stats extends React.Component {
                 queryType: prevState.activeData.queryType
             },
             data: data,
-            key : Math.random() * 10000
+            key : Math.random() * 10000,
+            inactiveLabels: []
         }))
         this.groupData(data, currentData, ["genders", "ages", "times", "days"])
     }
@@ -330,6 +331,42 @@ export default class Stats extends React.Component {
         })))
     }
 
+    getRespectiveDataType = (type) => {
+        if (type == 'genders') {
+            return this.state.data.genderData
+        } else if (type == 'ages') {
+            return this.state.data.ageData
+        } else if (type == 'times') {
+            return this.state.data.timeData
+        } else if (type == 'days') {
+            return this.state.data.dayData
+        } else {
+            return null
+        }
+    }
+
+    addGroupingButton = (type) => {
+        let sameType = this.state.activeData.barsActive == type
+        let dataType = this.getRespectiveDataType(type)
+
+        // If they are the same type then they should not be visible to the user - redundant grouping
+        if (sameType) {
+            return null
+        } else if (dataType) {
+            return <GraphButton
+                        handleclick={this.toggleGrouping}
+                        type={type}
+                    >
+                        <img src={`static/images/${type}Icon.png`}/>
+                        <AnimatedBars/>
+                    </GraphButton>
+        } else {
+            return <LoadingContainer>
+                <img style={{opacity: "50%"}} src={`static/images/${type}Icon.png`}/>
+            </LoadingContainer>
+        }
+    }
+
     componentDidMount = () => {
         let queryType = this.state.activeData.queryType
         this.getData(null, queryType)
@@ -369,10 +406,26 @@ export default class Stats extends React.Component {
 
         let queryTypeToSwitch = this.state.activeData.queryType == 'distinct' ? 'charges' : 'distinct'
         let queryTypeToSwitchIcon = `static/images/${queryTypeToSwitch}Icon.png`
+
+        let listOfQueries = ['groups', 'tags', 'arrests', 'ages', 'genders', 'dates', 'times', 'days', 'months']
+        let queryButtons = listOfQueries.map((queryType, i) => {
+            return <GraphButton
+                    handleclick={this.getData}
+                    type={queryType}
+                    key={i}
+                >
+                    <img src={`static/images/${queryType}Icon.png`}/>
+                </GraphButton>
+            })
         return (
             <>
-                <div className="Stats-container">
-                    <BarGraph
+                <div className="Stats-background">
+                    <div/>
+                    <div/>
+                    <div/>
+                </div>
+                {false ? <div className="Stats-container">
+                {false ? <BarGraph
                         data={this.state.data}
                         key={this.state.key}
                         activedata={this.state.activeData}
@@ -381,7 +434,8 @@ export default class Stats extends React.Component {
                         getinfoboxdata={this.getInfoBoxData}
                         graphlevel={this.state.level}
                         removeReady={sortReady}
-                    />
+                    /> : null }
+                    {false ? 
                     <div className="Stats-right-container">       
                         <div className="Stats-button-container">
                             <div className="Stats-button-container-group" style={{alignItems:'center', justifyContent:'center'}}>
@@ -408,82 +462,14 @@ export default class Stats extends React.Component {
                             </div>
                             <hr className="Stats-button-container-line"/>
                             <div className="Stats-button-container-group">
-                                <GraphButton
-                                    handleclick={this.getData}
-                                    type="groups"
-                                    ><img src="static/images/groupsIcon.png"/></GraphButton>
-                                <GraphButton 
-                                    handleclick={this.getData}
-                                    type="tags"
-                                    ><img src="static/images/tagsIcon.png"/></GraphButton>
-                                <GraphButton
-                                    handleclick={this.getData}
-                                    type="arrests"
-                                    ><img src="static/images/arrestsIcon.png"/></GraphButton>
-                                <GraphButton
-                                    handleclick={this.getData}
-                                    type="ages"
-                                    ><img src="static/images/agesIcon.png"/></GraphButton>
-                                <GraphButton
-                                    handleclick={this.getData}
-                                    type="genders"
-                                    ><img src="static/images/gendersIcon.png"/></GraphButton>
-                                <GraphButton
-                                    handleclick={this.getData}
-                                    type="dates"
-                                    ><img src="static/images/datesIcon.png"/></GraphButton>
-                                <GraphButton
-                                    handleclick={this.getData}
-                                    type="times"
-                                    ><img src="static/images/timesIcon.png"/></GraphButton>
-                                <GraphButton
-                                    handleclick={this.getData}
-                                    type="days"
-                                    ><img src="static/images/daysIcon.png"/></GraphButton>
-                                <GraphButton
-                                    handleclick={this.getData}
-                                    type="months"
-                                    ><img src="static/images/monthsIcon.png"/></GraphButton>
+                                {queryButtons}
                             </div>
                             <hr className="Stats-button-container-line"/>
                             <div className="Stats-button-container-group">
-                                {this.state.activeData.barsActive != 'genders' &&
-                                    this.state.data.genderData ? <GraphButton
-                                    handleclick={this.toggleGrouping}
-                                    type="genders"
-                                    ><img src="static/images/gendersIcon.png"/>
-                                    <AnimatedBars/>
-                                    </GraphButton> : <LoadingContainer>
-                                        <img style={{opacity: "50%"}} src="static/images/gendersIcon.png"/>
-                                    </LoadingContainer> }
-                                {this.state.activeData.barsActive != 'ages' &&
-                                    this.state.data.ageData ? <GraphButton
-                                    handleclick={this.toggleGrouping}
-                                    type="ages"
-                                    ><img src="static/images/agesIcon.png"/>
-                                    <AnimatedBars/>
-                                    </GraphButton> : <LoadingContainer>
-                                        <img style={{opacity: "50%"}} src="static/images/agesIcon.png"/>
-                                    </LoadingContainer> } 
-                                {this.state.activeData.barsActive != 'times' &&
-                                    this.state.data.timeData ? <GraphButton
-                                    handleclick={this.toggleGrouping}
-                                    type="times"
-                                    ><img src="static/images/timesIcon.png"/>
-                                    <AnimatedBars/>
-                                    </GraphButton> : <LoadingContainer>
-                                        <img style={{opacity: "50%"}} src="static/images/timesIcon.png"/>
-                                    </LoadingContainer> }
-                                {this.state.activeData.barsActive != 'dates' &&
-                                    this.state.activeData.barsActive != 'days' &&
-                                    this.state.data.dayData ? <GraphButton
-                                    handleclick={this.toggleGrouping}
-                                    type="days"
-                                    ><img src="static/images/daysIcon.png"/>
-                                    <AnimatedBars/>
-                                    </GraphButton> : <LoadingContainer>
-                                        <img style={{opacity: "50%"}} src="static/images/daysIcon.png"/>
-                                    </LoadingContainer> }
+                                    {this.addGroupingButton('genders')}
+                                    {this.addGroupingButton('ages')}
+                                    {this.addGroupingButton('times')}
+                                    {this.addGroupingButton('days')}
                             </div>
                             <hr className="Stats-button-container-line"/>
                             <div className="Stats-button-container-group">
@@ -501,8 +487,8 @@ export default class Stats extends React.Component {
                                     </LoadingContainer> }
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </div> : null }
+                </div> : null }
             </>
         )
     }
